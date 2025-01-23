@@ -1,0 +1,28 @@
+#pragma once
+#include "keycodes.h"
+
+namespace Input {
+	void Init(void* glfwWinodw);
+	void Update();
+	bool KeyPressed(unsigned int keycode);
+	bool KeyDown(unsigned int keycode);
+	float GetMouseOffsetX();
+	float GetMouseOffsetY();
+	bool LeftMouseDown();
+	bool RightMouseDown();
+	bool LeftMousePressed();
+	bool RightMousePressed();
+	bool MouseWheelUp();
+	bool MouseWheelDown();
+	int GetMouseWheelValue();
+	int GetMouseX();
+	int GetMouseY();
+	void PreventRightMouseHold();
+    int GetScrollWheelYOffset();
+    void ResetScrollWheelYOffset();
+    void DisableCursor();
+    void HideCursor();
+    void ShowCursor();
+    int GetCursorScreenX();
+    int GetCursorScreenY();
+}
