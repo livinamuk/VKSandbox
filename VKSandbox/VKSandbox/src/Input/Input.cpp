@@ -5,183 +5,199 @@
 
 namespace Input {
 
-    bool _keyPressed[372];
-    bool _keyDown[372];
-    bool _keyDownLastFrame[372];
-    double _mouseX = 0;
-    double _mouseY = 0;
-    double _mouseOffsetX = 0;
-    double _mouseOffsetY = 0;
-    int _mouseWheelValue = 0;
-    int _sensitivity = 100;
-    bool _mouseWheelUp = false;
-    bool _mouseWheelDown = false;
-    bool _leftMouseDown = false;
-    bool _rightMouseDown = false;
-    bool _leftMousePressed = false;
-    bool _rightMousePressed = false;
-    bool _leftMouseDownLastFrame = false;
-    bool _rightMouseDownLastFrame = false;
-    bool _preventRightMouseHoldTillNextClick = false;
-    int _mouseScreenX = 0;
-    int _mouseScreenY = 0;
-    int _scrollWheelYOffset = 0;
-    GLFWwindow* _window;
+    bool g_keyPressed[372];
+    bool g_keyDown[372];
+    bool g_keyDownLastFrame[372];
+    double g_mouseX = 0;
+    double g_mouseY = 0;
+    double g_mouseOffsetX = 0;
+    double g_mouseOffsetY = 0;
+    int g_mouseWheelValue = 0;
+    int g_sensitivity = 100;
+    bool g_mouseWheelUp = false;
+    bool g_mouseWheelDown = false;
+    bool g_leftMouseDown = false;
+    bool g_rightMouseDown = false;
+    bool g_leftMousePressed = false;
+    bool g_rightMousePressed = false;
+    bool g_leftMouseDownLastFrame = false;
+    bool g_rightMouseDownLastFrame = false;
+    bool g_preventRightMouseHoldTillNextClick = false;
+    int g_mouseScreenX = 0;
+    int g_mouseScreenY = 0;
+    int g_scrollWheelYOffset = 0;
+    int g_mouseXPreviousFrame = 0;
+    int g_mouseYPreviousFrame = 0;
+    GLFWwindow* g_window;
 
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
     void Init(void* glfwWindow) {
         double x, y;
-        _window = static_cast<GLFWwindow*>(glfwWindow);
-        glfwSetScrollCallback(_window, scroll_callback);
-        glfwGetCursorPos(_window, &x, &y);
+        g_window = static_cast<GLFWwindow*>(glfwWindow);
+        glfwSetScrollCallback(g_window, scroll_callback);
+        glfwGetCursorPos(g_window, &x, &y);
         DisableCursor();
-        _mouseOffsetX = x;
-        _mouseOffsetY = y;
-        _mouseX = x;
-        _mouseY = y;
+        g_mouseOffsetX = x;
+        g_mouseOffsetY = y;
+        g_mouseX = x;
+        g_mouseY = y;
     }
 
     void Update() {
         // Wheel
-        _mouseWheelUp = false;
-        _mouseWheelDown = false;
-        _mouseWheelValue = GetScrollWheelYOffset();
-        if (_mouseWheelValue < 0)
-            _mouseWheelDown = true;
-        if (_mouseWheelValue > 0)
-            _mouseWheelUp = true;
+        g_mouseWheelUp = false;
+        g_mouseWheelDown = false;
+        g_mouseWheelValue = GetScrollWheelYOffset();
+        if (g_mouseWheelValue < 0)
+            g_mouseWheelDown = true;
+        if (g_mouseWheelValue > 0)
+            g_mouseWheelUp = true;
         ResetScrollWheelYOffset();
 
         // Keyboard
         for (int i = 32; i < 349; i++) {
             // down
-            if (glfwGetKey(_window, i) == GLFW_PRESS)
-                _keyDown[i] = true;
+            if (glfwGetKey(g_window, i) == GLFW_PRESS)
+                g_keyDown[i] = true;
             else
-                _keyDown[i] = false;
+                g_keyDown[i] = false;
 
             // press
-            if (_keyDown[i] && !_keyDownLastFrame[i])
-                _keyPressed[i] = true;
+            if (g_keyDown[i] && !g_keyDownLastFrame[i])
+                g_keyPressed[i] = true;
             else
-                _keyPressed[i] = false;
-            _keyDownLastFrame[i] = _keyDown[i];
+                g_keyPressed[i] = false;
+            g_keyDownLastFrame[i] = g_keyDown[i];
         }
 
         // Mouse
+        g_mouseXPreviousFrame = g_mouseX;
+        g_mouseYPreviousFrame = g_mouseY;
         double x, y;
-        glfwGetCursorPos(_window, &x, &y);
-        _mouseOffsetX = x - _mouseX;
-        _mouseOffsetY = y - _mouseY;
-        _mouseX = x;
-        _mouseY = y;
+        glfwGetCursorPos(g_window, &x, &y);
+        g_mouseOffsetX = x - g_mouseX;
+        g_mouseOffsetY = y - g_mouseY;
+        g_mouseX = x;
+        g_mouseY = y;
 
         // Left mouse down/pressed
-        _leftMouseDown = glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_LEFT);
-        if (_leftMouseDown == GLFW_PRESS && !_leftMouseDownLastFrame)
-            _leftMousePressed = true;
+        g_leftMouseDown = glfwGetMouseButton(g_window, GLFW_MOUSE_BUTTON_LEFT);
+        if (g_leftMouseDown == GLFW_PRESS && !g_leftMouseDownLastFrame)
+            g_leftMousePressed = true;
         else
-            _leftMousePressed = false;
-        _leftMouseDownLastFrame = _leftMouseDown;
+            g_leftMousePressed = false;
+        g_leftMouseDownLastFrame = g_leftMouseDown;
 
         // Right mouse down/pressed
-        _rightMouseDown = glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_RIGHT);
-        if (_rightMouseDown == GLFW_PRESS && !_rightMouseDownLastFrame)
-            _rightMousePressed = true;
+        g_rightMouseDown = glfwGetMouseButton(g_window, GLFW_MOUSE_BUTTON_RIGHT);
+        if (g_rightMouseDown == GLFW_PRESS && !g_rightMouseDownLastFrame)
+            g_rightMousePressed = true;
         else
-            _rightMousePressed = false;
-        _rightMouseDownLastFrame = _rightMouseDown;
+            g_rightMousePressed = false;
+        g_rightMouseDownLastFrame = g_rightMouseDown;
 
-        if (_rightMousePressed)
-            _preventRightMouseHoldTillNextClick = false;
+        if (g_rightMousePressed)
+            g_preventRightMouseHoldTillNextClick = false;
     }
 
     bool KeyPressed(unsigned int keycode) {
-        return _keyPressed[keycode];
+        return g_keyPressed[keycode];
     }
 
     bool KeyDown(unsigned int keycode) {
-        return _keyDown[keycode];
+        return g_keyDown[keycode];
     }
 
     float GetMouseOffsetX() {
-        return (float)_mouseOffsetX;
+        return (float)g_mouseOffsetX;
     }
 
     float GetMouseOffsetY() {
-        return (float)_mouseOffsetY;
+        return (float)g_mouseOffsetY;
     }
 
     bool LeftMouseDown() {
-        return _leftMouseDown;
+        return g_leftMouseDown;
     }
 
     bool RightMouseDown() {
-        return _rightMouseDown && !_preventRightMouseHoldTillNextClick;
+        return g_rightMouseDown && !g_preventRightMouseHoldTillNextClick;
     }
 
     bool LeftMousePressed() {
-        return _leftMousePressed;
+        return g_leftMousePressed;
     }
 
     bool RightMousePressed() {
-        return _rightMousePressed;
+        return g_rightMousePressed;
     }
 
     bool MouseWheelDown() {
-        return _mouseWheelDown;
+        return g_mouseWheelDown;
     }
 
     int GetMouseWheelValue() {
-        return _mouseWheelValue;
+        return g_mouseWheelValue;
     }
 
     bool MouseWheelUp() {
-        return _mouseWheelUp;
+        return g_mouseWheelUp;
     }
 
     void PreventRightMouseHold() {
-        _preventRightMouseHoldTillNextClick = true;
+        g_preventRightMouseHoldTillNextClick = true;
     }
 
     int GetMouseX() {
-        return (int)_mouseX;
+        return (int)g_mouseX;
     }
 
     int GetMouseY() {
-        return (int)_mouseY;
+        return (int)g_mouseY;
+    }
+
+    int GetMouseXPreviousFrame() {
+        return (int)g_mouseXPreviousFrame;
+    }
+
+    int GetMouseYPreviousFrame() {
+        return (int)g_mouseYPreviousFrame;
     }
 
     int GetScrollWheelYOffset() {
-        return _scrollWheelYOffset;
+        return g_scrollWheelYOffset;
     }
 
     void ResetScrollWheelYOffset() {
-        _scrollWheelYOffset = 0;
+        g_scrollWheelYOffset = 0;
     }
 
     void DisableCursor() {
-        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     void HideCursor() {
-        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     }
 
     void ShowCursor() {
-        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
     int GetCursorScreenX() {
-        return _mouseScreenX;
+        return g_mouseScreenX;
     }
 
     int GetCursorScreenY() {
-        return _mouseScreenY;
+        return g_mouseScreenY;
+    }
+
+    void SetCursorPosition(int x, int y) {
+        glfwSetCursorPos(g_window, static_cast<double>(x), static_cast<double>(y));
     }
 
     void scroll_callback(GLFWwindow* /*window*/, double /*xoffset*/, double yoffset) {
-        _scrollWheelYOffset = (int)yoffset;
+        g_scrollWheelYOffset = (int)yoffset;
     }
 }

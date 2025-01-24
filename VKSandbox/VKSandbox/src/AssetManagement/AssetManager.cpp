@@ -7,6 +7,7 @@
 #include "../File/AssimpImporter.h"
 #include "../Tools/ImageTools.h"
 #include "../Types/DetachedMesh.hpp"
+#include "../UI/UIBackEnd.h"
 #include "../Util.hpp"
 
 namespace AssetManager {
@@ -56,6 +57,18 @@ namespace AssetManager {
 
     void UpdateLoading() {
 
+        // Calculate load log text
+        std::string text = "";
+        int maxLinesDisplayed = 36;
+        int endIndex = AssetManager::GetLoadLog().size();
+        int beginIndex = std::max(0, endIndex - maxLinesDisplayed);
+        for (int i = beginIndex; i < endIndex; i++) {
+            text += AssetManager::GetLoadLog()[i] + "\n";
+        }
+
+        UIBackEnd::BlitText(text, "StandardFont", 0, 0, 2.0f);
+
+
         if (BackEnd::GetAPI() == API::OPENGL) {
             OpenGLBackEnd::UpdateTextureBaking();
         }
@@ -75,6 +88,7 @@ namespace AssetManager {
         for (Model& model : g_models) {
             if (model.GetLoadingState() != LoadingState::LOADING_COMPLETE) {
                 g_loadingComplete = false;
+                std::cout << model.GetFileInfo().name;
                 return;
             }
         }
@@ -156,7 +170,6 @@ namespace AssetManager {
                 model.SetLoadingState(LoadingState::LOADING_FROM_DISK);
                 AddItemToLoadLog(model.GetFileInfo().path);
                 g_futures.push_back(std::async(std::launch::async, LoadModel, &model));
-                return;
             }
         }
     }

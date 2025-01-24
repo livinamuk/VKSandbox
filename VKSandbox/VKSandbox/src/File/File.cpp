@@ -95,15 +95,15 @@ ModelData File::ImportModel(const std::string& filepath) {
     file.read(reinterpret_cast<char*>(&modelHeader.timestamp), sizeof(modelHeader.timestamp));
     file.read(reinterpret_cast<char*>(&modelHeader.aabbMin), sizeof(glm::vec3));
     file.read(reinterpret_cast<char*>(&modelHeader.aabbMax), sizeof(glm::vec3));
+#if PRINT_MODEL_HEADERS_ON_READ
+    PrintModelHeader(modelHeader, "Read model header: " + modelData.name);
+#endif
     modelData.meshCount = modelHeader.meshCount;
     modelData.meshes.resize(modelHeader.meshCount);
     modelData.name = modelName;
     modelData.aabbMin = modelHeader.aabbMin;
     modelData.aabbMax = modelHeader.aabbMax;
     modelData.timestamp = modelHeader.timestamp;
-#if PRINT_MODEL_HEADERS_ON_READ
-    PrintModelHeader(modelHeader, "Read model header: " + modelData.name);
-#endif
     for (uint32_t i = 0; i < modelHeader.meshCount; ++i) {
         MeshHeader meshHeader;
         file.read((char*)&meshHeader.nameLength, sizeof(meshHeader.nameLength));

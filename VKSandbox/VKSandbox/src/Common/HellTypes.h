@@ -41,7 +41,7 @@ struct RenderItem2D {
 struct Vertex2D {
     glm::vec2 position;
     glm::vec2 uv;
-    glm::vec3 color;
+    glm::vec4 color;
     int textureIndex;
 };
 

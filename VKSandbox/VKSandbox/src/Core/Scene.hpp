@@ -2,9 +2,14 @@
 #include "HellTypes.h"
 #include <vector>
 #include "../AssetManagement/AssetManager.h"
+#include "../Core/Camera.h"
+#include "../Core/Debug.h"
 #include "../Input/Input.h"
 #include "../Types/GameObject.h"
 #include "../Util.hpp"
+#include "glm/gtx/intersect.hpp"
+
+#include "../API/OpenGL/GL_renderer.h"
 
 namespace Scene {
 
@@ -14,6 +19,15 @@ namespace Scene {
     inline std::vector<RenderItem> g_renderItemsAlphaDiscarded;
     inline std::vector<RenderItem> g_renderItemsHairTopLayer;
     inline std::vector<RenderItem> g_renderItemsHairBottomLayer;
+
+    inline glm::vec3 p1 = glm::vec3(0);
+    inline glm::vec3 p2 = glm::vec3(0);
+
+
+    inline glm::vec3 v0 = glm::vec3(0);
+    inline glm::vec3 v1 = glm::vec3(0);
+    inline glm::vec3 v2 = glm::vec3(0);
+    inline glm::vec3 v3 = glm::vec3(0);
 
     inline void Init() {
         // nothing as of yet
@@ -26,6 +40,60 @@ namespace Scene {
         g_renderItemsAlphaDiscarded.clear();
         g_renderItemsHairTopLayer.clear();
         g_renderItemsHairBottomLayer.clear();
+
+        // Hack to translate the gizmo
+        for (GameObject& gameObject : g_gameObjects) {         
+            if (gameObject.m_model->GetName() == "Gizmo") {
+                enum class Axis { X, Y, Z };
+                static Axis g_axis = Axis::X;
+                if (Input::KeyDown(HELL_KEY_X)) {
+                    g_axis = Axis::X;
+                }
+                else if (Input::KeyDown(HELL_KEY_Y)) {
+                    g_axis = Axis::Y;
+                }
+                else if (Input::KeyDown(HELL_KEY_Z)) {
+                    g_axis = Axis::Z;
+                }
+                else {
+                    break;
+                }
+                glm::mat4 projectionMatrix = Camera::GetProjectionMatrix();
+                glm::mat4 viewMatrix = Camera::GetViewMatrix();
+                glm::vec3 viewPos = Camera::GetViewPos();
+                glm::vec3 gizmoPosition = gameObject.m_transform.position;
+                glm::vec3 planeNormal = (g_axis == Axis::Y) ? glm::vec3(0.0f, 0.0f, 1.0f) : glm::vec3(0.0f, 1.0f, 0.0f);
+                glm::vec3 rayOrigin = viewPos;
+                glm::vec3 planeOrigin = glm::vec3(gizmoPosition);
+                int mouseX = Input::GetMouseX();
+                int mouseY = Input::GetMouseY();
+                int windowWidth = BackEnd::GetCurrentWindowWidth();
+                int windowHeight = BackEnd::GetCurrentWindowHeight();
+                glm::vec3 rayDirection = Util::GetMouseRay(projectionMatrix, viewMatrix, windowWidth, windowHeight, mouseX, mouseY);
+                float distanceToHit = 0;
+                bool hitFound = glm::intersectRayPlane(rayOrigin, rayDirection, planeOrigin, planeNormal, distanceToHit);                
+                if (hitFound) {
+                    glm::vec3 hitPosition = rayOrigin + (rayDirection * distanceToHit);
+                    switch (g_axis) {
+                    case Axis::X: gameObject.m_transform.position.x = hitPosition.x; break;
+                    case Axis::Y: gameObject.m_transform.position.y = hitPosition.y; break;
+                    case Axis::Z: gameObject.m_transform.position.z = hitPosition.z; break;
+                    }
+                }
+                // TODO: Once you this to the editor, make:
+                // rayDirection = Editor::GetMouseRay();
+            }
+        }
+
+        // Hack to scale the gizmo
+        for (GameObject& gameObject : g_gameObjects) {
+            if (gameObject.m_model->GetName() == "Gizmo") {
+                float screenScaleFactor = 0.2f;
+                float distance = glm::length(gameObject.m_transform.position - Camera::GetViewPos());
+                float scalingFactor = distance * screenScaleFactor;
+                gameObject.m_transform.scale = glm::vec3(scalingFactor);
+            }
+        }
 
         // Update each GameObject and collect render items
         for (GameObject& gameObject : g_gameObjects) {
@@ -99,7 +167,27 @@ namespace Scene {
         //room->SetMeshMaterialByMeshName("WallZNeg", "BathroomWall");
         //room->SetMeshMaterialByMeshName("WallXPos", "BathroomWall");
         //room->SetMeshMaterialByMeshName("WallXNeg", "BathroomWall");
-        
+
+      // CreateGameObject();
+      // GameObject* gizmo = &g_gameObjects[g_gameObjects.size() - 1];
+      // gizmo->SetPosition(glm::vec3(3.8, -1.0f, 5.25f));
+      // gizmo->SetModel("Gizmo");
+      // gizmo->PrintMeshNames();
+
+        //CreateGameObject();
+        //GameObject* scope = &g_gameObjects[g_gameObjects.size() - 1];
+        //scope->SetPosition(glm::vec3(0, 0, 0));
+        //scope->SetModel("AKS74U_Scope4");
+        //scope->m_transform.scale = glm::vec3(0.01);
+        //scope->PrintMeshNames();
+        //
+        //CreateGameObject();
+        //GameObject* scope2 = &g_gameObjects[g_gameObjects.size() - 1];
+        //scope2->SetPosition(glm::vec3(0, 0, 1));
+        //scope2->SetModel("AKS74U_Scope");
+        //scope2->m_transform.scale = glm::vec3(0.01);
+        //scope2->PrintMeshNames();
+
         CreateGameObject();
         GameObject* mermaid = &g_gameObjects[g_gameObjects.size() - 1];
         mermaid->SetPosition(glm::vec3(3.5, -1.0f, 7.5f));

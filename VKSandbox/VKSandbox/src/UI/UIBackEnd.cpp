@@ -3,6 +3,8 @@
 #include "TextBlitter.h"
 #include "../AssetManagement/AssetManager.h"
 #include "../BackEnd/BackEnd.h"
+#include "../Core/Debug.h"
+#include "../Config/Config.h"
 
 namespace UIBackEnd {
 
@@ -25,6 +27,15 @@ namespace UIBackEnd {
     }
 
     void Update() {
+        
+        BlitText(Debug::GetText(), "StandardFont", 0, 0, 2.0f);
+
+        //if (AssetManager::LoadingComplete()) {
+        //    BlitTexture("ui_test", glm::ivec2(250, 150), Alignment::TOP_LEFT, glm::vec4(1.0, 0.0, 0.0, 0.5), glm::ivec2(-1, -1));
+        //    BlitText("Might leave in a body bag,", "StandardFont", 250, 150, 2.0f);
+        //    BlitText("Never in cuffs.", "StandardFont", 250, 180, 2.0f);
+        //}       
+
         if (BackEnd::GetAPI() == API::OPENGL) {
             g_uiMesh.GetGLMesh2D().UpdateVertexBuffer(g_vertices, g_indices);
         }
@@ -40,14 +51,14 @@ namespace UIBackEnd {
         g_renderItems.clear();
     }
 
-    void BlitText(const std::string& text, const std::string& fontName, int originX, int originY, glm::ivec2 viewportSize, float scale) {
+    void BlitText(const std::string& text, const std::string& fontName, int originX, int originY, float scale) {
         FontSpriteSheet* fontSpriteSheet = TextBlitter::GetFontSpriteSheet(fontName);
         if (!fontSpriteSheet) {
             return;
         }
         int baseVertex = g_vertices.size();
 
-        MeshData2D meshData = TextBlitter::BlitText(text, fontName, originX, originY, viewportSize, scale, baseVertex);
+        MeshData2D meshData = TextBlitter::BlitText(text, fontName, originX, originY, Config::GetUIResolution(), scale, baseVertex);
         g_vertices.insert(std::end(g_vertices), std::begin(meshData.vertices), std::end(meshData.vertices));
         g_indices.insert(std::end(g_indices), std::begin(meshData.indices), std::end(meshData.indices));
 
@@ -57,10 +68,11 @@ namespace UIBackEnd {
         renderItem.indexCount = meshData.indices.size();
     }
 
-    void BlitTexture(const std::string& textureName, glm::ivec2 location, glm::ivec2 viewportSize, Alignment alignment, glm::vec3 colorTint, glm::ivec2 size) {
+    void BlitTexture(const std::string& textureName, glm::ivec2 location, Alignment alignment, glm::vec4 colorTint, glm::ivec2 size) {
         // Bail if texture not found
         int textureIndex = AssetManager::GetTextureIndexByName(textureName);
         if (textureIndex == -1) {
+            std::cout << "BlitTexture() failed. Could not find texture '" << textureName << "'\n";
             return;
         }
         // Get texture dimensions
@@ -89,6 +101,7 @@ namespace UIBackEnd {
             break;
         }
         // Calculate normalized device coordinates for quad
+        glm::ivec2 viewportSize = Config::GetUIResolution();
         float x0 = (location.x / static_cast<float>(viewportSize.x)) * 2.0f - 1.0f;
         float y0 = 1.0f - (location.y / static_cast<float>(viewportSize.y)) * 2.0f;
         float x1 = ((location.x + texWidth) / static_cast<float>(viewportSize.x)) * 2.0f - 1.0f;

@@ -19,15 +19,13 @@ namespace UIBackEnd {
         const std::string& fontName,
         int locationX,
         int locationY,
-        glm::ivec2 viewportSize,
         float scale
     );
     void BlitTexture(
         const std::string& textureName,
         glm::ivec2 location,
-        glm::ivec2 viewportSize,
         Alignment alignment,
-        glm::vec3 colorTint = WHITE,
+        glm::vec4 colorTint = glm::vec4(1,1,1,1),
         glm::ivec2 size = glm::ivec2(-1, -1)
     );
     void EndFrame();

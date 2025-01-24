@@ -68,5 +68,6 @@ namespace BakeQueue {
             }
         }
         std::cout << "BakeQueue::GetQueuedTextureBakeByJobID(int jobID) failed. '" << jobID << "' did not exist\n";
+        return nullptr;
     }
 }

@@ -8,6 +8,7 @@
 #include "../API/Vulkan/VK_backEnd.h"
 #include "../AssetManagement/AssetManager.h"
 #include "../Core/Audio.h"
+#include "../Core/Debug.h"
 #include "../Input/Input.h"
 #include "../Renderer/Renderer.h"
 #include "../UI/UIBackEnd.h"
@@ -27,7 +28,7 @@ namespace BackEnd {
 
     bool Init(API api, int windowWidth, int windowHeight, WindowedMode windowMode) {
         g_api = api;
-        if (GLFWIntegration::Init(api, windowWidth, windowHeight, windowMode)) {
+        if (!GLFWIntegration::Init(api, windowWidth, windowHeight, windowMode)) {
             return false;
         }        
         if (GetAPI() == API::OPENGL) {
@@ -61,11 +62,16 @@ namespace BackEnd {
 
     void EndFrame() {
         GLFWIntegration::EndFrame(g_api);
+        UIBackEnd::EndFrame();
+        Debug::EndFrame();
     }
 
     void UpdateSubSystems() {
         Input::Update();
         Audio::Update();
+        if (AssetManager::LoadingComplete()) {
+            Debug::Update();
+        }
         if (Input::KeyPressed(HELL_KEY_ESCAPE)) {
             BackEnd::ForceCloseWindow();
         }
@@ -161,6 +167,51 @@ namespace BackEnd {
 
     int GetPresentTargetHeight() {
         return g_presentTargetHeight;
+    }
+
+    void UpdateMousePicking(int x, int y) {
+        if (g_api == API::OPENGL) {
+            OpenGLBackEnd::UpdateMousePicking(x, y);
+        }
+        if (g_api == API::VULKAN) {
+            // TODO: VulkanBackEnd::UpdateMousePicking(x, y);
+        }
+    }
+
+    int GetMousePickR() {
+        if (g_api == API::OPENGL) {
+            return OpenGLBackEnd::GetMousePickR();
+        }
+        if (g_api == API::VULKAN) {
+            // TODO: VulkanBackEnd::GetMousePickR();
+        }
+    }
+
+    int GetMousePickG() {
+        if (g_api == API::OPENGL) {
+            return OpenGLBackEnd::GetMousePickG();
+        }
+        if (g_api == API::VULKAN) {
+            // TODO: VulkanBackEnd::GetMousePickG();
+        }
+    }
+
+    int GetMousePickB() {
+        if (g_api == API::OPENGL) {
+            return OpenGLBackEnd::GetMousePickB();
+        }
+        if (g_api == API::VULKAN) {
+            // TODO: VulkanBackEnd::GetMousePickB();
+        }
+    }
+
+    int GetMousePickA() {
+        if (g_api == API::OPENGL) {
+            return OpenGLBackEnd::GetMousePickA();
+        }
+        if (g_api == API::VULKAN) {
+            // TODO: VulkanBackEnd::GetMousePickA();
+        }
     }
 }
 

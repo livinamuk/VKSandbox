@@ -10,7 +10,7 @@ namespace TextBlitter {
     std::vector<FontSpriteSheet> g_fontSpriteSheets;
     std::unordered_map<std::string, uint32_t> g_fontIndices;
 
-    glm::vec3 ParseColorTag(const std::string& tag);
+    glm::vec4 ParseColorTag(const std::string& tag);
 
     MeshData2D BlitText(const std::string& text, const std::string& fontName, int originX, int originY, glm::ivec2 viewportSize, float scale, uint32_t baseVertex) {
         FontSpriteSheet* spriteSheet = GetFontSpriteSheet(fontName);
@@ -29,7 +29,7 @@ namespace TextBlitter {
             float invTextureHeight = 1.0f / static_cast<float>(spriteSheet->m_textureHeight);
             float halfPixelU = 0.5f * invTextureWidth;
             float halfPixelV = 0.5f * invTextureHeight;
-            glm::vec3 color(1.0f); // Default color
+            glm::vec4 color(1.0f); // Default color
 
             // Reserve space for vertices and indices
             size_t estimatedVertices = text.length() * 4;
@@ -119,8 +119,8 @@ namespace TextBlitter {
         return (it != g_fontIndices.end()) ? &g_fontSpriteSheets[it->second] : nullptr;
     }
 
-    glm::vec3 ParseColorTag(const std::string& tag) {
-        glm::vec3 color(1.0f);
+    glm::vec4 ParseColorTag(const std::string& tag) {
+        glm::vec4 color(1.0f);
         size_t start = tag.find("[COL=") + 5;
         if (start == std::string::npos) {
             return color;

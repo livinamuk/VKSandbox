@@ -2,6 +2,7 @@
 #include "HellDefines.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "../Editor/EditorNew.h"
 #include "../Input/Input.h"
 
 #define NEAR_PLANE 0.01f
@@ -35,17 +36,20 @@ namespace Camera {
     }
 
     void Update(float deltaTime) {
-        // Mouselook
+
         double x, y;
         glfwGetCursorPos(g_window, &x, &y);
         g_mouseOffsetX = x - g_mouseX;
         g_mouseOffsetY = y - g_mouseY;
         g_mouseX = x;
         g_mouseY = y;
-        g_transform.rotation.x += -g_mouseOffsetY * g_mouseSensitivity;
-        g_transform.rotation.y += -g_mouseOffsetX * g_mouseSensitivity;
-        g_transform.rotation.x = std::min(g_transform.rotation.x, 1.5f);
-        g_transform.rotation.x = std::max(g_transform.rotation.x, -1.5f);
+        // Mouselook
+        if (!EditorNew::IsOpen()) {
+            g_transform.rotation.x += -g_mouseOffsetY * g_mouseSensitivity;
+            g_transform.rotation.y += -g_mouseOffsetX * g_mouseSensitivity;
+            g_transform.rotation.x = std::min(g_transform.rotation.x, 1.5f);
+            g_transform.rotation.x = std::max(g_transform.rotation.x, -1.5f);
+        }
         glm::vec3 camRight = glm::vec3(g_transform.to_mat4()[0]);
         glm::vec3 camForward = glm::vec3(g_transform.to_mat4()[2]);
         glm::vec3 movementForwardVector = glm::normalize(glm::vec3(camForward.x, 0, camForward.z));
@@ -86,8 +90,8 @@ namespace Camera {
         int width, height;
         glfwGetWindowSize(g_window, &width, &height);
         return glm::perspective(1.0f, float(width) / float(height), NEAR_PLANE, FAR_PLANE);
-    }
-
+    }    
+    
     glm::mat4 GetViewMatrix() {
         return glm::inverse(g_transform.to_mat4());
     }

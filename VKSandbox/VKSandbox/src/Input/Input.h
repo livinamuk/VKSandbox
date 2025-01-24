@@ -14,9 +14,9 @@ namespace Input {
 	bool RightMousePressed();
 	bool MouseWheelUp();
 	bool MouseWheelDown();
-	int GetMouseWheelValue();
-	int GetMouseX();
-	int GetMouseY();
+    int GetMouseWheelValue();
+    int GetMouseX();
+    int GetMouseY();
 	void PreventRightMouseHold();
     int GetScrollWheelYOffset();
     void ResetScrollWheelYOffset();
@@ -25,4 +25,7 @@ namespace Input {
     void ShowCursor();
     int GetCursorScreenX();
     int GetCursorScreenY();
+    void SetCursorPosition(int x, int y);
+    int GetMouseXPreviousFrame();
+    int GetMouseYPreviousFrame();
 }

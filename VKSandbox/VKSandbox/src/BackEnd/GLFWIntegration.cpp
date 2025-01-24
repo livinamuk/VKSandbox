@@ -74,6 +74,7 @@ namespace GLFWIntegration {
         }
         glfwSetFramebufferSizeCallback(g_window, framebuffer_size_callback);
         glfwSetWindowFocusCallback(g_window, window_focus_callback);
+        return true;
     }
 
     void MakeContextCurrent() {

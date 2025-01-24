@@ -11,12 +11,15 @@
 #include "../Core/Audio.h"
 #include "../Core/Camera.h"
 #include "../Core/Scene.hpp"
+#include "../Config/Config.h"
+#include "../Game/Game.h"
 #include "../Input/Input.h"
 #include "../Util.hpp"
 #include "../UI/UIBackEnd.h"
 #include "../UI/TextBlitter.h"
 #include "../Types/GameObject.h"
 #include "../Hardcoded.hpp"
+#include "../Timer.hpp"
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace OpenGLRenderer {
@@ -28,6 +31,7 @@ namespace OpenGLRenderer {
         Shader ui;
         Shader hairfinalComposite;
         Shader hairLayerComposite;
+        Shader gizmo;
     } g_shaders;
 
     struct FrameBuffers {
@@ -37,7 +41,7 @@ namespace OpenGLRenderer {
         GLFrameBuffer ui;
     } g_frameBuffers;
     
-    int g_peelCount = 4;
+    int g_peelCount = 3;
     GLint g_UIQuadVAO;
 
     void DrawScene(Shader& shader);
@@ -46,10 +50,12 @@ namespace OpenGLRenderer {
     void RenderHair();
     void RenderHairLayer(std::vector<RenderItem>& renderItems, int peelCount);
     void RenderUI();
+    void RenderEditor();
 
     void Init() {
         g_frameBuffers.main.Create("Main", 1920, 1080);
         g_frameBuffers.main.CreateAttachment("Color", GL_RGBA8);
+        g_frameBuffers.main.CreateAttachment("MousePick", GL_RG16UI, GL_NEAREST, GL_NEAREST);
         g_frameBuffers.main.CreateDepthAttachment(GL_DEPTH32F_STENCIL8);
 
         float hairDownscaleRatio = 1.0f;
@@ -64,10 +70,15 @@ namespace OpenGLRenderer {
         g_frameBuffers.present.Create("Main", g_frameBuffers.main.GetWidth() * presentScale, g_frameBuffers.main.GetHeight() * presentScale);
         g_frameBuffers.present.CreateAttachment("Color", GL_RGBA8);
 
-        g_frameBuffers.ui.Create("UI", 1920, 1080);
+        glm::uvec2 uiResolution = Config::GetUIResolution();
+        g_frameBuffers.ui.Create("UI", uiResolution.x, uiResolution.y);
         g_frameBuffers.ui.CreateAttachment("Color", GL_RGBA8, GL_NEAREST, GL_NEAREST);
 
         g_UIQuadVAO = OpenGLRendererUtil::CreateQuadVAO();
+
+        int framebufferHandle = g_frameBuffers.main.GetHandle();
+        int attachmentSlot = g_frameBuffers.main.GetColorAttachmentSlotByName("MousePick");
+        OpenGLBackEnd::SetMousePickHandles(framebufferHandle, attachmentSlot);
 
         LoadShaders();
     }
@@ -89,7 +100,7 @@ namespace OpenGLRenderer {
         // Update UI
         GLFrameBuffer& frameBuffer = g_frameBuffers.ui;
         glm::ivec2 viewportSize = glm::ivec2(frameBuffer.GetWidth(), frameBuffer.GetHeight());
-        UIBackEnd::BlitText(text, "StandardFont", 0, 0, viewportSize, 2.0f);
+        UIBackEnd::BlitText(text, "StandardFont", 0, 0, 2.0f);
         UIBackEnd::Update();
 
         // Render UI
@@ -97,15 +108,6 @@ namespace OpenGLRenderer {
     }
 
     void RenderGame() {
-        // Update UI
-        GLFrameBuffer& frameBuffer = g_frameBuffers.ui;
-        glm::ivec2 viewportSize = glm::ivec2(frameBuffer.GetWidth(), frameBuffer.GetHeight());
-        //UIBackEnd::BlitText("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "StandardFont", 60, 60, viewportSize, 2.0f);
-        //UIBackEnd::BlitTexture("ui_test", glm::ivec2(0, 0), viewportSize, Alignment::TOP_LEFT);
-        UIBackEnd::BlitText("Might leave in a body bag,", "StandardFont", 0, 0, viewportSize, 2.0f);
-        UIBackEnd::BlitText("Never in cuffs.", "StandardFont", 0, 30, viewportSize, 2.0f);
-        //UIBackEnd::BlitText("Peel count: " + std::to_string(g_peelCount), "StandardFont", 0, 0, viewportSize, 2.0f);
-        UIBackEnd::Update();
 
         if (Input::KeyPressed(HELL_KEY_E) && g_peelCount < 7) {
             Audio::PlayAudio("UI_Select.wav", 1.0f);
@@ -120,12 +122,14 @@ namespace OpenGLRenderer {
 
         g_frameBuffers.main.Bind();
         g_frameBuffers.main.SetViewport();
+        g_frameBuffers.main.ClearAttachment("Color", 0, 0, 0, 0);
+        g_frameBuffers.main.ClearAttachment("MousePick", -1, -1, 0, 0);
+        g_frameBuffers.main.ClearDepthAttachment();
         g_frameBuffers.main.DrawBuffers({ "Color" });
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         RenderLighting();
         RenderHair();
+        RenderEditor();
         RenderDebug();
 
         GLFrameBuffer& mainFrameBuffer = g_frameBuffers.main;
@@ -153,8 +157,6 @@ namespace OpenGLRenderer {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.GetHandle());
         glBlitFramebuffer(0, 0, srcFrameBuffer.GetWidth(), srcFrameBuffer.GetHeight(), 0, 0, dstFrameBuffer.GetWidth(), dstFrameBuffer.GetHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
 
     void CopyColorBuffer(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer, const char* srcAttachmentName, const char* dstAttachmentName) {
@@ -165,8 +167,6 @@ namespace OpenGLRenderer {
         glReadBuffer(srcAttachmentSlot);
         glDrawBuffer(dstAttachmentSlot);
         glBlitFramebuffer(0, 0, srcFrameBuffer.GetWidth(), srcFrameBuffer.GetHeight(), 0, 0, dstFrameBuffer.GetWidth(), dstFrameBuffer.GetHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     }
 
     void DrawScene(Shader& shader) {
@@ -219,7 +219,7 @@ namespace OpenGLRenderer {
 
         g_frameBuffers.main.Bind();
         g_frameBuffers.main.SetViewport();
-        g_frameBuffers.main.DrawBuffers({ "Color" });
+        g_frameBuffers.main.DrawBuffers({ "Color", "MousePick"});
 
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
@@ -268,7 +268,7 @@ namespace OpenGLRenderer {
     }
 
     void RenderHairLayer(std::vector<RenderItem>& renderItems, int peelCount) {
-         g_frameBuffers.hair.Bind();
+        g_frameBuffers.hair.Bind();
         g_frameBuffers.hair.ClearAttachment("ViewspaceDepthPrevious", 1, 1, 1, 1);
         for (int i = 0; i < peelCount; i++) {
             // Viewspace depth pass
@@ -332,10 +332,19 @@ namespace OpenGLRenderer {
     }
 
     void RenderDebug() {
+
+        GLFrameBuffer& mainFrameBuffer = g_frameBuffers.main;
+        mainFrameBuffer.Bind();
+        mainFrameBuffer.DrawBuffer("Color");
+        mainFrameBuffer.SetViewport();
+
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
         glPointSize(8.0f);
         glDisable(GL_DEPTH_TEST);
+
+        // AABB aabb(glm::vec3(-0.5), glm::vec3(0.5));
+        // DrawAABB(aabb, WHITE);
         
         g_shaders.solidColor.Use();
         g_shaders.solidColor.SetMat4("projection", Camera::GetProjectionMatrix());
@@ -382,8 +391,6 @@ namespace OpenGLRenderer {
             glDrawElementsInstancedBaseVertex(GL_TRIANGLES, renderItem.indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * renderItem.baseIndex), 1, renderItem.baseVertex);
         }
 
-        UIBackEnd::EndFrame();
-
         // Draw the UI texture into the swapchain
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, BackEnd::GetCurrentWindowWidth(), BackEnd::GetCurrentWindowHeight());
@@ -396,6 +403,65 @@ namespace OpenGLRenderer {
         glDisable(GL_BLEND);
     }
 
+    void RenderEditor() {
+
+        g_frameBuffers.main.Bind();
+        g_frameBuffers.main.SetViewport();
+        g_frameBuffers.main.DrawBuffers({ "Color", "MousePick" });
+
+
+        glEnable(GL_DEPTH_TEST);
+        g_frameBuffers.main.ClearDepthAttachment();
+
+
+        Shader& shader = g_shaders.gizmo;
+        shader.Use();
+        shader.SetMat4("projection", Camera::GetProjectionMatrix());
+        shader.SetMat4("view", Camera::GetViewMatrix());
+        shader.SetMat4("model", glm::mat4(1));
+
+        static int modelIndex = AssetManager::GetModelIndexByName("Gizmo");
+        static Model* model = AssetManager::GetModelByIndex(modelIndex);
+
+        Transform transform;
+        transform.position = glm::vec3(0, 0, 0);
+
+        std::cout << "\n";
+
+        for (uint32_t& meshIndex : model->GetMeshIndices()) {
+            DetachedMesh* mesh = AssetManager::GetMeshByIndex(meshIndex);
+
+
+            if (mesh->GetName() == "XAxis") {
+                shader.SetVec3("color", RED);
+                shader.SetInt("mousePickType", 0);
+                shader.SetInt("mousePickValue", 1);
+            }
+            if (mesh->GetName() == "YAxis") {
+                shader.SetVec3("color", GREEN);
+                shader.SetInt("mousePickType", 0);
+                shader.SetInt("mousePickValue", 2);
+            }
+            if (mesh->GetName() == "ZAxis") {
+                shader.SetVec3("color", BLUE);
+                shader.SetInt("mousePickType", 0);
+                shader.SetInt("mousePickValue", 3);
+            }
+            if (mesh->GetName() == "Center") {
+                shader.SetVec3("color", YELLOW);
+                shader.SetInt("mousePickType", 0);
+                shader.SetInt("mousePickValue", 0);
+            }              
+
+            if (mesh) {
+                OpenGLDetachedMesh glMesh = mesh->GetGLMesh();
+                shader.SetMat4("model", transform.to_mat4());
+                glBindVertexArray(glMesh.GetVAO());
+                glDrawElements(GL_TRIANGLES, glMesh.GetIndexCount(), GL_UNSIGNED_INT, 0);
+            }
+        }
+    }
+
     void LoadShaders() {
         if (g_shaders.hairfinalComposite.Load({ "gl_hair_final_composite.comp" }) &&
             g_shaders.hairLayerComposite.Load({ "gl_hair_layer_composite.comp" }) &&
@@ -403,6 +469,7 @@ namespace OpenGLRenderer {
             g_shaders.hairDepthPeel.Load({ "gl_hair_depth_peel.vert", "gl_hair_depth_peel.frag" }) &&
             g_shaders.lighting.Load({ "gl_lighting.vert", "gl_lighting.frag" }) &&
             g_shaders.ui.Load({ "gl_ui.vert", "gl_ui.frag" })) {
+            g_shaders.gizmo.Load({ "gl_gizmo.vert", "gl_gizmo.frag" });
             std::cout << "Hotloaded shaders\n";
         }
     }

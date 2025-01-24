@@ -3,6 +3,7 @@
 #include "../common/post_processing.glsl"
 
 layout (location = 0) out vec4 FragOut;
+layout (location = 1) out uvec2  MousePickOut;
 layout (binding = 0) uniform sampler2D baseColorTexture;
 layout (binding = 1) uniform sampler2D normalTexture;
 layout (binding = 2) uniform sampler2D rmaTexture;
@@ -80,4 +81,6 @@ void main() {
 
     finalColor.rgb = finalColor.rgb * finalAlpha;
     FragOut = vec4(finalColor, finalAlpha);
+
+    MousePickOut.rg = uvec2(3, 4);
 }

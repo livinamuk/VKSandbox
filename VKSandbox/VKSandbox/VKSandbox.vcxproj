@@ -34,9 +34,12 @@
     <ClCompile Include="src\API\Vulkan\vk_util.cpp" />
     <ClCompile Include="src\BackEnd\BackEnd.cpp" />
     <ClCompile Include="src\BackEnd\GLFWIntegration.cpp" />
+    <ClCompile Include="src\Config\Config.cpp" />
     <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\AssetManagement\BakeQueue.cpp" />
     <ClCompile Include="src\Core\Camera.cpp" />
+    <ClCompile Include="src\Core\Debug.cpp" />
+    <ClCompile Include="src\Editor\EditorNew.cpp" />
     <ClCompile Include="src\File\AssimpImporter.cpp" />
     <ClCompile Include="src\File\File.cpp" />
     <ClCompile Include="src\Game\Game.cpp" />
@@ -58,6 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\common\constants.glsl" />
+    <None Include="res\shaders\OpenGL\gl_gizmo.frag" />
+    <None Include="res\shaders\OpenGL\gl_gizmo.vert" />
     <None Include="res\shaders\OpenGL\gl_hair_final_composite.comp" />
     <None Include="res\shaders\OpenGL\gl_hair_depth_peel.frag" />
     <None Include="res\shaders\OpenGL\gl_hair_depth_peel.vert" />
@@ -103,14 +108,18 @@
     <ClInclude Include="src\BackEnd\BackEnd.h" />
     <ClInclude Include="src\BackEnd\GLFWIntegration.h" />
     <ClInclude Include="src\Common\HellDefines.h" />
+    <ClInclude Include="src\Config\Config.h" />
     <ClInclude Include="src\Core\Audio.h" />
     <ClInclude Include="src\AssetManagement\BakeQueue.h" />
     <ClInclude Include="src\Core\Camera.h" />
+    <ClInclude Include="src\Core\Debug.h" />
+    <ClInclude Include="src\Editor\EditorNew.h" />
     <ClInclude Include="src\File\AssimpImporter.h" />
     <ClInclude Include="src\File\File.h" />
     <ClInclude Include="src\File\FileFormats.h" />
     <ClInclude Include="src\Game\Game.h" />
     <ClInclude Include="src\Renderer\Renderer.h" />
+    <ClInclude Include="src\Timer.hpp" />
     <ClInclude Include="src\Types\GameObject.h" />
     <ClInclude Include="src\Hardcoded.hpp" />
     <ClInclude Include="src\AssetManagement\AssetManager.h" />

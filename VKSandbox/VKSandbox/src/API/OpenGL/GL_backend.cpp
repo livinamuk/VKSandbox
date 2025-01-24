@@ -18,6 +18,13 @@ namespace OpenGLBackEnd {
     const size_t MAX_CHANNEL_COUNT = 4;
     const size_t MAX_DATA_SIZE = MAX_TEXTURE_WIDTH * MAX_TEXTURE_HEIGHT * MAX_CHANNEL_COUNT;
     std::vector<PBO> g_textureBakingPBOs;
+    PBO g_mousePickPBO;
+    GLuint g_frameBufferHandle = 0;
+    GLuint g_mousePickAttachmentSlot = 0;
+    uint8_t g_mousePickR = 0;
+    uint8_t g_mousePickG = 0;
+    uint8_t g_mousePickB = 0;
+    uint8_t g_mousePickA = 0;
 
     void Init() {
 
@@ -61,6 +68,50 @@ namespace OpenGLBackEnd {
             PBO& pbo = g_textureBakingPBOs.emplace_back();
             pbo.Init(MAX_DATA_SIZE);
         }
+
+        g_mousePickPBO.Init(2 * sizeof(uint16_t));
+
+    }
+
+    void SetMousePickHandles(GLuint frameBufferHandle, GLuint attachmentSlot) {
+        g_frameBufferHandle = frameBufferHandle;
+        g_mousePickAttachmentSlot = attachmentSlot;
+    }
+
+    void UpdateMousePicking(GLint x, GLint y) {
+        g_mousePickPBO.UpdateState();        
+        if (!g_mousePickPBO.IsSyncComplete()) {
+            //std::cout << "Waiting for PBO sync: " << g_mousePickPBO.GetSyncStatusAsString() << "\n";
+            return;
+        }
+        // Access the data in the PBO
+        const uint16_t* mappedBuffer = reinterpret_cast<const uint16_t*>(g_mousePickPBO.GetPersistentBuffer());
+        if (mappedBuffer) {
+            g_mousePickR = mappedBuffer[0];
+            g_mousePickG = mappedBuffer[1];
+        }
+        if (!g_mousePickPBO.IsSyncInProgress()) {
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, g_mousePickPBO.GetHandle());
+            glBindFramebuffer(GL_FRAMEBUFFER, g_frameBufferHandle);
+            glReadBuffer(g_mousePickAttachmentSlot);
+            glReadPixels(x, y, 1, 1, GL_RG_INTEGER, GL_UNSIGNED_SHORT, nullptr);  // RG UINT
+            //glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);       // RGBA
+            glBindTexture(GL_TEXTURE_2D, 0);
+            g_mousePickPBO.SyncStart();
+        }
+    }
+
+    int GetMousePickR() {
+        return g_mousePickR;
+    }
+    int GetMousePickG() {
+        return g_mousePickG;
+    }
+    int GetMousePickB() {
+        return g_mousePickB;
+    }
+    int GetMousePickA() {
+        return g_mousePickA;
     }
 
     void AllocateTextureMemory(Texture& texture) {
@@ -209,5 +260,13 @@ namespace OpenGLBackEnd {
         pbo->SyncStart();
         pbo->SetCustomValue(jobID);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    }
+
+
+    void CleanUpBakingPBOs() {
+        for (PBO& pbo : g_textureBakingPBOs) {
+            pbo.CleanUp();
+        }
+        g_textureBakingPBOs.clear();
     }
 }

@@ -34,4 +34,11 @@ namespace BackEnd {
     void SetPresentTargetSize(int width, int height);
     int GetPresentTargetWidth();
     int GetPresentTargetHeight();
+
+    // MousePick
+    void UpdateMousePicking(int x, int);
+    int GetMousePickR();
+    int GetMousePickG();
+    int GetMousePickB();
+    int GetMousePickA();
 }
