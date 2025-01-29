@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../Types/Texture.h"
+#include "../../../Renderer/Types/Texture.h"
 
 namespace VulkanTextureManager {
     void AllocateTexture(Texture& vkTexture);

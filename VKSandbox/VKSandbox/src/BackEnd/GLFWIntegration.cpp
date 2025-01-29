@@ -48,6 +48,7 @@ namespace GLFWIntegration {
         glfwWindowHint(GLFW_GREEN_BITS, g_mode->greenBits);
         glfwWindowHint(GLFW_BLUE_BITS, g_mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, g_mode->refreshRate);
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
         g_fullscreenWidth = g_mode->width;
         g_fullscreenHeight = g_mode->height;
         g_windowedWidth = windowWidth;
@@ -120,7 +121,8 @@ namespace GLFWIntegration {
         else if (windowedMode == WindowedMode::FULLSCREEN) {
             g_currentWindowWidth = g_fullscreenWidth;
             g_currentWindowHeight = g_fullscreenHeight;
-            glfwSetWindowMonitor(g_window, g_monitor, 0, 0, g_fullscreenWidth, g_fullscreenHeight, g_mode->refreshRate);
+            glfwSetWindowMonitor(g_window, nullptr, 0, 0, g_fullscreenWidth - 1, g_fullscreenHeight - 1, g_mode->refreshRate);
+            //glfwSetWindowMonitor(g_window, g_monitor, 0, 0, g_fullscreenWidth, g_fullscreenHeight, g_mode->refreshRate);
         }
         g_windowedMode = windowedMode;
     }

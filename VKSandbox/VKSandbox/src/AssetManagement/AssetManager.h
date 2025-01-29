@@ -2,9 +2,9 @@
 #include "HellTypes.h"
 #include <string>
 #include "../File/File.h"
-#include "../Types/DetachedMesh.hpp"
-#include "../Types/Model.hpp"
-#include "../Types/Texture.h"
+#include "../Renderer/Types/Mesh.hpp"
+#include "../Renderer/Types/Model.hpp"
+#include "../Renderer/Types/Texture.h"
 
 namespace AssetManager {
     void Init(); 
@@ -29,8 +29,8 @@ namespace AssetManager {
     int CreateMesh(const std::string& name, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
     int GetMeshIndexByName(const std::string& name);
     int GetMeshIndexByName(const std::string& name);
-    DetachedMesh* GetMeshByName(const std::string& name);
-    DetachedMesh* GetMeshByIndex(int index);
+    Mesh* GetMeshByName(const std::string& name);
+    Mesh* GetMeshByIndex(int index);
 
     // Materials
     Material* GetDefaultMaterial();

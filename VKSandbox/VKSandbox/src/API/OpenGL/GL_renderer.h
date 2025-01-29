@@ -5,6 +5,7 @@
 namespace OpenGLRenderer {
 
     void Init();
+    void InitMain();
     void LoadShaders();
     void RenderLoadingScreen();
     void RenderGame();

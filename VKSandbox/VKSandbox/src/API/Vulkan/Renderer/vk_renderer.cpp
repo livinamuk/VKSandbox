@@ -4,6 +4,7 @@
 #include "../Managers/vk_frame_manager.h"
 #include "../vk_util.h"
 #include "../../../AssetManagement/AssetManager.h"
+#include "../BackEnd/BackEnd.h"
 
 namespace VulkanRenderer {
 

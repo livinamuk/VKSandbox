@@ -26,6 +26,7 @@ struct RenderItem {
     int baseColorTextureIndex;
     int normalTextureIndex;
     int rmaTextureIndex;
+    int mousePickIndex;
 };
 
 struct RenderItem2D {
@@ -114,6 +115,15 @@ struct Transform {
 	glm::vec3 position = glm::vec3(0);
 	glm::vec3 rotation = glm::vec3(0);
 	glm::vec3 scale = glm::vec3(1);
+
+    Transform() = default;
+
+    explicit Transform(const glm::vec3& position, const glm::vec3& rotation = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f)) {
+        this->position = position;
+        this->rotation = rotation;
+        this->scale = scale;
+    }
+
 	glm::mat4 to_mat4() {
 		glm::mat4 m = glm::translate(glm::mat4(1), position);
 		m *= glm::mat4_cast(glm::quat(rotation));
@@ -141,4 +151,37 @@ struct QueuedTextureBake {
     int dataSize = 0;
     const void* data = nullptr;
     bool inProgress = false;
+};
+
+struct PlayerData {
+    glm::mat4 projection;
+    glm::mat4 inverseProjection;
+    glm::mat4 view;
+    glm::mat4 inverseView;
+    glm::mat4 projectionView;
+    glm::mat4 inverseProjectionView;
+    glm::mat4 skyboxModelMatrix;
+    int renderItemsCount;
+    int renderItemsOffset;
+    int renderItemsBlendedCount;
+    int renderItemsBlendedOffset;
+    int renderItemsAlphaDiscardedCount;
+    int renderItemsAlphaDiscardedOffset;
+    int renderItemsHairTopLayerCount;
+    int renderItemsHairTopLayerOffset;
+    int renderItemsHairBottomLayerCount;
+    int renderItemsHairBottomLayerOffset;
+};
+
+struct RendererData {
+    float gBufferWidth;
+    float gBufferHeight;
+    int splitscreenMode;
+};
+
+struct Resolutions {
+    glm::ivec2 gBuffer;
+    glm::ivec2 finalImage;
+    glm::ivec2 ui;
+    glm::ivec2 hair;
 };

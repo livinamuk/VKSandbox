@@ -47,6 +47,30 @@ namespace OpenGLRendererUtil {
         }
     }
 
+    void BlitFrameBufferDepth(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer) {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.GetHandle());
+        BlitRect srcRect{ 0, 0, srcFrameBuffer.GetWidth(), srcFrameBuffer.GetHeight() };
+        BlitRect dstRect{ 0, 0, dstFrameBuffer.GetWidth(), dstFrameBuffer.GetHeight() };
+        glBlitFramebuffer(srcRect.x0, srcRect.y0, srcRect.x1, srcRect.y1, dstRect.x0, dstRect.y0, dstRect.x1, dstRect.y1, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    }
+
+    void BlitFrameBufferDepth(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer, const Viewport& viewport) {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.GetHandle());
+        glm::vec2 position = viewport.GetPosition();
+        glm::vec2 size = viewport.GetSize();
+        BlitRect srcRect{ position.x * srcFrameBuffer.GetWidth(), position.y * srcFrameBuffer.GetHeight(), (position.x + size.x) * srcFrameBuffer.GetWidth(), (position.y + size.y) * srcFrameBuffer.GetHeight() };
+        BlitRect dstRect{ position.x * dstFrameBuffer.GetWidth(), position.y * dstFrameBuffer.GetHeight(), (position.x + size.x) * dstFrameBuffer.GetWidth(), (position.y + size.y) * dstFrameBuffer.GetHeight() };
+        glBlitFramebuffer(srcRect.x0, srcRect.y0, srcRect.x1, srcRect.y1, dstRect.x0, dstRect.y0, dstRect.x1, dstRect.y1, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    }
+
+    void BlitFrameBufferDepth(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer, BlitRect srcRect, BlitRect dstRect) {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.GetHandle());
+        glBlitFramebuffer(srcRect.x0, srcRect.y0, srcRect.x1, srcRect.y1, dstRect.x0, dstRect.y0, dstRect.x1, dstRect.y1, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    }
+
     void BlitToDefaultFrameBuffer(GLFrameBuffer& srcFrameBuffer, const char* srcName, BlitRect srcRect, BlitRect dstRect, GLbitfield mask, GLenum filter) {
         GLint srcAttachmentSlot = srcFrameBuffer.GetColorAttachmentSlotByName(srcName);
         if (srcAttachmentSlot != GL_INVALID_VALUE) {
@@ -68,6 +92,12 @@ namespace OpenGLRendererUtil {
             glDrawBuffer(dstAttachmentSlot);
             glBlitFramebuffer(srcRect.x0, srcRect.y0, srcRect.x1, srcRect.y1, dstRect.x0, dstRect.y0, dstRect.x1, dstRect.y1, mask, filter);
         }
+    }
+
+    void CopyDepthBuffer(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer) {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.GetHandle());
+        glBlitFramebuffer(0, 0, srcFrameBuffer.GetWidth(), srcFrameBuffer.GetHeight(), 0, 0, dstFrameBuffer.GetWidth(), dstFrameBuffer.GetHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     }
 
     RenderItem2D CreateRenderItem2D(const std::string& textureName, glm::ivec2 location, glm::ivec2 viewportSize, Alignment alignment, glm::vec3 colorTint, glm::ivec2 size) {
@@ -143,5 +173,30 @@ namespace OpenGLRendererUtil {
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(4 * sizeof(float)));
         glBindVertexArray(0);
         return vao;
+    }
+
+    void SetViewport(const GLFrameBuffer& framebuffer, const Viewport& viewport) {
+        GLuint fbWidth = framebuffer.GetWidth();
+        GLuint fbHeight = framebuffer.GetHeight();
+        glm::vec2 pos = viewport.GetPosition();
+        glm::vec2 size = viewport.GetSize();
+        GLint x = static_cast<GLint>(pos.x * fbWidth);
+        GLint y = static_cast<GLint>(pos.y * fbHeight);
+        GLsizei w = static_cast<GLsizei>(size.x * fbWidth);
+        GLsizei h = static_cast<GLsizei>(size.y * fbHeight);
+        glViewport(x, y, w, h);
+    }
+
+    void SetScissor(const GLFrameBuffer& framebuffer, const Viewport& viewport) {
+        GLuint fbWidth = framebuffer.GetWidth();
+        GLuint fbHeight = framebuffer.GetHeight();
+        glm::vec2 pos = viewport.GetPosition();
+        glm::vec2 size = viewport.GetSize();
+        GLint x = static_cast<GLint>(pos.x * fbWidth);
+        GLint y = static_cast<GLint>(pos.y * fbHeight);
+        GLsizei w = static_cast<GLsizei>(size.x * fbWidth);
+        GLsizei h = static_cast<GLsizei>(size.y * fbHeight);
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(x, y, w, h);
     }
 }

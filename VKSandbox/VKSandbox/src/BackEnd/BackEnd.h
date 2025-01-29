@@ -1,13 +1,16 @@
 #pragma once
 #include "HellEnums.h"
+#include "stdint.h"
 
 namespace BackEnd {
     // Core
     bool Init(API api, int windowWidth, int windowHeight, WindowedMode windowMode);
     void BeginFrame();
+    void UpdateGame();
     void UpdateSubSystems();
     void EndFrame();
     void CleanUp();
+    bool IsRenderDocActive();
 
     // API
     void SetAPI(API api);
@@ -37,8 +40,8 @@ namespace BackEnd {
 
     // MousePick
     void UpdateMousePicking(int x, int);
-    int GetMousePickR();
-    int GetMousePickG();
-    int GetMousePickB();
-    int GetMousePickA();
+    uint16_t GetMousePickR();
+    uint16_t GetMousePickG();
+    uint16_t GetMousePickB();
+    uint16_t GetMousePickA();
 }

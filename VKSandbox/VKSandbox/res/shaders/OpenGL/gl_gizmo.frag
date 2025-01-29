@@ -5,12 +5,12 @@ layout (location = 1) out uvec2  MousePickOut;
 
 uniform vec3 color;
 uniform int mousePickType;
-uniform int mousePickValue;
+uniform int mousePickIndex;
 
 void main() {
 
     FragOut.rgb = color;
 	FragOut.a = 1.0;
     
-    MousePickOut.rg = uvec2(mousePickType, mousePickValue);
+    MousePickOut.rg = uvec2(mousePickType, mousePickIndex);
 }

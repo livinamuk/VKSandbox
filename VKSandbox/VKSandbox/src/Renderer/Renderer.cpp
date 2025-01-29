@@ -5,6 +5,15 @@
 
 namespace Renderer {
 
+    void InitMain() {
+        if (BackEnd::GetAPI() == API::OPENGL) {
+            OpenGLRenderer::InitMain();
+        }
+        else if (BackEnd::GetAPI() == API::VULKAN) {
+            //VulkanRenderer::InitMain();
+        }
+    }
+
     void RenderLoadingScreen() {
         if (BackEnd::GetAPI() == API::OPENGL) {
             OpenGLRenderer::RenderLoadingScreen();

@@ -1,10 +1,17 @@
 #include "Config.h"
 
 namespace Config {
+    Resolutions g_resolitions;
 
-    glm::ivec2 g_uiResolution = { 1920, 1080 };
-
-    glm::ivec2 GetUIResolution() {
-        return g_uiResolution;
+    void Init() {
+        g_resolitions.gBuffer = { 1920, 1080 };
+        g_resolitions.finalImage = { 1920 / 2, 1080 / 2 };
+        g_resolitions.ui = { 1920, 1080 };
+        g_resolitions.hair = { 1920 / 2, 1080 / 2 };
     }
+
+    const Resolutions& GetResolutions() {
+        return g_resolitions;
+    }
+
 }

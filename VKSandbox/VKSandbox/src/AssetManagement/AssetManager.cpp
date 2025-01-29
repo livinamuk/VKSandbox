@@ -4,9 +4,11 @@
 #include "../AssetManagement/BakeQueue.h"
 #include "../API/OpenGL/GL_backend.h"
 #include "../API/Vulkan/VK_backend.h"
+#include "../BackEnd/Backend.h"
 #include "../File/AssimpImporter.h"
 #include "../Tools/ImageTools.h"
-#include "../Types/DetachedMesh.hpp"
+#include "../Renderer/Renderer.h"
+#include "../Renderer/Types/Mesh.hpp"
 #include "../UI/UIBackEnd.h"
 #include "../Util.hpp"
 
@@ -15,13 +17,18 @@ namespace AssetManager {
     std::vector<Texture> g_textures;
     std::vector<Material> g_materials;
     std::vector<Model> g_models;
-    std::vector<DetachedMesh> g_meshes;
+    std::vector<Mesh> g_meshes;
     std::unordered_map<std::string, int> g_textureIndexMap;
     std::unordered_map<std::string, int> g_materialIndexMap;
     std::unordered_map<std::string, int> g_modelIndexMap;
     std::vector<std::string> g_loadLog;
     std::vector<std::future<void>> g_futures;
     bool g_loadingComplete = false;
+
+    std::vector<Vertex> g_vertices;
+    std::vector<uint32_t> g_indices;
+    int g_nextVertexInsert = 0;
+    int g_nextIndexInsert = 0;
 
     void AddItemToLoadLog(std::string text);
     void CompressMissingDDSTexutres();
@@ -68,14 +75,6 @@ namespace AssetManager {
 
         UIBackEnd::BlitText(text, "StandardFont", 0, 0, 2.0f);
 
-
-        if (BackEnd::GetAPI() == API::OPENGL) {
-            OpenGLBackEnd::UpdateTextureBaking();
-        }
-        else if (BackEnd::GetAPI() == API::OPENGL) {
-            // TO DO
-        }
-
         // Loading complete?
         g_loadingComplete = true;
         for (Texture& texture : g_textures) {
@@ -97,6 +96,10 @@ namespace AssetManager {
             BakePendingModels();
             BuildMaterials();
             BuildIndexMaps();
+            if (BackEnd::GetAPI() == API::OPENGL) {
+                OpenGLBackEnd::UploadVertexData(g_vertices, g_indices);
+            }
+            Renderer::InitMain();
             std::cout << "Assets loaded\n";
         }
     }
@@ -125,11 +128,6 @@ namespace AssetManager {
     }
 
     void FindAssetPaths() {
-
-        std::cout << "compress count: " << Util::IterateDirectory("res/textures/compressed", { "dds" }).size() << "\n";
-        std::cout << "uncompress count: " << Util::IterateDirectory("res/textures/uncompressed", { "png", "jpg", "tga" }).size() << "\n";
-        std::cout << "ui count: " << Util::IterateDirectory("res/textures/ui", { "png", "jpg"}).size() << "\n";
-
         // Find .model files
         for (FileInfo& fileInfo : Util::IterateDirectory("res/models")) {
             Model& model = g_models.emplace_back();
@@ -254,43 +252,23 @@ namespace AssetManager {
     ▀   ▀ ▀▀▀ ▀▀▀ ▀ ▀ */
 
     int CreateMesh(const std::string& name, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, glm::vec3 aabbMin, glm::vec3 aabbMax) {
-        DetachedMesh& mesh = g_meshes.emplace_back();
+        Mesh& mesh = g_meshes.emplace_back();
+        mesh.baseVertex = g_nextVertexInsert;
+        mesh.baseIndex = g_nextIndexInsert;
+        mesh.vertexCount = (uint32_t)vertices.size();
+        mesh.indexCount = (uint32_t)indices.size();
         mesh.SetName(name);
         mesh.aabbMin = aabbMin;
         mesh.aabbMax = aabbMax;
-        mesh.UpdateBuffers(vertices, indices);
-        return g_meshes.size() - 1;
-    }
+        mesh.extents = aabbMax - aabbMin;
+        mesh.boundingSphereRadius = std::max(mesh.extents.x, std::max(mesh.extents.y, mesh.extents.z)) * 0.5f;
 
-    int CreateMesh(const std::string& name, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) {
-        glm::vec3 aabbMin = glm::vec3(std::numeric_limits<float>::max());
-        glm::vec3 aabbMax = glm::vec3(-std::numeric_limits<float>::max());
-        for (int i = 0; i < indices.size(); i += 3) {
-            Vertex* vert0 = &vertices[indices[i]];
-            Vertex* vert1 = &vertices[indices[i + 1]];
-            Vertex* vert2 = &vertices[indices[i + 2]];
-            glm::vec3 deltaPos1 = vert1->position - vert0->position;
-            glm::vec3 deltaPos2 = vert2->position - vert0->position;
-            glm::vec2 deltaUV1 = vert1->uv - vert0->uv;
-            glm::vec2 deltaUV2 = vert2->uv - vert0->uv;
-            float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-            glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-            glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
-            vert0->tangent = tangent;
-            vert1->tangent = tangent;
-            vert2->tangent = tangent;
-            aabbMin = Util::Vec3Min(vert0->position, aabbMin);
-            aabbMax = Util::Vec3Max(vert0->position, aabbMax);
-            aabbMin = Util::Vec3Min(vert1->position, aabbMin);
-            aabbMax = Util::Vec3Max(vert1->position, aabbMax);
-            aabbMin = Util::Vec3Min(vert2->position, aabbMin);
-            aabbMax = Util::Vec3Max(vert2->position, aabbMax);
-        }
-        DetachedMesh& mesh = g_meshes.emplace_back();
-        mesh.SetName(name);
-        mesh.aabbMin = aabbMin;
-        mesh.aabbMax = aabbMax;
-        mesh.UpdateBuffers(vertices, indices);
+        g_vertices.reserve(g_vertices.size() + vertices.size());
+        g_vertices.insert(std::end(g_vertices), std::begin(vertices), std::end(vertices));
+        g_indices.reserve(g_indices.size() + indices.size());
+        g_indices.insert(std::end(g_indices), std::begin(indices), std::end(indices));
+        g_nextVertexInsert += mesh.vertexCount;
+        g_nextIndexInsert += mesh.indexCount;
         return g_meshes.size() - 1;
     }
 
@@ -303,16 +281,16 @@ namespace AssetManager {
         return -1;
     }
 
-    DetachedMesh* GetMeshByName(const std::string& name) {
+    Mesh* GetMeshByName(const std::string& name) {
         for (int i = 0; i < g_meshes.size(); i++) {
             if (g_meshes[i].GetName() == name)
                 return &g_meshes[i];
         }
-        std::cout << "AssetManager::GetDetachedMeshByName() failed because '" << name << "' does not exist\n";
+        std::cout << "AssetManager::GetMeshByName() failed because '" << name << "' does not exist\n";
         return nullptr;
     }
 
-    DetachedMesh* GetMeshByIndex(int index) {
+    Mesh* GetMeshByIndex(int index) {
         if (index >= 0 && index < g_meshes.size()) {
             return &g_meshes[index];
         }
@@ -493,7 +471,7 @@ namespace AssetManager {
             return it->second;
         }
         else {
-            std::cout << "AssetManager::GetMaterialIndex() failed because '" << name << "' does not exist\n";
+            //std::cout << "AssetManager::GetMaterialIndex() failed because '" << name << "' does not exist\n";
             return -1;
         }
     }

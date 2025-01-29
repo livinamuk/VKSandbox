@@ -1,6 +1,6 @@
 #pragma once
 #include "HellTypes.h"
-#include "../Types/Texture.h"
+#include "../Renderer/Types/Texture.h"
 
 namespace BakeQueue {
     // Textures

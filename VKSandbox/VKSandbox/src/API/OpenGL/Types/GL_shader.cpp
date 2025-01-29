@@ -62,7 +62,7 @@ bool Shader::Load(std::vector<std::string> shaderPaths) {
         std::cout << linkingErrors << "\n";
         std::cout << "-------------------------------------------------------------------------\n";
         for (ShaderModule& module : modules) {
-            glDeleteShader(tempHandle);
+            glDeleteShader(module.GetHandle());
         }
         return false;
     }
@@ -75,7 +75,7 @@ bool Shader::Load(std::vector<std::string> shaderPaths) {
         m_uniformLocations.clear();
     }
     for (ShaderModule& module : modules) {
-        glDeleteShader(tempHandle);
+        glDeleteShader(module.GetHandle());
     }
     return true;
 }

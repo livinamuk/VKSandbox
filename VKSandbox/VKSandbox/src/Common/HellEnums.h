@@ -62,3 +62,25 @@ enum class TextureFilter {
     LINEAR_MIPMAP,
     UNDEFINED
 };
+
+enum class EditorObjectType {
+    NONE = 0,
+    GAME_OBJECT,
+    DOOR,
+    WINDOW,
+    CSG
+}; 
+
+enum class Axis {
+    X,
+    Y,
+    Z,
+    NONE,
+};
+
+enum class SplitscreenMode { 
+    FULLSCREEN, 
+    TWO_PLAYER, 
+    FOUR_PLAYER, 
+    SPLITSCREEN_MODE_COUNT 
+};

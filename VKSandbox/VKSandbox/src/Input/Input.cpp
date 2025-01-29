@@ -4,7 +4,6 @@
 #include "../Util.hpp"
 
 namespace Input {
-
     bool g_keyPressed[372];
     bool g_keyDown[372];
     bool g_keyDownLastFrame[372];

@@ -1,8 +1,10 @@
 #pragma once
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../../vendor/DDS/DDS_Helpers.h"
+#include "HellEnums.h"
 #include <string>
+#include <iostream>
+#include "../../vendor/DDS/DDS_Helpers.h">
 
 namespace OpenGLUtil {
 

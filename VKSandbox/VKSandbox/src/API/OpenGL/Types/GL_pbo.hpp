@@ -27,7 +27,7 @@ public:
             glDeleteSync(m_syncObj);
         }
         m_syncObj = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-        glWaitSync(m_syncObj, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+        glWaitSync(m_syncObj, 0, GL_TIMEOUT_IGNORED);
         m_syncInProgress = true;
     }
 
@@ -52,7 +52,7 @@ public:
 
     bool UpdateState() {
         if (m_syncObj) {
-            GLenum result = glClientWaitSync(m_syncObj, GL_SYNC_FLUSH_COMMANDS_BIT, 0);
+            GLenum result = glClientWaitSync(m_syncObj, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
             if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
                 glDeleteSync(m_syncObj);
                 m_syncObj = nullptr;

@@ -13,8 +13,8 @@
 
 #include "AssetManagement/AssetManager.h"
 #include "Backend/Backend.h"
-#include "Game/Game.h"
-#include "Editor/EditorNew.h"
+#include "Core/Game.h"
+#include "Editor/Editor.h"
 #include "Renderer/Renderer.h"
 #include "UI/UIBackEnd.h"
 #include <iostream>
@@ -46,12 +46,9 @@ int main() {
         }
         // Update/render game
         else {
-            Game::Update();
-            EditorNew::Update();
-            UIBackEnd::Update();
+            BackEnd::UpdateGame();
             Renderer::RenderGame();
         }
-
         BackEnd::EndFrame();
     }
     return 0;

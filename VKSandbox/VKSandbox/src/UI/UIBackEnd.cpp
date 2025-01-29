@@ -58,7 +58,9 @@ namespace UIBackEnd {
         }
         int baseVertex = g_vertices.size();
 
-        MeshData2D meshData = TextBlitter::BlitText(text, fontName, originX, originY, Config::GetUIResolution(), scale, baseVertex);
+        const Resolutions& resolutions = Config::GetResolutions();
+
+        MeshData2D meshData = TextBlitter::BlitText(text, fontName, originX, originY, resolutions.ui, scale, baseVertex);
         g_vertices.insert(std::end(g_vertices), std::begin(meshData.vertices), std::end(meshData.vertices));
         g_indices.insert(std::end(g_indices), std::begin(meshData.indices), std::end(meshData.indices));
 
@@ -101,11 +103,11 @@ namespace UIBackEnd {
             break;
         }
         // Calculate normalized device coordinates for quad
-        glm::ivec2 viewportSize = Config::GetUIResolution();
-        float x0 = (location.x / static_cast<float>(viewportSize.x)) * 2.0f - 1.0f;
-        float y0 = 1.0f - (location.y / static_cast<float>(viewportSize.y)) * 2.0f;
-        float x1 = ((location.x + texWidth) / static_cast<float>(viewportSize.x)) * 2.0f - 1.0f;
-        float y1 = 1.0f - ((location.y + texHeight) / static_cast<float>(viewportSize.y)) * 2.0f;
+        const Resolutions& resolutions = Config::GetResolutions();
+        float x0 = (location.x / static_cast<float>(resolutions.ui.x)) * 2.0f - 1.0f;
+        float y0 = 1.0f - (location.y / static_cast<float>(resolutions.ui.y)) * 2.0f;
+        float x1 = ((location.x + texWidth) / static_cast<float>(resolutions.ui.x)) * 2.0f - 1.0f;
+        float y1 = 1.0f - ((location.y + texHeight) / static_cast<float>(resolutions.ui.y)) * 2.0f;
 
         int baseVertex = g_vertices.size();
         int baseIndex = g_indices.size();

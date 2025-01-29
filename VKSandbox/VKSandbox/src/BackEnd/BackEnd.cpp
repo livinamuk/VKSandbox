@@ -7,13 +7,24 @@
 #include "../API/OpenGL/GL_renderer.h"
 #include "../API/Vulkan/VK_backEnd.h"
 #include "../AssetManagement/AssetManager.h"
+#include "../Config/Config.h"
 #include "../Core/Audio.h"
 #include "../Core/Debug.h"
+#include "../Core/Game.h"
+#include "../Core/Scene.h"
+#include "../Editor/Editor.h"
+#include "../Editor/Gizmo.h"
 #include "../Input/Input.h"
 #include "../Renderer/Renderer.h"
+#include "../Renderer/RenderDataManager.h"
 #include "../UI/UIBackEnd.h"
 
 #include "GLFWIntegration.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#include <tlhelp32.h>
+#endif
 
 // Prevent accidentally selecting integrated GPU
 extern "C" {
@@ -28,9 +39,10 @@ namespace BackEnd {
 
     bool Init(API api, int windowWidth, int windowHeight, WindowedMode windowMode) {
         g_api = api;
+        Config::Init();
         if (!GLFWIntegration::Init(api, windowWidth, windowHeight, windowMode)) {
             return false;
-        }        
+        }
         if (GetAPI() == API::OPENGL) {
             OpenGLBackEnd::Init();
             OpenGLRenderer::Init();
@@ -44,20 +56,43 @@ namespace BackEnd {
         UIBackEnd::Init();
         Audio::Init();
         Input::Init(BackEnd::GetWindowPointer());
+        Gizmo::Init();
 
-        //Input::Init();
-        //Audio::Init();
-        //Physics::Init();
-        //InputMulti::Init();
-        //CSG::Init();
-        //Pathfinding2::Init();
-        //WeaponManager::Init();
         glfwShowWindow(static_cast<GLFWwindow*>(BackEnd::GetWindowPointer()));
         return true;
     }
 
     void BeginFrame() {
         GLFWIntegration::BeginFrame(g_api);
+        if (GetAPI() == API::OPENGL) {
+            OpenGLBackEnd::BeginFrame();
+            OpenGLBackEnd::UpdateTextureBaking();
+        }
+        else if (GetAPI() == API::VULKAN) {
+            //VulkanBackEnd::BeginFrame();
+        }
+    }
+
+    void UpdateGame() {
+
+        const Resolutions& resolutions = Config::GetResolutions();
+
+        Game::Update();
+        Scene::SetMaterials();
+        Scene::Update(Game::GetDeltaTime());
+
+        // Mouse picking
+        float textureWidth = resolutions.gBuffer.x;
+        float textureHeight = resolutions.gBuffer.y;
+        float aspectX = textureWidth / (float)BackEnd::GetCurrentWindowWidth();
+        float aspectY = textureHeight / (float)BackEnd::GetCurrentWindowHeight();
+        int x = Input::GetMouseX() * aspectX;
+        int y = textureHeight - (Input::GetMouseY() * aspectY);
+        BackEnd::UpdateMousePicking(x, y);
+
+        Editor::Update();
+        UIBackEnd::Update();
+        RenderDataManager::Update();
     }
 
     void EndFrame() {
@@ -178,7 +213,7 @@ namespace BackEnd {
         }
     }
 
-    int GetMousePickR() {
+    uint16_t GetMousePickR() {
         if (g_api == API::OPENGL) {
             return OpenGLBackEnd::GetMousePickR();
         }
@@ -187,7 +222,7 @@ namespace BackEnd {
         }
     }
 
-    int GetMousePickG() {
+    uint16_t GetMousePickG() {
         if (g_api == API::OPENGL) {
             return OpenGLBackEnd::GetMousePickG();
         }
@@ -196,7 +231,7 @@ namespace BackEnd {
         }
     }
 
-    int GetMousePickB() {
+    uint16_t GetMousePickB() {
         if (g_api == API::OPENGL) {
             return OpenGLBackEnd::GetMousePickB();
         }
@@ -205,13 +240,38 @@ namespace BackEnd {
         }
     }
 
-    int GetMousePickA() {
+    uint16_t GetMousePickA() {
         if (g_api == API::OPENGL) {
             return OpenGLBackEnd::GetMousePickA();
         }
         if (g_api == API::VULKAN) {
             // TODO: VulkanBackEnd::GetMousePickA();
         }
+    }
+
+    bool IsRenderDocActive() {
+        #ifdef _WIN32
+        HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, GetCurrentProcessId());
+        if (snapshot == INVALID_HANDLE_VALUE) return false;
+        MODULEENTRY32 moduleEntry;
+        moduleEntry.dwSize = sizeof(MODULEENTRY32);
+        bool found = false;
+        if (Module32First(snapshot, &moduleEntry)) {
+            do {
+                std::wstring wmodule(moduleEntry.szModule);
+                std::string moduleName(wmodule.begin(), wmodule.end());
+
+                if (moduleName.find("renderdoc.dll") != std::string::npos) {
+                    found = true;
+                    break;
+                }
+            } while (Module32Next(snapshot, &moduleEntry));
+        }
+        CloseHandle(snapshot);
+        return found;
+        #else
+        return false;
+        #endif
     }
 }
 

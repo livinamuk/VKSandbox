@@ -1,6 +1,6 @@
 #pragma once
 #include "HellTypes.h"
-#include "Model.hpp"
+#include "../Renderer/Types/Model.hpp"
 
 struct GameObject {
     std::string m_name;
@@ -8,6 +8,7 @@ struct GameObject {
     Transform m_transform;
     std::vector<BlendingMode> m_meshBlendingModes;
     std::vector<int> m_meshMaterialIndices;
+    int m_mousePickIndex = 0;
 
     void SetName(const std::string& name);
     void SetPosition(glm::vec3 position);

@@ -54,7 +54,7 @@ void GameObject::SetMeshBlendingMode(const char* meshName, BlendingMode blending
     if (m_model) {
         bool found = false;
         for (int i = 0; i < m_model->GetMeshIndices().size(); i++) {
-            DetachedMesh* mesh = AssetManager::GetMeshByIndex(m_model->GetMeshIndices()[i]);
+            Mesh* mesh = AssetManager::GetMeshByIndex(m_model->GetMeshIndices()[i]);
             if (mesh && mesh->GetName() == meshName) {
                 m_meshBlendingModes[i] = blendingMode;
                 found = true;
@@ -69,10 +69,7 @@ void GameObject::SetMeshBlendingMode(const char* meshName, BlendingMode blending
 void GameObject::SetMeshBlendingModes(BlendingMode blendingMode) {
     if (m_model) {
         for (int i = 0; i < m_model->GetMeshIndices().size(); i++) {
-            DetachedMesh* mesh = AssetManager::GetMeshByIndex(m_model->GetMeshIndices()[i]);
-            if (mesh) {
-                m_meshBlendingModes[i] = blendingMode;
-            }
+            m_meshBlendingModes[i] = blendingMode;
         }
     }
 }
@@ -85,7 +82,7 @@ void GameObject::PrintMeshNames() {
     if (m_model) {
         std::cout << m_model->GetName() << "\n";
         for (uint32_t meshIndex : m_model->GetMeshIndices()) {
-            DetachedMesh* mesh = AssetManager::GetMeshByIndex(meshIndex);
+            Mesh* mesh = AssetManager::GetMeshByIndex(meshIndex);
             if (mesh) {
                 std::cout << "-" << meshIndex << ": " << mesh->GetName() << "\n";
             }
@@ -101,9 +98,10 @@ void GameObject::UpdateRenderItems() {
     m_renderItemsHairBottomLayer.clear();
     if (m_model) {
         for (int i = 0; i < m_model->GetMeshCount(); i++) {
-            DetachedMesh* mesh = AssetManager::GetMeshByIndex(m_model->GetMeshIndices()[i]);
+            Mesh* mesh = AssetManager::GetMeshByIndex(m_model->GetMeshIndices()[i]);
             if (mesh) {
                 RenderItem renderItem;
+                renderItem.mousePickIndex = m_mousePickIndex;
                 renderItem.modelMatrix = m_transform.to_mat4();
                 renderItem.meshIndex = m_model->GetMeshIndices()[i];
                 Material* material = AssetManager::GetMaterialByIndex(m_meshMaterialIndices[i]);
