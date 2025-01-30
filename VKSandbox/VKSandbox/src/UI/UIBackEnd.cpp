@@ -28,7 +28,7 @@ namespace UIBackEnd {
 
     void Update() {
         
-        BlitText(Debug::GetText(), "StandardFont", 0, 0, 2.0f);
+        BlitText(Debug::GetText(), "StandardFont", 0, 0, 1.25f);
 
         //if (AssetManager::LoadingComplete()) {
         //    BlitTexture("ui_test", glm::ivec2(250, 150), Alignment::TOP_LEFT, glm::vec4(1.0, 0.0, 0.0, 0.5), glm::ivec2(-1, -1));

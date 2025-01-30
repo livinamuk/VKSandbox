@@ -1,21 +1,19 @@
 #version 460 core
-layout (location = 0) in vec3 vPos;
-
 #include "../common/util.glsl"
 #include "../common/types.glsl"
 
-readonly restrict layout(std430, binding = 2) buffer playerDataBuffer {
-	PlayerData playerData[];
+layout (location = 0) in vec3 vPos;
+
+readonly restrict layout(std430, binding = 2) buffer viewportDataBuffer {
+	ViewportData viewportData[];
 };
 
 out vec3 TexCoords;
 
 void main() {
-
-    int playerIndex = gl_BaseInstance;
-	mat4 projectionView = playerData[playerIndex].projectionView;
-	mat4 skyboxModelMatrix = playerData[playerIndex].skyboxModelMatrix;
-
     TexCoords = vPos;
-    gl_Position = projectionView * skyboxModelMatrix * vec4(vPos, 1.0);
+    int viewportIndex = gl_BaseInstance;
+	mat4 projectionView = viewportData[viewportIndex].skyboxProjectionView;	
+    vec3 viewPos = viewportData[viewportIndex].inverseView[3].xyz;
+    gl_Position = projectionView * vec4((vPos * 8) + viewPos, 1.0);
 }

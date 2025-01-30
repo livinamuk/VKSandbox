@@ -3,7 +3,7 @@
 #include "vk_command_manager.h"
 #include "../vk_util.h"
 
-#include "../../../API/OpenGL/GL_util.hpp"
+#include "../../../API/OpenGL/GL_Util.h"
 
 namespace VulkanTextureManager {
 

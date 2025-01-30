@@ -8,14 +8,8 @@ layout (binding = 0) uniform samplerCube cubeMap;
 
 in vec3 TexCoords;
 
-uniform vec3 u_skyboxTint;
-
 readonly restrict layout(std430, binding = 1) buffer rendereDataBuffer {
 	RendererData rendererData;
-};
-
-readonly restrict layout(std430, binding = 2) buffer playerDataBuffer {
-	PlayerData playerData[];
 };
 
 void contrastAdjust( inout vec4 color, in float c) {

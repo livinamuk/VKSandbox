@@ -84,3 +84,10 @@ enum class SplitscreenMode {
     FOUR_PLAYER, 
     SPLITSCREEN_MODE_COUNT 
 };
+
+enum class ViewportMode {
+    SHADED,
+    WIREFRAME,
+    WIREFRAME_OVERLAY,
+    VIEWPORT_MODE_COUNT
+};

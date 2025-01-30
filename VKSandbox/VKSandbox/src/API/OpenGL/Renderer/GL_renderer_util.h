@@ -1,7 +1,7 @@
 #pragma once
 #include "HellTypes.h"
-#include "Types/GL_frameBuffer.h"
-#include "../Renderer/Types/Viewport.h"
+#include "../Types/GL_frameBuffer.h"
+#include "../Viewport/Viewport.h"
 
 namespace OpenGLRendererUtil {
     void SetViewport(const GLFrameBuffer& framebuffer, const Viewport& viewport);

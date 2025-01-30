@@ -8,11 +8,25 @@ namespace Scene {
     std::vector<RenderItem> g_renderItemsHairTopLayer;
     std::vector<RenderItem> g_renderItemsHairBottomLayer;
 
+    void UpdateObjects();
+    void UpdateRenderItems();
+
     void Init() {
         // Nothing as of yet
     }
 
     void Update(float deltaTime) {
+        UpdateObjects();
+        UpdateRenderItems();
+    }
+
+    void UpdateObjects() {
+        for (GameObject& gameObject : g_gameObjects) {
+            // TODO: gameObject.Update();
+        }
+    }
+
+    void UpdateRenderItems() {
         // Clear global render item vectors
         g_renderItems.clear();
         g_renderItemsBlended.clear();
@@ -21,9 +35,10 @@ namespace Scene {
         g_renderItemsHairBottomLayer.clear();
 
         // Update each GameObject and collect render items
+        int mousePickIndex = 0;
         for (GameObject& gameObject : g_gameObjects) {
             gameObject.UpdateRenderItems();
-
+            gameObject.SetMousePickIndex(mousePickIndex++);
             // Merge render items into global vectors
             g_renderItems.insert(g_renderItems.end(), gameObject.GetRenderItems().begin(), gameObject.GetRenderItems().end());
             g_renderItemsBlended.insert(g_renderItemsBlended.end(), gameObject.GetRenderItemsBlended().begin(), gameObject.GetRenderItemsBlended().end());
@@ -70,8 +85,8 @@ namespace Scene {
     void CreateGameObjects() {
         CreateGameObject();
         GameObject* mermaid = &g_gameObjects.back();
-        mermaid->SetPosition(glm::vec3(3.5, -1.0f, 7.5f));
-        mermaid->SetRotationY(3.14f * 1.7f);
+        mermaid->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+        mermaid->SetRotationY(0.0f);
         mermaid->SetModel("Mermaid");
         mermaid->SetMeshMaterialByMeshName("Rock", "Rock");
         mermaid->SetMeshMaterialByMeshName("BoobTube", "BoobTube");
@@ -94,14 +109,18 @@ namespace Scene {
         mermaid->SetMeshBlendingMode("HairOutta", BlendingMode::HAIR_TOP_LAYER);
         mermaid->SetMeshBlendingMode("HairInner", BlendingMode::HAIR_UNDER_LAYER);
         mermaid->SetName("Mermaid");
-        mermaid->m_mousePickIndex = 0;
 
-        CreateGameObject();
-        GameObject* scope = &g_gameObjects.back();
-        scope->SetPosition(glm::vec3(2.76f, 0.0f, 6.2f));
-        scope->SetModel("AKS74U_Scope4");
-        scope->m_transform.scale = glm::vec3(0.01);
-        scope->m_mousePickIndex = 1;
+        for (int i = 0; i < 500; i++) {
+            float x = Util::RandomFloat(-30.0f, 30.0f);
+            float y = Util::RandomFloat(3.0f, 25);
+            float z = Util::RandomFloat(-30.0f, 30.0f);
+            CreateGameObject();
+            GameObject* cube = &g_gameObjects.back();
+            cube->SetPosition(glm::vec3(x, y, z));
+            cube->SetRotation(glm::vec3(Util::RandomFloat(-HELL_PI, HELL_PI), Util::RandomFloat(-HELL_PI, HELL_PI), Util::RandomFloat(-HELL_PI, HELL_PI)));
+            cube->SetModel("Cube");
+            cube->SetMeshMaterials("MermaidTail");
+        }
     }
 
     std::vector<RenderItem>& GetRenderItems() { return g_renderItems; }

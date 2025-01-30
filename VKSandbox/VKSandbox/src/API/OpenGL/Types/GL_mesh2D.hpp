@@ -8,18 +8,18 @@ private:
     GLuint m_vao = 0;
     GLuint m_vbo = 0;
     GLuint m_ebo = 0;
-    GLuint m_indexCount = 0;
+    GLsizei m_indexCount = 0;
     GLsizei m_vertexBufferSize = 0;
     GLsizei m_indexBufferSize = 0;
 
 public:
     void UpdateVertexBuffer(std::vector<Vertex2D>& vertices, std::vector<uint32_t>& indices) {
-        m_indexCount = indices.size();
+        m_indexCount = (GLuint)indices.size();
         if (m_indexCount == 0) {
             return;
         }
-        GLsizei vertexBufferSize = vertices.size() * sizeof(Vertex2D);
-        GLsizei indexBufferSize = indices.size() * sizeof(uint32_t);
+        GLsizei vertexBufferSize = (GLsizei)(vertices.size() * sizeof(Vertex2D));
+        GLsizei indexBufferSize = (GLsizei)(indices.size() * sizeof(uint32_t));
         if (vertexBufferSize > m_vertexBufferSize || indexBufferSize > m_indexBufferSize) {
             CleanUp();
             Create();
@@ -51,7 +51,7 @@ public:
         return m_vao;
     }
 
-    int GetIndexCount() {
+    GLsizei GetIndexCount() {
         return m_indexCount;
     }
 

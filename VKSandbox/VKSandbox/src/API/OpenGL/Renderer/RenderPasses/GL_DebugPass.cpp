@@ -1,6 +1,8 @@
-#include "GL_renderer.h"
+#include "../GL_renderer.h"
 
 namespace OpenGLRenderer {
+
+
 
     void DrawPoint(glm::vec3 position, glm::vec3 color) {
         g_debugPoints.push_back(Vertex(position, color));

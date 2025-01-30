@@ -80,6 +80,6 @@ const glm::vec3& Camera::GetRight() const {
     return m_right;
 }
 
-const glm::vec3& Camera::GetForwardXZ() const {
+const glm::vec3 Camera::GetForwardXZ() const {
     return glm::normalize(glm::vec3(m_forward.x, 0.0f, m_forward.z));
 }

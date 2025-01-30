@@ -11,19 +11,24 @@ std::string GetErrorMessage(const std::string& line);
 std::string GetLinkingErrors(unsigned int shader);
 std::string GetShaderCompileErrors(unsigned int shader, const std::string& filename, const std::vector<std::string>& lineToFile);
 
-void Shader::Use() {
+OpenGLShader::OpenGLShader(std::vector<std::string> shaderPaths) {
+    m_shaderPaths = shaderPaths;
+    Load(m_shaderPaths);
+}
+
+void OpenGLShader::Use() {
     glUseProgram(m_handle);
 }
 
-bool Shader::Load(std::vector<std::string> shaderPaths) {
+bool OpenGLShader::Load(std::vector<std::string> shaderPaths) {
     // Compile shader modules
-    std::vector<ShaderModule> modules;
+    std::vector<OpenGLShaderModule> modules;
     for (std::string& shaderPath : shaderPaths) {
         modules.push_back(shaderPath);
     }
     // Print compilation errors
     bool errorsFound = false;
-    for (ShaderModule& module : modules) {
+    for (OpenGLShaderModule& module : modules) {
         if (module.CompilationFailed()) {
             errorsFound = true;
             break;
@@ -31,7 +36,7 @@ bool Shader::Load(std::vector<std::string> shaderPaths) {
     }
     if (errorsFound) {
         std::cout << "\n-------------------------------------------------------------------------\n\n";
-        for (ShaderModule& module : modules) {
+        for (OpenGLShaderModule& module : modules) {
             if (module.CompilationFailed()) {
                 std::cout << " COMPILATION ERROR: " << module.GetFilename() << "\n\n";
                 std::cout << module.GetErrors() << "\n";
@@ -43,7 +48,7 @@ bool Shader::Load(std::vector<std::string> shaderPaths) {
     }
     // Attempt to link
     int tempHandle = glCreateProgram();
-    for (ShaderModule& module : modules) {
+    for (OpenGLShaderModule& module : modules) {
         glAttachShader(tempHandle, module.GetHandle());
     }
     glLinkProgram(tempHandle);
@@ -61,7 +66,7 @@ bool Shader::Load(std::vector<std::string> shaderPaths) {
         }
         std::cout << linkingErrors << "\n";
         std::cout << "-------------------------------------------------------------------------\n";
-        for (ShaderModule& module : modules) {
+        for (OpenGLShaderModule& module : modules) {
             glDeleteShader(module.GetHandle());
         }
         return false;
@@ -74,101 +79,105 @@ bool Shader::Load(std::vector<std::string> shaderPaths) {
         m_handle = tempHandle;
         m_uniformLocations.clear();
     }
-    for (ShaderModule& module : modules) {
+    for (OpenGLShaderModule& module : modules) {
         glDeleteShader(module.GetHandle());
     }
     return true;
 }
 
-void Shader::SetBool(const std::string& name, bool value) {
+bool OpenGLShader::Hotload() {
+    return Load(m_shaderPaths);
+}
+
+void OpenGLShader::SetBool(const std::string& name, bool value) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniform1i(m_uniformLocations[name], (int)value);
 }
 
-void Shader::SetInt(const std::string& name, int value) {
+void OpenGLShader::SetInt(const std::string& name, int value) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniform1i(m_uniformLocations[name], value);
 }
 
-void Shader::SetFloat(const std::string& name, float value) {
+void OpenGLShader::SetFloat(const std::string& name, float value) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniform1f(m_uniformLocations[name], value);
 }
 
-void Shader::SetMat2(const std::string& name, const glm::mat2& mat) {
+void OpenGLShader::SetMat2(const std::string& name, const glm::mat2& mat) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniformMatrix2fv(m_uniformLocations[name], 1, GL_FALSE, &mat[0][0]);
 }
 
-void Shader::SetMat3(const std::string& name, const glm::mat3& mat) {
+void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& mat) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniformMatrix3fv(m_uniformLocations[name], 1, GL_FALSE, &mat[0][0]);
 }
 
-void Shader::SetMat4(const std::string& name, glm::mat4 value) {
+void OpenGLShader::SetMat4(const std::string& name, glm::mat4 value) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniformMatrix4fv(m_uniformLocations[name], 1, GL_FALSE, &value[0][0]);
 }
 
-void Shader::SetVec2(const std::string& name, const glm::vec2& value) {
+void OpenGLShader::SetVec2(const std::string& name, const glm::vec2& value) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniform2fv(m_uniformLocations[name], 1, &value[0]);
 }
 
-void Shader::SetVec3(const std::string& name, const glm::vec3& value) {
+void OpenGLShader::SetVec3(const std::string& name, const glm::vec3& value) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniform3fv(m_uniformLocations[name], 1, &value[0]);
 }
 
-void Shader::SetVec4(const std::string& name, const glm::vec4& value) {
+void OpenGLShader::SetVec4(const std::string& name, const glm::vec4& value) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniform4fv(m_uniformLocations[name], 1, &value[0]);
 }
 
-void Shader::SetVec2(const std::string& name, float x, float y) {
+void OpenGLShader::SetVec2(const std::string& name, float x, float y) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniform2f(m_uniformLocations[name], x, y);
 }
 
-void Shader::SetVec3(const std::string& name, float x, float y, float z) {
+void OpenGLShader::SetVec3(const std::string& name, float x, float y, float z) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniform3f(m_uniformLocations[name], x, y, z);
 }
 
-void Shader::SetVec4(const std::string& name, float x, float y, float z, float w) {
+void OpenGLShader::SetVec4(const std::string& name, float x, float y, float z, float w) {
     if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
         m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
     }
     glUniform4f(m_uniformLocations[name], x, y, z, w);
 }
 
-int Shader::GetHandle() {
+int OpenGLShader::GetHandle() {
     return m_handle;
 }
 
-ShaderModule::ShaderModule(const std::string& filename) {
+OpenGLShaderModule::OpenGLShaderModule(const std::string& filename) {
     // Parse the source code
     std::vector<std::string> lineMap;
     std::vector<std::string> includedPaths;
@@ -196,23 +205,23 @@ ShaderModule::ShaderModule(const std::string& filename) {
     m_filename = filename;
 }
 
-int ShaderModule::GetHandle() {
+int OpenGLShaderModule::GetHandle() {
     return m_handle;
 }
 
-bool ShaderModule::CompilationFailed() {
+bool OpenGLShaderModule::CompilationFailed() {
     return m_errors.length();
 }
 
-std::string& ShaderModule::GetFilename() {
+std::string& OpenGLShaderModule::GetFilename() {
     return m_filename;
 }
 
-std::string& ShaderModule::GetErrors() {
+std::string& OpenGLShaderModule::GetErrors() {
     return m_errors;
 }
 
-std::vector<std::string>& ShaderModule::GetLineMap() {
+std::vector<std::string>& OpenGLShaderModule::GetLineMap() {
     return m_lineMap;
 }
 

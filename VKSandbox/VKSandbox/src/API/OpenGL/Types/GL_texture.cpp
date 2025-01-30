@@ -1,10 +1,10 @@
 ﻿#include <iostream>
 #include "GL_texture.h"
-#include "../../../Util.hpp"
+#include "../../../Util/Util.h"
 #include "DDS/DDS_Helpers.h"
 #include <stb_image.h>
 #include "../Tools/ImageTools.h"
-#include "../GL_util.hpp"
+#include "../GL_Util.h"
 #include "tinyexr.h"
 
 #define ALLOW_BINDLESS_TEXTURES 1

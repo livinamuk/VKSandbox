@@ -8,15 +8,17 @@ struct GameObject {
     Transform m_transform;
     std::vector<BlendingMode> m_meshBlendingModes;
     std::vector<int> m_meshMaterialIndices;
-    int m_mousePickIndex = 0;
 
     void SetName(const std::string& name);
     void SetPosition(glm::vec3 position);
+    void SetRotation(glm::vec3 rotation);
     void SetRotationY(float rotation);
     void SetModel(const std::string& name);
+    void SetMeshMaterials(const char* materialName);
     void SetMeshMaterialByMeshName(std::string meshName, const char* materialName);
     void SetMeshBlendingMode(const char* meshName, BlendingMode blendingMode);
     void SetMeshBlendingModes(BlendingMode blendingMode);
+    void SetMousePickIndex(int index);
     void PrintMeshNames();
     void UpdateRenderItems();
 
@@ -27,6 +29,7 @@ struct GameObject {
     std::vector<RenderItem>& GetRenderItemsHairBottomLayer();
 
 private:
+    int m_mousePickIndex = 0;
     std::vector<RenderItem> m_renderItems;
     std::vector<RenderItem> m_renderItemsBlended;
     std::vector<RenderItem> m_renderItemsAlphaDiscarded;

@@ -42,6 +42,4 @@ namespace BackEnd {
     void UpdateMousePicking(int x, int);
     uint16_t GetMousePickR();
     uint16_t GetMousePickG();
-    uint16_t GetMousePickB();
-    uint16_t GetMousePickA();
 }

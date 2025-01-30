@@ -1,7 +1,6 @@
 #pragma once
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "../GL_util.hpp"
+#include "../GL_Util.h"
 #include <vector>
 #include <iostream>
 #include <cstring>

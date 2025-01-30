@@ -4,6 +4,8 @@
 namespace Debug {
     void Update();
     void AddText(const std::string& text);
-    const std::string& GetText();
     void EndFrame();
+    void ToggleDebugText();
+    bool IsDebugTextVisible();
+    const std::string& GetText();
 }

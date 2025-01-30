@@ -12,9 +12,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\API\OpenGL\GL_backend.cpp" />
-    <ClCompile Include="src\API\OpenGL\GL_renderer.cpp" />
-    <ClCompile Include="src\API\OpenGL\GL_renderer_debug.cpp" />
-    <ClCompile Include="src\API\OpenGL\GL_renderer_util.cpp" />
+    <ClCompile Include="src\API\OpenGL\GL_util.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer_util.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_DebugPass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_GeometryPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_cubemapView.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_framebuffer.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_shader.cpp" />
@@ -40,6 +42,7 @@
     <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\AssetManagement\BakeQueue.cpp" />
     <ClCompile Include="src\Core\Scene.cpp" />
+    <ClCompile Include="src\Editor\Editor_debug.cpp" />
     <ClCompile Include="src\Player\Player.cpp" />
     <ClCompile Include="src\Core\Debug.cpp" />
     <ClCompile Include="src\Editor\Editor.cpp" />
@@ -47,6 +50,9 @@
     <ClCompile Include="src\File\AssimpImporter.cpp" />
     <ClCompile Include="src\File\File.cpp" />
     <ClCompile Include="src\Core\Game.cpp" />
+    <ClCompile Include="src\Player\Player_camera.cpp" />
+    <ClCompile Include="src\Player\Player_movement.cpp" />
+    <ClCompile Include="src\Player\Player_ui.cpp" />
     <ClCompile Include="src\Renderer\RenderDataManager.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Types\Camera.cpp" />
@@ -54,7 +60,10 @@
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\AssetManagement\AssetManager.cpp" />
-    <ClCompile Include="src\Renderer\Types\Viewport.cpp" />
+    <ClCompile Include="src\Util\Util_file.cpp" />
+    <ClCompile Include="src\Util\Util_raycasting.cpp" />
+    <ClCompile Include="src\Util\Util_text.cpp" />
+    <ClCompile Include="src\Viewport\Viewport.cpp" />
     <ClCompile Include="src\UI\FontSpriteSheet.cpp" />
     <ClCompile Include="src\UI\Mesh2D.cpp" />
     <ClCompile Include="src\UI\TextBlitter.cpp" />
@@ -63,6 +72,7 @@
     <ClCompile Include="src\UI\UIBackEnd.cpp" />
     <ClCompile Include="src\Util\Util_math.cpp" />
     <ClCompile Include="src\Util\Util_mesh.cpp" />
+    <ClCompile Include="src\Viewport\ViewportManager.cpp" />
     <ClCompile Include="vendor\glad\src\glad.c" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
     <ClCompile Include="vendor\tinyexr\tinyexr.cpp" />
@@ -96,11 +106,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\API\OpenGL\GL_backend.h" />
-    <ClInclude Include="src\API\OpenGL\GL_renderer.h" />
-    <ClInclude Include="src\API\OpenGL\GL_renderer_util.h" />
-    <ClInclude Include="src\API\OpenGL\GL_util.hpp" />
+    <ClInclude Include="src\API\OpenGL\Renderer\GL_renderer.h" />
+    <ClInclude Include="src\API\OpenGL\Renderer\GL_renderer_util.h" />
+    <ClInclude Include="src\API\OpenGL\GL_util.h" />
     <ClInclude Include="src\API\OpenGL\Types\GL_cubemapView.h" />
     <ClInclude Include="src\API\OpenGL\Types\GL_detachedMesh.hpp" />
+    <ClInclude Include="src\API\OpenGL\Types\GL_indirectBuffer.hpp" />
     <ClInclude Include="src\API\OpenGL\Types\GL_mesh2D.hpp" />
     <ClInclude Include="src\API\OpenGL\Types\GL_frameBuffer.h" />
     <ClInclude Include="src\API\OpenGL\Types\GL_pbo.hpp" />
@@ -159,7 +170,7 @@
     <ClInclude Include="src\learnopengl\mesh.h" />
     <ClInclude Include="src\learnopengl\model.h" />
     <ClInclude Include="src\learnopengl\model_animation.h" />
-    <ClInclude Include="src\Renderer\Types\Viewport.h" />
+    <ClInclude Include="src\Viewport\Viewport.h" />
     <ClInclude Include="src\UI\FontSpriteSheet.h" />
     <ClInclude Include="src\UI\Mesh2D.h" />
     <ClInclude Include="src\UI\TextBlitter.h" />
@@ -169,10 +180,10 @@
     <ClInclude Include="src\Core\Scene.h" />
     <ClInclude Include="src\Tools\ImageTools.h" />
     <ClInclude Include="src\UI\UIBackEnd.h" />
-    <ClInclude Include="src\Util.hpp" />
     <ClInclude Include="src\Renderer\Types\Texture.h" />
     <ClInclude Include="src\Common\HellTypes.h" />
     <ClInclude Include="src\Util\Util.h" />
+    <ClInclude Include="src\Viewport\ViewportManager.h" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
     <ClInclude Include="vendor\stb_image\stb_image_write.h" />
     <ClInclude Include="vendor\VkBootstrap\VkBootstrap.h" />
@@ -226,13 +237,21 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\fmod\include;vendor\compressonator\include;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;vendor\VkBootstrap;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\fmod\include;vendor\compressonator\include;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;vendor\VkBootstrap;src\Util;src\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>vendor\GLFW\lib\Release;vendor\fmod\lib;vendor\Vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;fmod_vc.lib;assimp-vc143-mt.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(ProjectDir)vendor\DLLs\fmod.dll" "$(TargetDir)fmod.dll"
@@ -248,8 +267,12 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>vendor\compressonator\include\;vendor\gli\include;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -258,6 +281,8 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>vendor\assimp\lib;vendor\GLFW\lib\Release;vendor\compressonator\lib;vendor\fmod\lib;vendor\Vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;Compressonator_MD.lib;CMP_Framework_MD.lib;assimp-vc143-mt.lib;fmod_vc.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(ProjectDir)vendor\DLLs\fmod.dll" "$(TargetDir)fmod.dll"

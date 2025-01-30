@@ -7,10 +7,8 @@
 #include "../Core/Debug.h"
 #include "../Input/Input.h"
 #include "../Types/GameObject.h"
-#include "../Util.hpp"
+#include "../Util/Util.h"
 #include "glm/gtx/intersect.hpp"
-
-#include "../API/OpenGL/GL_renderer.h"
 
 namespace Scene {
     extern std::vector<GameObject> g_gameObjects;

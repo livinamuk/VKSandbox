@@ -19,7 +19,7 @@ struct Camera {
     const glm::vec3& GetForward() const;
     const glm::vec3& GetUp() const;
     const glm::vec3& GetRight() const;
-    const glm::vec3& GetForwardXZ() const;
+    const glm::vec3 GetForwardXZ() const;
 
 private:
     glm::vec3 m_position = glm::vec3(0.0f);

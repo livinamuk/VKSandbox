@@ -1,7 +1,7 @@
 #include "Input.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../Util.hpp"
+#include "../Util/Util.h"
 
 namespace Input {
     bool g_keyPressed[372];

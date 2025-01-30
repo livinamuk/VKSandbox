@@ -5,6 +5,10 @@ void GameObject::SetPosition(glm::vec3 position) {
     m_transform.position = position;
 }
 
+void GameObject::SetRotation(glm::vec3 rotation) {
+    m_transform.rotation = rotation;
+}
+
 void GameObject::SetRotationY(float rotation) {
     m_transform.rotation.y = rotation;
 }
@@ -21,6 +25,16 @@ void GameObject::SetModel(const std::string& name) {
     }
     for (BlendingMode& blendingMode : m_meshBlendingModes) {
         blendingMode = BlendingMode::NONE;
+    }
+}
+
+void GameObject::SetMeshMaterials(const char* materialName) {
+    int materialIndex = AssetManager::GetMaterialIndex(materialName);
+    if (m_model && materialIndex != -1) {
+        for (int i = 0; i < m_model->GetMeshCount(); i++) {
+            m_meshMaterialIndices[i] = materialIndex;
+            return;
+        }
     }
 }
 
@@ -74,6 +88,10 @@ void GameObject::SetMeshBlendingModes(BlendingMode blendingMode) {
     }
 }
 
+void GameObject::SetMousePickIndex(int index) {
+    m_mousePickIndex = index;
+}
+
 void GameObject::SetName(const std::string& name) {
     m_name = name;
 }
@@ -101,13 +119,15 @@ void GameObject::UpdateRenderItems() {
             Mesh* mesh = AssetManager::GetMeshByIndex(m_model->GetMeshIndices()[i]);
             if (mesh) {
                 RenderItem renderItem;
+                renderItem.mousePickType = (int)EditorObjectType::GAME_OBJECT;
                 renderItem.mousePickIndex = m_mousePickIndex;
                 renderItem.modelMatrix = m_transform.to_mat4();
+                renderItem.inverseModelMatrix = glm::inverse(renderItem.modelMatrix);
                 renderItem.meshIndex = m_model->GetMeshIndices()[i];
                 Material* material = AssetManager::GetMaterialByIndex(m_meshMaterialIndices[i]);
                 if (material) {
                     renderItem.baseColorTextureIndex = material->m_basecolor;
-                    renderItem.normalTextureIndex = material->m_normal;
+                    renderItem.normalMapTextureIndex = material->m_normal;
                     renderItem.rmaTextureIndex = material->m_rma;
                 }
                 BlendingMode blendingMode = m_meshBlendingModes[i];

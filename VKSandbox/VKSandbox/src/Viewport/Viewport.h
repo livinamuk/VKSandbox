@@ -1,17 +1,29 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "HellEnums.h"
 
 struct Viewport {
 public:
     Viewport(const glm::vec2& position = { 0.0f, 0.0f }, const glm::vec2& size = { 1.0f, 1.0f }, bool isOrthographic = true);
+    void UpdateHover();
     void SetOrthographic(float orthoSize, float nearPlane, float farPlane);
     void SetPerspective(float fov, float nearPlane, float farPlane);
     void SetPosition(const glm::vec2& position);
     void SetSize(const glm::vec2& size);
+    void Show();
+    void Hide(); 
+    void SetViewportMode(ViewportMode viewportMode);
+    void NextViewportMode();
     glm::mat4 GetProjectionMatrix() const;
+    glm::mat4 GetPerpsectiveMatrix() const;
+    glm::mat4 GetOrthographicMatrix() const;
     glm::vec2 GetPosition() const;
     glm::vec2 GetSize() const;
+    const bool IsVisible() const;
+    const bool IsOrthographic() const;
+    const bool IsHovered() const;
+    ViewportMode GetViewportMode() const;
 
 private:
     glm::vec2 m_position;           // Top-left corner in normalized screen space (0-1)
@@ -22,6 +34,10 @@ private:
     float m_farPlane;
     float m_fov;
     float m_aspect;
-    glm::mat4 m_projectionMatrix;
-    void UpdateProjectionMatrix();
+    bool m_isVisible = true;
+    bool m_hasHover = false;
+    glm::mat4 m_perspectiveMatrix;
+    glm::mat4 m_orthographicMatrix;
+    ViewportMode m_viewportMode;
+    void UpdateProjectionMatrices();
 };

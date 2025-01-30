@@ -16,15 +16,18 @@ public:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    int GetVertexCount() {
-        return vertices.size();
+    GLsizei GetVertexCount() {
+        return (GLsizei)vertices.size();
     }
-    int GetIndexCount() {
-        return indices.size();
+
+    GLsizei GetIndexCount() {
+        return (GLsizei)indices.size();
     }
+
     int GetVAO() {
         return VAO;
     }
+
     void UpdateBuffers(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) {
         this->indices = indices;
         this->vertices = vertices;

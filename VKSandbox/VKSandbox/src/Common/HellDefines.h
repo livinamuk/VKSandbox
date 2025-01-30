@@ -18,6 +18,12 @@
 #define TRANSPARENT   glm::vec4(0.00f, 0.00f, 0.00f, 0.0f)
 
 #define HELL_PI 3.14159265358979323846
+#define PLAYER_INDEX_SHIFT 20 // Only 2 bits needed for 4 players
 
 // Render limits
 #define TEXTURE_ARRAY_SIZE 1024
+#define MAX_INSTANCE_DATA_COUNT 8192
+#define MAX_INDIRECT_DRAW_COMMAND_COUNT 4096
+
+// System audio
+#define AUDIO_SELECT "UI_Select.wav"

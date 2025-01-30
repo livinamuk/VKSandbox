@@ -6,7 +6,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/Scene.h>
 #include <assimp/PostProcess.h>
-#include "../Util.hpp"
+#include "../Util/Util.h"
 
 ModelData AssimpImporter::ImportFbx(const std::string filepath) {
     ModelData modelData;

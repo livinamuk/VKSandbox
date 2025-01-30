@@ -1,12 +1,13 @@
 #pragma once
 #include "Common.h"
-#include "Types/GL_detachedMesh.hpp"
+#include <string>
+#include "../Types/GL_detachedMesh.hpp"
+#include "../Types/GL_shader.h"
 
 namespace OpenGLRenderer {
 
     void Init();
     void InitMain();
-    void LoadShaders();
     void RenderLoadingScreen();
     void RenderGame();
 
@@ -21,4 +22,8 @@ namespace OpenGLRenderer {
     inline std::vector<Vertex> g_debugPoints;
     inline OpenGLDetachedMesh g_debugLinesMesh;
     inline OpenGLDetachedMesh g_debugPointsMesh;
+
+    // Shaders
+    OpenGLShader* GetShader(const std::string& name);
+    void HotloadShaders();
 }

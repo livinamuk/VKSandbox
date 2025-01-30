@@ -1,7 +1,6 @@
 #include "Util.h"
 
 namespace Util {
-
     std::vector<Vertex> GenerateRingVertices(float sphereRadius, float ringThickness, int segments, int thicknessSegments) {
         std::vector<Vertex> vertices;
         for (int i = 0; i < segments; ++i) {

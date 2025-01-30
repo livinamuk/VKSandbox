@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 #include "HellTypes.h"
-#include "GL_util.hpp"
+#include "GL_Util.h"
 #include "../BackEnd/GLFWIntegration.h"
 #include "Types/GL_pbo.hpp"
 
@@ -227,9 +227,9 @@ namespace OpenGLBackEnd {
 
 
     void UpdateTextureBaking() {
-        int bakeCommandsIssuedPerFrame = g_textureBakingPBOs.size();
+        size_t bakeCommandsIssuedPerFrame = g_textureBakingPBOs.size();
 
-        for (int i = 0; i < bakeCommandsIssuedPerFrame; i++) {
+        for (size_t i = 0; i < bakeCommandsIssuedPerFrame; i++) {
             // Update PBO states
             for (PBO& pbo : g_textureBakingPBOs) {
                 pbo.UpdateState();

@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <cstdint>
 
-struct SSBO {
+struct IndirectBuffer {
 public:
     uint32_t GetHandle() const {
         return m_handle;
@@ -16,22 +16,29 @@ public:
     }
 
     void Update(size_t size, const void* data) {
-        if (size == 0 || data == nullptr) {
+        if (size == 0) {
             return;
         }
+        // Reallocate only if the requested size exceeds the current capacity
         if (m_handle == 0 || m_bufferSize < size) {
-            // Destroy old buffer and allocate a new one
             CleanUp();
             glCreateBuffers(1, &m_handle);
             glNamedBufferStorage(m_handle, (GLsizeiptr)size, nullptr, GL_DYNAMIC_STORAGE_BIT);
             m_bufferSize = size;
         }
-        // Upload data
+        // Upload new data
         glNamedBufferSubData(m_handle, 0, (GLsizeiptr)size, data);
+        glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
     }
 
-    void Bind(GLint index) const {
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, m_handle);
+    void Bind() const {
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, m_handle);
+    }
+
+    void CopyFromSSBO(uint32_t ssboHandle, size_t size) {
+        glBindBuffer(GL_COPY_READ_BUFFER, ssboHandle);
+        glBindBuffer(GL_COPY_WRITE_BUFFER, m_handle);
+        glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, (GLsizeiptr)size);
     }
 
     void CleanUp() {

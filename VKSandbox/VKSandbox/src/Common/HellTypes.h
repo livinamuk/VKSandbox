@@ -22,11 +22,15 @@ struct BlitRect {
 
 struct RenderItem {
     glm::mat4 modelMatrix;
+    glm::mat4 inverseModelMatrix;
     int meshIndex;
     int baseColorTextureIndex;
-    int normalTextureIndex;
+    int normalMapTextureIndex;
     int rmaTextureIndex;
+    int mousePickType;
     int mousePickIndex;
+    int padding0;
+    int padding1;
 };
 
 struct RenderItem2D {
@@ -35,8 +39,8 @@ struct RenderItem2D {
     float colorTintG = 1.0f;
     float colorTintB = 1.0f;
     int textureIndex = -1;
-    int baseVertex;
-    int baseIndex;
+    int baseVertex = 0;
+    int baseIndex = 0;
 };
 
 struct Vertex2D {
@@ -111,6 +115,22 @@ struct FileInfo {
     }
 };
 
+/*
+struct FileInfoOld {
+    std::string fullpath;
+    std::string directory;
+    std::string filename;
+    std::string filetype;
+    std::string materialType;
+};
+struct FileInfo {
+    std::string path;
+    std::string name;
+    std::string ext;
+    std::string dir;
+};
+*/
+
 struct Transform {
 	glm::vec3 position = glm::vec3(0);
 	glm::vec3 rotation = glm::vec3(0);
@@ -153,29 +173,23 @@ struct QueuedTextureBake {
     bool inProgress = false;
 };
 
-struct PlayerData {
+struct ViewportData {
     glm::mat4 projection;
     glm::mat4 inverseProjection;
     glm::mat4 view;
     glm::mat4 inverseView;
     glm::mat4 projectionView;
     glm::mat4 inverseProjectionView;
-    glm::mat4 skyboxModelMatrix;
-    int renderItemsCount;
-    int renderItemsOffset;
-    int renderItemsBlendedCount;
-    int renderItemsBlendedOffset;
-    int renderItemsAlphaDiscardedCount;
-    int renderItemsAlphaDiscardedOffset;
-    int renderItemsHairTopLayerCount;
-    int renderItemsHairTopLayerOffset;
-    int renderItemsHairBottomLayerCount;
-    int renderItemsHairBottomLayerOffset;
+    glm::mat4 skyboxProjectionView;
 };
 
 struct RendererData {
+    float nearPlane;
+    float farPlane;
     float gBufferWidth;
     float gBufferHeight;
+    float hairBufferWidth;
+    float hairBufferHeight;
     int splitscreenMode;
 };
 
@@ -184,4 +198,24 @@ struct Resolutions {
     glm::ivec2 finalImage;
     glm::ivec2 ui;
     glm::ivec2 hair;
+};
+
+struct DrawIndexedIndirectCommand {
+    uint32_t indexCount;
+    uint32_t instanceCount;
+    uint32_t firstIndex;
+    int32_t  baseVertex;
+    uint32_t baseInstance;
+};
+
+struct DrawCommands {
+    std::vector<DrawIndexedIndirectCommand> perPlayer[4]; // One for each splitscreen player
+};
+
+struct DrawCommandsSet {
+    DrawCommands geometry;
+    DrawCommands geometryBlended;
+    DrawCommands geometryAlphaDiscarded;
+    DrawCommands hairTopLayer;
+    DrawCommands hairBottomLayer;
 };

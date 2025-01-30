@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-struct ShaderModule {
+struct OpenGLShaderModule {
 public:
-    ShaderModule(const std::string& filename);
+    OpenGLShaderModule(const std::string& filename);
     int GetHandle();
     bool CompilationFailed();
     std::string& GetFilename();
@@ -19,10 +19,13 @@ private:
     std::vector<std::string> m_lineMap;
 };
 
-struct Shader {
+struct OpenGLShader {
 public:
+    OpenGLShader() = default;
+    OpenGLShader(std::vector<std::string> shaderPaths);
     void Use();
     bool Load(std::vector<std::string> shaderPaths);
+    bool Hotload();
     void SetInt(const std::string& name, int value);
     void SetBool(const std::string& name, bool value);
     void SetFloat(const std::string& name, float value);
@@ -37,6 +40,7 @@ public:
     void SetVec4(const std::string& name, float x, float y, float z, float w);
     int GetHandle();
 private:
+    std::vector<std::string> m_shaderPaths;
     std::unordered_map<std::string, int> m_uniformLocations;
     int m_handle = -1;
 };

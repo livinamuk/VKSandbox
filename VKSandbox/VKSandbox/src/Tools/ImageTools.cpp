@@ -8,7 +8,7 @@
 #include "stb_image_write.h"
 #pragma warning(pop)
 #include "tinyexr.h"
-#include "../API/OpenGL/GL_util.hpp" // Remove me when you can
+#include "../API/OpenGL/GL_Util.h" // Remove me when you can
 #include "DDS/DDS_Helpers.h"
 #include "cmp_compressonatorlib/compressonator.h"
 #include <mutex>

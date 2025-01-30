@@ -1,6 +1,5 @@
 #version 460 core
 #extension GL_ARB_bindless_texture : enable
-
 #include "../common/lighting.glsl"
 #include "../common/post_processing.glsl"
 #include "../common/types.glsl"
@@ -15,34 +14,26 @@ readonly restrict layout(std430, binding = 0) buffer textureSamplersBuffer {
 };
 
 readonly restrict layout(std430, binding = 1) buffer rendereDataBuffer {
-	RendererData rendereData[];
-};
-
-readonly restrict layout(std430, binding = 2) buffer playerDataBuffer {
-	PlayerData playerData[];
+	RendererData rendereData;
 };
 
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 Tangent;
 in vec3 BiTangent;
-in vec3 WorldPos;
+in vec4 WorldPos;
+in vec3 ViewPos;
 
-uniform vec3 viewPos;
-uniform int settings;
-uniform float renderTargetWidth;
-uniform float renderTargetHeight;
-uniform vec2 viewportSize;
-uniform vec2 viewportPosition;
-
-uniform int baseColorHandle;
-uniform int normalHandle;
-uniform int rmaHandle;
+in flat int BaseColorTextureIndex;
+in flat int NormalTextureIndex;
+in flat int RMATextureIndex;
+in flat int MousePickType;
+in flat int MousePickIndex;
 
 void main() {
-    vec4 baseColor = texture(sampler2D(textureSamplers[baseColorHandle]), TexCoord);
-    vec3 normalMap = texture(sampler2D(textureSamplers[normalHandle]), TexCoord).rgb;   
-    vec3 rma = texture(sampler2D(textureSamplers[rmaHandle]), TexCoord).rgb;   
+    vec4 baseColor = texture(sampler2D(textureSamplers[BaseColorTextureIndex]), TexCoord);
+    vec3 normalMap = texture(sampler2D(textureSamplers[NormalTextureIndex]), TexCoord).rgb;   
+    vec3 rma = texture(sampler2D(textureSamplers[RMATextureIndex]), TexCoord).rgb;  
 	baseColor.rgb = pow(baseColor.rgb, vec3(2.2));
     float finalAlpha = baseColor.a;// * 1.25;
 
@@ -57,11 +48,11 @@ void main() {
     float lightRadius = 5;
     float lightStrength = 2;
         
-    lightPosition = (vec3(7, 0, 10) * 0.5) + vec3(-0.5, 0.525, 1);
+    lightPosition = vec3(-3.5, 2, 1);
     lightStrength = 1;
-    lightRadius = 10;
+    lightRadius = 15;
     	
-    vec3 directLighting = GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal, WorldPos.xyz, baseColor.rgb, roughness, metallic, viewPos);
+    vec3 directLighting = GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal, WorldPos.xyz, baseColor.rgb, roughness, metallic, ViewPos);
     
     float ambientIntensity = 0.05;
     vec3 ambientColor = baseColor.rgb * lightColor;
@@ -77,7 +68,7 @@ void main() {
     finalColor.rgb = finalColor.rgb * finalAlpha;
     FragOut = vec4(finalColor, finalAlpha);
 
-    vec2 uv_screenspace = gl_FragCoord.xy / vec2(renderTargetWidth, renderTargetHeight);
+    vec2 uv_screenspace = gl_FragCoord.xy / vec2(rendereData.hairBufferWidth, rendereData.hairBufferHeight);
     float ViewSpaceDepth = texture2D(ViewSpaceDepthTexture, uv_screenspace).r;
     ViewSpaceDepthPreviousOut = vec4(ViewSpaceDepth, 0, 0, 0);
 }

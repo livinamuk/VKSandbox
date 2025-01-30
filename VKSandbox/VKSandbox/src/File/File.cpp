@@ -4,7 +4,7 @@
 #include <string>
 #include <cstdint>
 #include <chrono>
-#include "../Util.hpp"
+#include "../Util/Util.h"
 
 #define PRINT_MODEL_HEADERS_ON_READ 0
 #define PRINT_MODEL_HEADERS_ON_WRITE 0

@@ -1,5 +1,5 @@
 #include "Renderer.h"
-#include "../API/OpenGL/GL_renderer.h"
+#include "../API/OpenGL/Renderer/GL_renderer.h"
 #include "../API/Vulkan/Renderer/VK_renderer.h"
 #include "../BackEnd/BackEnd.h"
 
@@ -34,10 +34,10 @@ namespace Renderer {
 
     void HotloadShaders() {
         if (BackEnd::GetAPI() == API::OPENGL) {
-            OpenGLRenderer::LoadShaders();
+            OpenGLRenderer::HotloadShaders();
         }
         else if (BackEnd::GetAPI() == API::VULKAN) {
-            //VulkanRenderer::LoadShaders();
+            //VulkanRenderer::HotloadShaders();
         }
     }
 }

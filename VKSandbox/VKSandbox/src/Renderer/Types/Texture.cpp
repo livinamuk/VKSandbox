@@ -1,8 +1,8 @@
 #include "Texture.h"
-#include "../Util.hpp"
-#include "../Tools/ImageTools.h"
+#include "../API/OpenGL/GL_Util.h"
 #include "../AssetManagement/AssetManager.h"
-#include "../API/OpenGL/GL_util.hpp"
+#include "../Tools/ImageTools.h"
+#include "../Util/Util.h"
 
 void Texture::Load() {
     // Load texture data from disk

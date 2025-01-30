@@ -1,23 +1,32 @@
 #include "Debug.h"
+#include "Util.h"
 #include "../BackEnd/BackEnd.h"
 #include "../Core/Game.h"
 #include "../Editor/Editor.h"
+#include "../Renderer/RenderDataManager.h"
+#include "../Viewport/ViewportManager.h"
 #include "../UI/UIBackEnd.h"
-#include "../Util.hpp"
 
 namespace Debug {
     std::string g_text = "";
+    bool g_showDebugText = false;
 
     void Update() {
+        if (!g_showDebugText) return;
 
-        Player* player = Game::GetPlayerByIndex(0);
-        if (player) {
-            AddText("Cam Pos: " + Util::Vec3ToString(player->GetCameraPosition()));
-            AddText("Cam Forward: " + Util::Vec3ToString(player->GetCameraForward()));
-            AddText("MousePick: " + std::to_string(BackEnd::GetMousePickR()) + ", " + std::to_string(BackEnd::GetMousePickG()));
+        //AddText("MousePick: " + std::to_string(BackEnd::GetMousePickR()) + ", " + std::to_string(BackEnd::GetMousePickG()));
+        //AddText("Selected Object: " + Editor::EditorObjectTypeToString(Editor::GetSelectedObjectType()));
+        //AddText("");
+
+        for (int i = 0; i < 4; i++) {
+            const std::vector<ViewportData>& viewportData = RenderDataManager::GetViewportData();
+            AddText("ProjectionMatrix: \n" + Util::Mat4ToString(viewportData[i].projection) + "\n");
+            AddText("ViewMatrix: \n" + Util::Mat4ToString(viewportData[i].view) + "\n");
         }
-        AddText("\nSelected Object: " + Editor::EditorObjectTypeToString(Editor::GetSelectedObjectType()));
-        
+
+        for (int i = 0; i < 4; i++) {
+            AddText(std::to_string(i) + ": " + std::to_string(ViewportManager::GetViewportByIndex(i)->IsVisible()));
+        }
     }
 
     void AddText(const std::string& text) {
@@ -30,5 +39,13 @@ namespace Debug {
 
     void EndFrame() {
         g_text = "";
+    }
+
+    void ToggleDebugText() {
+        g_showDebugText = !g_showDebugText;
+    }
+
+    bool IsDebugTextVisible() {
+        return g_showDebugText;
     }
 }
