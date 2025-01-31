@@ -4,6 +4,8 @@
 #include <GLFW/glfw3.h>
 
 struct CubemapView {
+    CubemapView() = default;
+    CubemapView(const std::vector<GLuint>& tex2D);
     void CreateCubemap(const std::vector<GLuint>& tex2D);
     GLuint GetHandle() const;
 

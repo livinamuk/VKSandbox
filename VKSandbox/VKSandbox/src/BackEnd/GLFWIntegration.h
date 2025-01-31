@@ -22,6 +22,7 @@ namespace GLFWIntegration {
     int GetFullScreenHeight();
     void* GetWindowPointer();
     const WindowedMode& GetWindowedMode();
+    void SetCursor(int);
 
     // OpenGL only
     void MakeContextCurrent();

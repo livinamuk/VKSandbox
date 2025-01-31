@@ -1,39 +1,6 @@
 #include "Util.h"
 
-namespace Util {
-    FileInfoOld GetFileInfo(std::string filepath) {
-        std::string filename = GetFilename(filepath);
-        std::string filetype = filepath.substr(filepath.length() - 3);
-        std::string directory = filepath.substr(0, filepath.rfind("/") + 1);
-        std::string materialType = "NONE";
-
-        if (filename.length() > 5) {
-            std::string query = filename.substr(filename.length() - 3);
-            if (query == "ALB" || query == "RMA" || query == "NRM")
-                materialType = query;
-        }
-
-        return { filepath, directory, filename, filetype, materialType };
-    }
-
-    FileInfoOld GetFileInfo(const std::filesystem::directory_entry& filepath) {
-        const auto& path = filepath.path();
-        const auto stem = path.has_stem() ? path.stem().string() : "";
-        std::string filetype = path.has_extension() ? path.extension().string().substr(1) : "";
-
-        auto get_material_type = [](std::string_view filename) -> std::string {
-            if (filename.size() > 5) {
-                filename.remove_prefix(filename.size() - 3);
-                if (filename == "ALB" || filename == "RMA" || filename == "NRM") {
-                    return std::string{ filename };
-                }
-            }
-            return "NONE";
-        };
-
-        return { path.string(), path.parent_path().string(), stem, Lowercase(filetype), get_material_type(stem) };
-    }
-
+namespace Util {  
     bool FileExists(const std::string_view name) {
         struct stat buffer;
         return (stat(name.data(), &buffer) == 0);

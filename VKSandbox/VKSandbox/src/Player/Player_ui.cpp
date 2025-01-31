@@ -22,7 +22,7 @@ void Player::UpdateUI() {
         std::string text = "";
         text += "Cam Pos: " + Util::Vec3ToString(GetCameraPosition()) + "\n";
         text += "Cam Forward: " + Util::Vec3ToString(GetCameraForward()) + "\n";
-        text += "Cam Rotation: " + Util::Vec3ToString(GetCameraRotation()) + "\n";
+        text += "Cam Euler: " + Util::Vec3ToString(GetCameraRotation()) + "\n";
         UIBackEnd::BlitText(text, "StandardFont", xLeft, yTop, 2.0f);
     }
 }

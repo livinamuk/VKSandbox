@@ -1,31 +1,39 @@
 #include "GL_frameBuffer.h"
 
-void GLFrameBuffer::Bind() {
+void OpenGLFrameBuffer::Bind() {
     glBindFramebuffer(GL_FRAMEBUFFER, m_handle);
 }
 
-void GLFrameBuffer::SetViewport() {
+void OpenGLFrameBuffer::SetViewport() {
     glViewport(0, 0, m_width, m_height);
 }
 
-void GLFrameBuffer::Create(const char* name, int width, int height) {
+OpenGLFrameBuffer::OpenGLFrameBuffer(const char* name, int width, int height) {
+    Create(name, width, height);
+}
+
+OpenGLFrameBuffer::OpenGLFrameBuffer(const char* name, const glm::ivec2& size) {
+    Create(name, size);
+}
+
+void OpenGLFrameBuffer::Create(const char* name, int width, int height) {
     glCreateFramebuffers(1, &m_handle);
     this->m_name = name;
     this->m_width = width;
     this->m_height = height;
 }
 
-void GLFrameBuffer::CleanUp() {
+void OpenGLFrameBuffer::CleanUp() {
     m_colorAttachments.clear();
     glDeleteFramebuffers(1, &m_handle);
     m_handle = 0;
 }
 
-void GLFrameBuffer::Create(const char* name, const glm::ivec2& size) {
+void OpenGLFrameBuffer::Create(const char* name, const glm::ivec2& size) {
     Create(name, size.x, size.y);
 }
 
-void GLFrameBuffer::CreateAttachment(const char* name, GLenum internalFormat, GLenum minFilter, GLenum magFilter) {
+void OpenGLFrameBuffer::CreateAttachment(const char* name, GLenum internalFormat, GLenum minFilter, GLenum magFilter) {
     ColorAttachment& colorAttachment = m_colorAttachments.emplace_back();
     colorAttachment.name = name;
     colorAttachment.internalFormat = internalFormat;
@@ -41,7 +49,7 @@ void GLFrameBuffer::CreateAttachment(const char* name, GLenum internalFormat, GL
 
 }
 
-void GLFrameBuffer::CreateDepthAttachment(GLenum internalFormat, GLenum minFilter, GLenum magFilter) {
+void OpenGLFrameBuffer::CreateDepthAttachment(GLenum internalFormat, GLenum minFilter, GLenum magFilter) {
     m_depthAttachment.internalFormat = internalFormat;
     glCreateTextures(GL_TEXTURE_2D, 1, &m_depthAttachment.handle);
     glTextureStorage2D(m_depthAttachment.handle, 1, internalFormat, m_width, m_height);
@@ -54,12 +62,12 @@ void GLFrameBuffer::CreateDepthAttachment(GLenum internalFormat, GLenum minFilte
     glObjectLabel(GL_TEXTURE, m_depthAttachment.handle, static_cast<GLsizei>(debugLabel.length()), debugLabel.c_str());
 }
 
-bool GLFrameBuffer::StrCmp(const char* queryA, const char* queryB) {
+bool OpenGLFrameBuffer::StrCmp(const char* queryA, const char* queryB) {
     return std::strcmp(queryA, queryB) == 0;
 }
 
 
-void GLFrameBuffer::DrawBuffers(std::vector<const char*> attachmentNames) {
+void OpenGLFrameBuffer::DrawBuffers(std::vector<const char*> attachmentNames) {
     std::vector<GLuint> attachments;
     for (const char* attachmentName : attachmentNames) {
         attachments.push_back(GetColorAttachmentSlotByName(attachmentName));
@@ -67,7 +75,7 @@ void GLFrameBuffer::DrawBuffers(std::vector<const char*> attachmentNames) {
     glDrawBuffers(static_cast<GLsizei>(attachments.size()), attachments.data());
 }
 
-void GLFrameBuffer::DrawBuffer(const char* attachmentName) {
+void OpenGLFrameBuffer::DrawBuffer(const char* attachmentName) {
     for (int i = 0; i < m_colorAttachments.size(); i++) {
         if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
             glDrawBuffer(GL_COLOR_ATTACHMENT0 + i);
@@ -132,7 +140,7 @@ void GLFrameBuffer::ClearAttachmentRGBA(const char* attachmentName, float r, flo
 }
 */
 
-void GLFrameBuffer::ClearAttachment(const char* attachmentName, float r, float g, float b, float a) {
+void OpenGLFrameBuffer::ClearAttachment(const char* attachmentName, float r, float g, float b, float a) {
     for (int i = 0; i < m_colorAttachments.size(); i++) {
         if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
             glDrawBuffer(GL_COLOR_ATTACHMENT0 + i);
@@ -143,23 +151,23 @@ void GLFrameBuffer::ClearAttachment(const char* attachmentName, float r, float g
     }
 }
 
-void GLFrameBuffer::ClearDepthAttachment() {
+void OpenGLFrameBuffer::ClearDepthAttachment() {
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-GLuint GLFrameBuffer::GetHandle() const {
+GLuint OpenGLFrameBuffer::GetHandle() const {
     return m_handle;
 }
 
-GLuint GLFrameBuffer::GetWidth() const {
+GLuint OpenGLFrameBuffer::GetWidth() const {
     return m_width;
 }
 
-GLuint GLFrameBuffer::GetHeight() const {
+GLuint OpenGLFrameBuffer::GetHeight() const {
     return m_height;
 }
 
-GLuint GLFrameBuffer::GetColorAttachmentHandleByName(const char* name) const {
+GLuint OpenGLFrameBuffer::GetColorAttachmentHandleByName(const char* name) const {
     for (int i = 0; i < m_colorAttachments.size(); i++) {
         if (StrCmp(name, m_colorAttachments[i].name)) {
             return m_colorAttachments[i].handle;
@@ -169,11 +177,11 @@ GLuint GLFrameBuffer::GetColorAttachmentHandleByName(const char* name) const {
     return GL_NONE;
 }
 
-GLuint GLFrameBuffer::GetDepthAttachmentHandle() const {
+GLuint OpenGLFrameBuffer::GetDepthAttachmentHandle() const {
     return m_depthAttachment.handle;
 }
 
-GLenum GLFrameBuffer::GetColorAttachmentSlotByName(const char* name) const {
+GLenum OpenGLFrameBuffer::GetColorAttachmentSlotByName(const char* name) const {
     for (int i = 0; i < m_colorAttachments.size(); i++) {
         if (StrCmp(name, m_colorAttachments[i].name)) {
             return GL_COLOR_ATTACHMENT0 + i;
@@ -183,7 +191,7 @@ GLenum GLFrameBuffer::GetColorAttachmentSlotByName(const char* name) const {
     return GL_INVALID_VALUE;
 }
 
-void GLFrameBuffer::BlitToDefaultFrameBuffer(const char* srcName, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) {
+void OpenGLFrameBuffer::BlitToDefaultFrameBuffer(const char* srcName, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, GetHandle());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glReadBuffer(GetColorAttachmentSlotByName(srcName));

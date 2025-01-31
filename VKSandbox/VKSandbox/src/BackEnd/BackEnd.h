@@ -16,6 +16,9 @@ namespace BackEnd {
     void SetAPI(API api);
     const API GetAPI();
 
+    // Cursor
+    void SetCursor(int cursor);
+
     // Window
     void* GetWindowPointer();
     void SetWindowedMode(const WindowedMode& windowedMode);

@@ -6,11 +6,13 @@
 #include <iostream>
 #include <string>
 #include "../API/Vulkan/Managers/VK_device_manager.h"
+#include <unordered_map>
 
 namespace GLFWIntegration {
     GLFWwindow* g_window = NULL;
     WindowedMode g_windowedMode = WindowedMode::WINDOWED;
     GLFWmonitor* g_monitor;
+    std::unordered_map<int, GLFWcursor*> g_cursorsPtrs;
     const GLFWvidmode* g_mode;
     bool g_forceCloseWindow = false;
     bool g_windowHasFocus = true;
@@ -20,6 +22,7 @@ namespace GLFWIntegration {
     int g_fullscreenHeight = 0;
     int g_currentWindowWidth = 0;
     int g_currentWindowHeight = 0;
+    int g_currentCursor = GLFW_ARROW_CURSOR;
 
     void framebuffer_size_callback(GLFWwindow* window, int width, int height);
     void window_focus_callback(GLFWwindow* window, int focused);
@@ -75,7 +78,20 @@ namespace GLFWIntegration {
         }
         glfwSetFramebufferSizeCallback(g_window, framebuffer_size_callback);
         glfwSetWindowFocusCallback(g_window, window_focus_callback);
+
+        g_cursorsPtrs[GLFW_ARROW_CURSOR] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+        g_cursorsPtrs[GLFW_IBEAM_CURSOR] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+        g_cursorsPtrs[GLFW_CROSSHAIR_CURSOR] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+        g_cursorsPtrs[GLFW_HAND_CURSOR] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+        g_cursorsPtrs[GLFW_HRESIZE_CURSOR] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+        g_cursorsPtrs[GLFW_VRESIZE_CURSOR] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+
         return true;
+    }
+
+    void SetCursor(int cursor) {
+        g_currentCursor = cursor;
+        glfwSetCursor(g_window, g_cursorsPtrs[cursor]);
     }
 
     void MakeContextCurrent() {
@@ -108,6 +124,12 @@ namespace GLFWIntegration {
         if (GetWindowedMode() == WindowedMode::FULLSCREEN) {
             ToggleFullscreen();
         }
+        glfwDestroyCursor(g_cursorsPtrs[GLFW_ARROW_CURSOR]);
+        glfwDestroyCursor(g_cursorsPtrs[GLFW_IBEAM_CURSOR]);
+        glfwDestroyCursor(g_cursorsPtrs[GLFW_CROSSHAIR_CURSOR]);
+        glfwDestroyCursor(g_cursorsPtrs[GLFW_HAND_CURSOR]);
+        glfwDestroyCursor(g_cursorsPtrs[GLFW_HRESIZE_CURSOR]);
+        glfwDestroyCursor(g_cursorsPtrs[GLFW_VRESIZE_CURSOR]);
         glfwTerminate();
     }
 

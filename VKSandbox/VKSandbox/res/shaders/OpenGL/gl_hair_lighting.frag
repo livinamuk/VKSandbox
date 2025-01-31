@@ -51,6 +51,8 @@ void main() {
     lightPosition = vec3(-3.5, 2, 1);
     lightStrength = 1;
     lightRadius = 15;
+
+     
     	
     vec3 directLighting = GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal, WorldPos.xyz, baseColor.rgb, roughness, metallic, ViewPos);
     

@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include "GL_texture.h"
 #include "../../../Util/Util.h"
-#include "DDS/DDS_Helpers.h"
+//#include "DDS/DDS_Helpers.h"
 #include <stb_image.h>
 #include "../Tools/ImageTools.h"
 #include "../GL_Util.h"

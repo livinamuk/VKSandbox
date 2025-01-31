@@ -17,6 +17,7 @@ public:
     void SetMagFilter(TextureFilter filter);
     void SetTextureDataLevelBakeState(int index, BakeState state);
     void RequestMipmaps();
+    void FreeCPUMemory();
     const void PrintDebugInfo();
     void CheckForBakeCompletion();
     const bool MipmapsAreRequested();
@@ -41,6 +42,7 @@ public:
     const TextureFilter GetMagFilter();
     OpenGLTexture& GetGLTexture();
     VulkanTexture& GetVKTexture();
+
 
 private:
     OpenGLTexture m_glTexture;

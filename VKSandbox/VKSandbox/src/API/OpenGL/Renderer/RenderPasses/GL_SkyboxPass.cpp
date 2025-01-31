@@ -1,0 +1,43 @@
+#include "../GL_renderer.h" 
+#include "../GL_renderer_util.h" 
+#include "../../GL_backend.h"
+#include "AssetManagement/AssetManager.h"
+#include "Viewport/ViewportManager.h"
+
+namespace OpenGLRenderer {
+
+    void SkyBoxPass() {
+        OpenGLShader* shader = GetShader("Skybox");
+        if (!shader) return;
+
+        OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
+        if (!gBuffer) return;
+
+        Mesh* mesh = AssetManager::GetCubeMesh();
+        if (!mesh) return;
+
+        CubemapView* skyboxCubemapView = GetCubemapView("SkyboxNightSky");
+        if (!skyboxCubemapView) return;
+
+        gBuffer->Bind();
+        gBuffer->DrawBuffer("Color");       
+        shader->Use();
+        
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+        glDisable(GL_CULL_FACE);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemapView->GetHandle());
+        glBindVertexArray(OpenGLBackEnd::GetVertexDataVAO());
+
+        for (int i = 0; i < 4; i++) {
+            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+            if (viewport->IsVisible()) {
+                OpenGLRendererUtil::SetViewport(*gBuffer, *viewport);
+                glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), 1, mesh->baseVertex, i);
+            }
+        }
+        glEnable(GL_CULL_FACE);
+        glDepthMask(GL_TRUE);
+    }
+}

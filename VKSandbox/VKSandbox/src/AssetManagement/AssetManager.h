@@ -31,6 +31,7 @@ namespace AssetManager {
     int GetMeshIndexByName(const std::string& name);
     Mesh* GetMeshByName(const std::string& name);
     Mesh* GetMeshByIndex(int index);
+    Mesh* GetCubeMesh();
 
     // Materials
     Material* GetDefaultMaterial();

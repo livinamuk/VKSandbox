@@ -4,7 +4,7 @@
 
 namespace OpenGLRendererUtil {
 
-    void BlitToDefaultFrameBuffer(GLFrameBuffer& srcFrameBuffer, const char* srcName, GLbitfield mask, GLenum filter) {
+    void BlitToDefaultFrameBuffer(OpenGLFrameBuffer& srcFrameBuffer, const char* srcName, GLbitfield mask, GLenum filter) {
         GLint srcAttachmentSlot = srcFrameBuffer.GetColorAttachmentSlotByName(srcName);
         if (srcAttachmentSlot != GL_INVALID_VALUE) {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
@@ -25,7 +25,7 @@ namespace OpenGLRendererUtil {
         }
     }
 
-    void BlitFrameBuffer(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer, const char* srcName, const char* dstName, GLbitfield mask, GLenum filter) {
+    void BlitFrameBuffer(OpenGLFrameBuffer& srcFrameBuffer, OpenGLFrameBuffer& dstFrameBuffer, const char* srcName, const char* dstName, GLbitfield mask, GLenum filter) {
         GLint srcAttachmentSlot = srcFrameBuffer.GetColorAttachmentSlotByName(srcName);
         GLint dstAttachmentSlot = dstFrameBuffer.GetColorAttachmentSlotByName(dstName);
         if (srcAttachmentSlot != GL_INVALID_VALUE && dstAttachmentSlot != GL_INVALID_VALUE) {
@@ -47,7 +47,7 @@ namespace OpenGLRendererUtil {
         }
     }
 
-    void BlitFrameBufferDepth(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer) {
+    void BlitFrameBufferDepth(OpenGLFrameBuffer& srcFrameBuffer, OpenGLFrameBuffer& dstFrameBuffer) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.GetHandle());
         BlitRect srcRect{ 0, 0, srcFrameBuffer.GetWidth(), srcFrameBuffer.GetHeight() };
@@ -55,7 +55,7 @@ namespace OpenGLRendererUtil {
         glBlitFramebuffer(srcRect.x0, srcRect.y0, srcRect.x1, srcRect.y1, dstRect.x0, dstRect.y0, dstRect.x1, dstRect.y1, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     }
 
-    void BlitFrameBufferDepth(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer, const Viewport& viewport) {
+    void BlitFrameBufferDepth(OpenGLFrameBuffer& srcFrameBuffer, OpenGLFrameBuffer& dstFrameBuffer, const Viewport& viewport) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.GetHandle());
         glm::vec2 position = viewport.GetPosition();
@@ -65,13 +65,13 @@ namespace OpenGLRendererUtil {
         glBlitFramebuffer(srcRect.x0, srcRect.y0, srcRect.x1, srcRect.y1, dstRect.x0, dstRect.y0, dstRect.x1, dstRect.y1, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     }
 
-    void BlitFrameBufferDepth(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer, BlitRect srcRect, BlitRect dstRect) {
+    void BlitFrameBufferDepth(OpenGLFrameBuffer& srcFrameBuffer, OpenGLFrameBuffer& dstFrameBuffer, BlitRect srcRect, BlitRect dstRect) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.GetHandle());
         glBlitFramebuffer(srcRect.x0, srcRect.y0, srcRect.x1, srcRect.y1, dstRect.x0, dstRect.y0, dstRect.x1, dstRect.y1, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     }
 
-    void BlitToDefaultFrameBuffer(GLFrameBuffer& srcFrameBuffer, const char* srcName, BlitRect srcRect, BlitRect dstRect, GLbitfield mask, GLenum filter) {
+    void BlitToDefaultFrameBuffer(OpenGLFrameBuffer& srcFrameBuffer, const char* srcName, BlitRect srcRect, BlitRect dstRect, GLbitfield mask, GLenum filter) {
         GLint srcAttachmentSlot = srcFrameBuffer.GetColorAttachmentSlotByName(srcName);
         if (srcAttachmentSlot != GL_INVALID_VALUE) {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
@@ -82,7 +82,7 @@ namespace OpenGLRendererUtil {
         }
     }
 
-    void BlitFrameBuffer(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer, const char* srcName, const char* dstName, BlitRect srcRect, BlitRect dstRect, GLbitfield mask,GLenum filter) {
+    void BlitFrameBuffer(OpenGLFrameBuffer& srcFrameBuffer, OpenGLFrameBuffer& dstFrameBuffer, const char* srcName, const char* dstName, BlitRect srcRect, BlitRect dstRect, GLbitfield mask,GLenum filter) {
         GLint srcAttachmentSlot = srcFrameBuffer.GetColorAttachmentSlotByName(srcName);
         GLint dstAttachmentSlot = dstFrameBuffer.GetColorAttachmentSlotByName(dstName);
         if (srcAttachmentSlot != GL_INVALID_VALUE && dstAttachmentSlot != GL_INVALID_VALUE) {
@@ -94,7 +94,7 @@ namespace OpenGLRendererUtil {
         }
     }
 
-    void CopyDepthBuffer(GLFrameBuffer& srcFrameBuffer, GLFrameBuffer& dstFrameBuffer) {
+    void CopyDepthBuffer(OpenGLFrameBuffer& srcFrameBuffer, OpenGLFrameBuffer& dstFrameBuffer) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFrameBuffer.GetHandle());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.GetHandle());
         glBlitFramebuffer(0, 0, srcFrameBuffer.GetWidth(), srcFrameBuffer.GetHeight(), 0, 0, dstFrameBuffer.GetWidth(), dstFrameBuffer.GetHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
@@ -175,7 +175,7 @@ namespace OpenGLRendererUtil {
         return vao;
     }
 
-    void SetViewport(const GLFrameBuffer& framebuffer, const Viewport& viewport) {
+    void SetViewport(const OpenGLFrameBuffer& framebuffer, const Viewport& viewport) {
         GLuint fbWidth = framebuffer.GetWidth();
         GLuint fbHeight = framebuffer.GetHeight();
         glm::vec2 pos = viewport.GetPosition();
@@ -187,7 +187,7 @@ namespace OpenGLRendererUtil {
         glViewport(x, y, w, h);
     }
 
-    void SetScissor(const GLFrameBuffer& framebuffer, const Viewport& viewport) {
+    void SetScissor(const OpenGLFrameBuffer& framebuffer, const Viewport& viewport) {
         GLuint fbWidth = framebuffer.GetWidth();
         GLuint fbHeight = framebuffer.GetHeight();
         glm::vec2 pos = viewport.GetPosition();

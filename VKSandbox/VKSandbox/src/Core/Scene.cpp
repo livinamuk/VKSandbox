@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include "HellDefines.h"
 
 namespace Scene {
     std::vector<GameObject> g_gameObjects;

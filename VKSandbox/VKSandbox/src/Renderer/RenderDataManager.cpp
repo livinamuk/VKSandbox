@@ -1,10 +1,12 @@
 #include "RenderDataManager.h"
+#include "HellDefines.h"
 #include "../Core/Game.h"
 #include "../Core/Scene.h"
 #include "../Config/Config.h"
 #include "../Editor/Editor.h"
 #include "../Viewport/ViewportManager.h"
 #include <span>
+#include <unordered_map>
 
 namespace RenderDataManager {
     DrawCommandsSet g_drawCommandsSet;

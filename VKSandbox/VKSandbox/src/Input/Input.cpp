@@ -1,7 +1,8 @@
 #include "Input.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../Util/Util.h"
+#include "BackEnd/BackEnd.h"
+#include "Util/Util.h"
 
 namespace Input {
     bool g_keyPressed[372];
@@ -21,6 +22,9 @@ namespace Input {
     bool g_rightMousePressed = false;
     bool g_leftMouseDownLastFrame = false;
     bool g_rightMouseDownLastFrame = false;
+    bool g_middleMouseDown = false;
+    bool g_middleMousePressed = false;
+    bool g_middleMouseDownLastFrame = false;
     bool g_preventRightMouseHoldTillNextClick = false;
     int g_mouseScreenX = 0;
     int g_mouseScreenY = 0;
@@ -29,12 +33,12 @@ namespace Input {
     int g_mouseYPreviousFrame = 0;
     GLFWwindow* g_window;
 
-    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+    void MouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
     void Init(void* glfwWindow) {
         double x, y;
         g_window = static_cast<GLFWwindow*>(glfwWindow);
-        glfwSetScrollCallback(g_window, scroll_callback);
+        glfwSetScrollCallback(g_window, MouseScrollCallback);
         glfwGetCursorPos(g_window, &x, &y);
         DisableCursor();
         g_mouseOffsetX = x;
@@ -47,12 +51,12 @@ namespace Input {
         // Wheel
         g_mouseWheelUp = false;
         g_mouseWheelDown = false;
-        g_mouseWheelValue = GetScrollWheelYOffset();
+        g_mouseWheelValue = g_scrollWheelYOffset;
         if (g_mouseWheelValue < 0)
             g_mouseWheelDown = true;
         if (g_mouseWheelValue > 0)
             g_mouseWheelUp = true;
-        ResetScrollWheelYOffset();
+        g_scrollWheelYOffset = 0;
 
         // Keyboard
         for (int i = 32; i < 349; i++) {
@@ -98,6 +102,30 @@ namespace Input {
 
         if (g_rightMousePressed)
             g_preventRightMouseHoldTillNextClick = false;
+
+        // Middle button
+        g_middleMouseDown = glfwGetMouseButton(g_window, GLFW_MOUSE_BUTTON_MIDDLE);
+        if (g_middleMouseDown == GLFW_PRESS && !g_middleMouseDownLastFrame)
+            g_middleMousePressed = true;
+        else
+            g_middleMousePressed = false;
+        g_middleMouseDownLastFrame = g_middleMouseDown;
+
+        // Wrap mouse
+        if (LeftMouseDown() || RightMouseDown() || MiddleMouseDown()) {
+            if (g_mouseX == 0) {
+                glfwSetCursorPos(g_window, BackEnd::GetFullScreenWidth() - 2, g_mouseY);
+            }
+            if (g_mouseX == BackEnd::GetFullScreenWidth() - 1) {
+                glfwSetCursorPos(g_window, 1, g_mouseY);
+            }
+            if (g_mouseY == 0) {
+                glfwSetCursorPos(g_window, g_mouseX, BackEnd::GetFullScreenHeight() - 2);
+            }
+            if (g_mouseY == BackEnd::GetFullScreenHeight() - 1) {
+                glfwSetCursorPos(g_window, g_mouseX, 1);
+            }
+        }
     }
 
     bool KeyPressed(unsigned int keycode) {
@@ -120,12 +148,20 @@ namespace Input {
         return g_leftMouseDown;
     }
 
+    bool MiddleMouseDown() {
+        return g_middleMouseDown;
+    }
+
     bool RightMouseDown() {
         return g_rightMouseDown && !g_preventRightMouseHoldTillNextClick;
     }
 
     bool LeftMousePressed() {
         return g_leftMousePressed;
+    }
+
+    bool MiddleMousePressed() {
+        return g_middleMousePressed;
     }
 
     bool RightMousePressed() {
@@ -164,14 +200,6 @@ namespace Input {
         return (int)g_mouseYPreviousFrame;
     }
 
-    int GetScrollWheelYOffset() {
-        return g_scrollWheelYOffset;
-    }
-
-    void ResetScrollWheelYOffset() {
-        g_scrollWheelYOffset = 0;
-    }
-
     void DisableCursor() {
         glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
@@ -196,7 +224,7 @@ namespace Input {
         glfwSetCursorPos(g_window, static_cast<double>(x), static_cast<double>(y));
     }
 
-    void scroll_callback(GLFWwindow* /*window*/, double /*xoffset*/, double yoffset) {
+    void MouseScrollCallback(GLFWwindow* /*window*/, double /*xoffset*/, double yoffset) {
         g_scrollWheelYOffset = (int)yoffset;
     }
 }

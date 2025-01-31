@@ -85,9 +85,25 @@ enum class SplitscreenMode {
     SPLITSCREEN_MODE_COUNT 
 };
 
-enum class ViewportMode {
+enum class ShadingMode {
     SHADED,
     WIREFRAME,
     WIREFRAME_OVERLAY,
-    VIEWPORT_MODE_COUNT
+    SHADING_MODE_COUNT
+};
+
+enum class CameraView {
+    PERSPECTIVE,
+    FRONT,
+    BACK,
+    TOP,
+    LEFT,
+    RIGHT
+};
+
+enum struct ViewportResizeState {
+    IDLE,
+    RESIZING_HORIZONTAL,
+    RESIZING_VERTICAL,
+    RESIZING_HORIZONTAL_VERTICAL,
 };

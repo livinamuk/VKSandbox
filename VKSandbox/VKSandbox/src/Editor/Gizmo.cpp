@@ -1,8 +1,12 @@
-#include "Gizmo.h"
+﻿#include "Gizmo.h"
 #include "HellEnums.h"
+#include "HellDefines.h"
+#include "../Config/Config.h"
 #include "../Core/Audio.h"
+#include "../Editor/Editor.h"
 #include "../Input/Input.h"
 #include "../Util/Util.h"
+#include "../Viewport/ViewportManager.h"
 #include "glm/gtx/intersect.hpp"
 
 namespace Gizmo {
@@ -18,7 +22,7 @@ namespace Gizmo {
     float g_gizmoSize = 1.0f;
     float g_armLength = 1.0f;
     glm::vec3 g_gizmoPosition = glm::vec3(2.76f, 0.0f, 6.2f);// glm::vec3(0.0f, 0.0f, 0.0f);
-    std::vector<GizmoRenderItem> g_renderItems;
+    std::vector<GizmoRenderItem> g_renderItems[4];
     std::vector<DetachedMesh> g_meshes;
     GizmoFlag g_hoverFlag = GizmoFlag::NONE;
     GizmoFlag g_actionFlag = GizmoFlag::NONE;
@@ -29,9 +33,8 @@ namespace Gizmo {
     glm::vec3 g_translateOffset = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::ivec2 g_scaleOffset = glm::ivec2(0, 0);
     
-    void UpdateRenderItems(glm::mat4 viewMatrix);
-    void UpdateInput(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
-    float GetScalingFactor(glm::vec3 viewPos);
+    void UpdateRenderItems();
+    void UpdateInput();
 
     void Init() {        
         g_meshes.resize(MESH_COUNT);
@@ -82,12 +85,21 @@ namespace Gizmo {
         }
     }
 
-    void Update(glm::mat4 projectionMatrix, glm::mat4 viewMatrix) {
-        UpdateInput(projectionMatrix, viewMatrix);
-        UpdateRenderItems(viewMatrix);
+    void Update() {
+        if (!Editor::IsOpen()) return;
+        UpdateInput();
+        UpdateRenderItems();
     }
 
-    void UpdateInput(glm::mat4 projectionMatrix, glm::mat4 viewMatrix) {
+    void UpdateInput() {
+        int viewportIndex = Editor::GetHoveredViewportIndex();
+        const Viewport* viewport = ViewportManager::GetViewportByIndex(viewportIndex);
+        const Camera* camera = Editor::GetCameraByIndex(viewportIndex);
+        const glm::vec3 rayOrigin = Editor::GetMouseRayOriginByViewportIndex(viewportIndex);
+        const glm::vec3 rayDir = Editor::GetMouseRayDirectionByViewportIndex(viewportIndex);
+
+        glm::mat4 projectionMatrix = viewport->GetProjectionMatrix();
+        glm::mat4 viewMatrix = camera->GetViewMatrix();
         glm::mat4 projectionView = projectionMatrix * viewMatrix;
         glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
         glm::vec3 camRight = glm::vec3(inverseViewMatrix[0]);
@@ -114,20 +126,12 @@ namespace Gizmo {
         int mouseY = Input::GetMouseY();
         int windowWidth = BackEnd::GetCurrentWindowWidth();
         int windowHeight = BackEnd::GetCurrentWindowHeight();
-        std::vector<glm::vec3> rayDirs;
-        int threshold = 6;
-        rayDirs.push_back(Util::GetMouseRayDir(projectionMatrix, viewMatrix, windowWidth, windowHeight, mouseX, mouseY));
-        rayDirs.push_back(Util::GetMouseRayDir(projectionMatrix, viewMatrix, windowWidth, windowHeight, mouseX - threshold, mouseY - threshold));
-        rayDirs.push_back(Util::GetMouseRayDir(projectionMatrix, viewMatrix, windowWidth, windowHeight, mouseX - threshold, mouseY + threshold));
-        rayDirs.push_back(Util::GetMouseRayDir(projectionMatrix, viewMatrix, windowWidth, windowHeight, mouseX + threshold, mouseY + threshold));
-        rayDirs.push_back(Util::GetMouseRayDir(projectionMatrix, viewMatrix, windowWidth, windowHeight, mouseX + threshold, mouseY - threshold));
-        glm::vec3 rayOrigin = glm::inverse(viewMatrix)[3];
 
         // Raycast against all render item triangles to find hover
         float closestDistance = 9999;
         g_gizmoHasHover = false;
         g_hoverFlag = GizmoFlag::NONE;
-        for (GizmoRenderItem& renderItem : g_renderItems) {
+        for (GizmoRenderItem& renderItem : g_renderItems[viewportIndex]) {
             DetachedMesh* mesh = Gizmo::GetDetachedMeshByIndex(renderItem.meshIndex);
             if (mesh) {
                 std::vector<Vertex>& vertices = mesh->GetVertices();
@@ -142,13 +146,12 @@ namespace Gizmo {
                     glm::vec3 pos2 = renderItem.modelMatrix * glm::vec4(v2.position, 1.0f);
 
                     float t = 0;
-                    for (glm::vec3& rayDir : rayDirs) {
-                        if (Util::RayIntersectsTriangle(rayOrigin, rayDir, pos0, pos1, pos2, t)) {
-                            if (t < closestDistance) {
-                                closestDistance = t;
-                                g_hoverFlag = renderItem.flag;
-                                g_gizmoHasHover = true;
-                            }
+
+                    if (Util::RayIntersectsTriangle(rayOrigin, rayDir, pos0, pos1, pos2, t)) {
+                        if (t < closestDistance) {
+                            closestDistance = t;
+                            g_hoverFlag = renderItem.flag;
+                            g_gizmoHasHover = true;
                         }
                     }
                 }
@@ -173,17 +176,12 @@ namespace Gizmo {
         // Translating
         if (g_actionFlag == GizmoFlag::TRANSLATE_X || g_actionFlag == GizmoFlag::TRANSLATE_Y || g_actionFlag == GizmoFlag::TRANSLATE_Z) {
             if (g_gizmoAction == GizmoAction::DRAGGING) {
-                glm::vec3 planeNormal = (g_actionFlag == GizmoFlag::TRANSLATE_Y) ? glm::vec3(0.0f, 0.0f, 1.0f) : glm::vec3(0.0f, 1.0f, 0.0f);
+                glm::vec3 planeNormal = -rayDir;
                 glm::vec3 planeOrigin = glm::vec3(g_gizmoPosition);
-                int mouseX = Input::GetMouseX();
-                int mouseY = Input::GetMouseY();
-                int windowWidth = BackEnd::GetCurrentWindowWidth();
-                int windowHeight = BackEnd::GetCurrentWindowHeight();
-                glm::vec3 rayDirection = rayDirs[0];
                 float distanceToHit = 0;
-                bool hitFound = glm::intersectRayPlane(rayOrigin, rayDirection, planeOrigin, planeNormal, distanceToHit);
+                bool hitFound = glm::intersectRayPlane(rayOrigin, rayDir, planeOrigin, planeNormal, distanceToHit);
                 if (hitFound) {
-                    glm::vec3 hitPosition = rayOrigin + (rayDirection * distanceToHit);
+                    glm::vec3 hitPosition = rayOrigin + (rayDir * distanceToHit);
                     if (g_offsetNeedsUpdate) {
                         g_offsetNeedsUpdate = false;
                         g_translateOffset = hitPosition - g_gizmoPosition;
@@ -193,11 +191,7 @@ namespace Gizmo {
                     case GizmoFlag::TRANSLATE_Y: g_gizmoPosition.y = hitPosition.y - g_translateOffset.y; break;
                     case GizmoFlag::TRANSLATE_Z: g_gizmoPosition.z = hitPosition.z - g_translateOffset.z; break;
                     }
-                }  
-                // Translate the selected object
-                //if (g_selectedObjectType == MousePickType::GAME_OBJECT) {
-                //    Scene::g_gameObjects[g_selectedObjectIndex].m_transform.position = g_gizmoPosition;
-                //}
+                }
             }
         }
 
@@ -206,9 +200,9 @@ namespace Gizmo {
 
                 if (g_offsetNeedsUpdate) {
                     glm::vec3 armOffset = glm::vec3(
-                        (g_actionFlag == GizmoFlag::SCALE_X) ? g_armLength * GetScalingFactor(viewPos) : 0.0f,
-                        (g_actionFlag == GizmoFlag::SCALE_Y) ? g_armLength * GetScalingFactor(viewPos) : 0.0f,
-                        (g_actionFlag == GizmoFlag::SCALE_Z) ? g_armLength * GetScalingFactor(viewPos) : 0.0f
+                        (g_actionFlag == GizmoFlag::SCALE_X) ? g_armLength * GetGizmoScalingFactorByViewportIndex(viewportIndex) : 0.0f,
+                        (g_actionFlag == GizmoFlag::SCALE_Y) ? g_armLength * GetGizmoScalingFactorByViewportIndex(viewportIndex) : 0.0f,
+                        (g_actionFlag == GizmoFlag::SCALE_Z) ? g_armLength * GetGizmoScalingFactorByViewportIndex(viewportIndex) : 0.0f
                     );
                     glm::mat4 mvpArm = projectionMatrix * viewMatrix * Transform(g_gizmoPosition + armOffset).to_mat4();
                     glm::ivec2 centerScreenCoords = Util::WorldToScreenCoords(g_gizmoPosition, projectionView, windowWidth, windowHeight, true);
@@ -236,195 +230,204 @@ namespace Gizmo {
 
     
 
-    void UpdateRenderItems(glm::mat4 viewMatrix) {
-        g_renderItems.clear();
+    void UpdateRenderItems() {
+        for (int i = 0; i < 4; i++) {
+            g_renderItems[i].clear();
 
-        glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
-        glm::vec3 camRight = glm::vec3(inverseViewMatrix[0]);
-        glm::vec3 camUp = glm::vec3(inverseViewMatrix[1]);
-        glm::vec3 camForward = glm::vec3(inverseViewMatrix[2]);
-        glm::vec3 camPos = inverseViewMatrix[3];
+            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+            if (!viewport->IsVisible()) continue;
 
-        float scaleCubeSize = 0.23f;
-        float coneOffset = 0.9f;
+            Camera* camera = Editor::GetCameraByIndex(i);
+            glm::mat4 projectionMatrix = viewport->GetProjectionMatrix();
+            glm::mat4 viewMatrix = camera->GetViewMatrix();
+            glm::mat4 projectionView = projectionMatrix * viewMatrix;
+            glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
+            glm::vec3 camRight = glm::vec3(inverseViewMatrix[0]);
+            glm::vec3 camUp = glm::vec3(inverseViewMatrix[1]);
+            glm::vec3 camForward = glm::vec3(inverseViewMatrix[2]);
+            glm::vec3 camPos = inverseViewMatrix[3];
 
-        // Scale the gizmo based on camera distance.
-        float scalingFactor = GetScalingFactor(camPos);
-        Transform transform;
-        transform.position = g_gizmoPosition;
-        transform.scale = glm::vec3(scalingFactor);
+            float scaleCubeSize = 0.23f;
+            float coneOffset = 0.9f;
 
-        if (g_mode == GizmoMode::TRANSLATE) {
-            GizmoRenderItem& centerCube = g_renderItems.emplace_back();
+            // Scale the gizmo based on camera distance.
+            float scalingFactor = GetGizmoScalingFactorByViewportIndex(i);
+            Transform transform;
             transform.position = g_gizmoPosition;
-            transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor * 0.2f);
-            centerCube.modelMatrix = transform.to_mat4();
-            centerCube.meshIndex = CUBE;
-            centerCube.flag = GizmoFlag::NONE;
-            centerCube.color = YELLOW;
-
-            GizmoRenderItem& cylinderX = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition;
-            transform.rotation = glm::vec3(0.0f, 0.0f, HELL_PI * -0.5f);
             transform.scale = glm::vec3(scalingFactor);
-            cylinderX.modelMatrix = transform.to_mat4();
-            cylinderX.meshIndex = CYLINDER;
-            cylinderX.flag = GizmoFlag::TRANSLATE_X;
-            cylinderX.color = RED;
 
-            GizmoRenderItem& cylinderY = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition;
-            transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor);
-            cylinderY.modelMatrix = transform.to_mat4();
-            cylinderY.meshIndex = CYLINDER;
-            cylinderY.flag = GizmoFlag::TRANSLATE_Y;
-            cylinderY.color = GREEN;
+            if (g_mode == GizmoMode::TRANSLATE) {
+                GizmoRenderItem& centerCube = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition;
+                transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor * 0.2f);
+                centerCube.modelMatrix = transform.to_mat4();
+                centerCube.meshIndex = CUBE;
+                centerCube.flag = GizmoFlag::NONE;
+                centerCube.color = YELLOW;
 
-            GizmoRenderItem& cylinderZ = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition;
-            transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor);
-            cylinderZ.modelMatrix = transform.to_mat4();
-            cylinderZ.meshIndex = CYLINDER;
-            cylinderZ.flag = GizmoFlag::TRANSLATE_Z;
-            cylinderZ.color = BLUE;
+                GizmoRenderItem& cylinderX = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition;
+                transform.rotation = glm::vec3(0.0f, 0.0f, HELL_PI * -0.5f);
+                transform.scale = glm::vec3(scalingFactor);
+                cylinderX.modelMatrix = transform.to_mat4();
+                cylinderX.meshIndex = CYLINDER;
+                cylinderX.flag = GizmoFlag::TRANSLATE_X;
+                cylinderX.color = RED;
 
-            GizmoRenderItem& coneX = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition + glm::vec3(coneOffset * scalingFactor, 0.0f, 0.0f);
-            transform.rotation = glm::vec3(0.0f, 0.0f, HELL_PI * -0.5f);
-            transform.scale = glm::vec3(scalingFactor);
-            coneX.modelMatrix = transform.to_mat4();
-            coneX.meshIndex = CONE;
-            coneX.flag = GizmoFlag::TRANSLATE_X;
-            coneX.color = RED;
+                GizmoRenderItem& cylinderY = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition;
+                transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor);
+                cylinderY.modelMatrix = transform.to_mat4();
+                cylinderY.meshIndex = CYLINDER;
+                cylinderY.flag = GizmoFlag::TRANSLATE_Y;
+                cylinderY.color = GREEN;
 
-            GizmoRenderItem& coneY = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition + glm::vec3(0.0f, coneOffset * scalingFactor, 0.0f);
-            transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor);
-            coneY.modelMatrix = transform.to_mat4();
-            coneY.meshIndex = CONE;
-            coneY.flag = GizmoFlag::TRANSLATE_Y;
-            coneY.color = GREEN;
+                GizmoRenderItem& cylinderZ = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition;
+                transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor);
+                cylinderZ.modelMatrix = transform.to_mat4();
+                cylinderZ.meshIndex = CYLINDER;
+                cylinderZ.flag = GizmoFlag::TRANSLATE_Z;
+                cylinderZ.color = BLUE;
 
-            GizmoRenderItem& coneZ = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition + glm::vec3(0.0f, 0.0f, coneOffset * scalingFactor);
-            transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor);
-            coneZ.modelMatrix = transform.to_mat4();
-            coneZ.meshIndex = CONE;
-            coneZ.flag = GizmoFlag::TRANSLATE_Z;
-            coneZ.color = BLUE;
-        }
+                GizmoRenderItem& coneX = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition + glm::vec3(coneOffset * scalingFactor, 0.0f, 0.0f);
+                transform.rotation = glm::vec3(0.0f, 0.0f, HELL_PI * -0.5f);
+                transform.scale = glm::vec3(scalingFactor);
+                coneX.modelMatrix = transform.to_mat4();
+                coneX.meshIndex = CONE;
+                coneX.flag = GizmoFlag::TRANSLATE_X;
+                coneX.color = RED;
 
-        if (g_mode == GizmoMode::SCALE) {
-            GizmoRenderItem& centerCube = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition;
-            transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor * 0.2f);
-            centerCube.modelMatrix = transform.to_mat4();
-            centerCube.meshIndex = CUBE;
-            centerCube.flag = GizmoFlag::SCALE;
-            centerCube.color = YELLOW;
+                GizmoRenderItem& coneY = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition + glm::vec3(0.0f, coneOffset * scalingFactor, 0.0f);
+                transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor);
+                coneY.modelMatrix = transform.to_mat4();
+                coneY.meshIndex = CONE;
+                coneY.flag = GizmoFlag::TRANSLATE_Y;
+                coneY.color = GREEN;
 
-            GizmoRenderItem& cylinderX = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition;
-            transform.rotation = glm::vec3(0.0f, 0.0f, HELL_PI * -0.5f);
-            transform.scale = glm::vec3(scalingFactor);
-            cylinderX.modelMatrix = transform.to_mat4();
-            cylinderX.meshIndex = CYLINDER;
-            cylinderX.flag = GizmoFlag::SCALE_X;
-            cylinderX.color = RED;
+                GizmoRenderItem& coneZ = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition + glm::vec3(0.0f, 0.0f, coneOffset * scalingFactor);
+                transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor);
+                coneZ.modelMatrix = transform.to_mat4();
+                coneZ.meshIndex = CONE;
+                coneZ.flag = GizmoFlag::TRANSLATE_Z;
+                coneZ.color = BLUE;
+            }
 
-            GizmoRenderItem& cylinderY = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition;
-            transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor);
-            cylinderY.modelMatrix = transform.to_mat4();
-            cylinderY.meshIndex = CYLINDER;
-            cylinderY.flag = GizmoFlag::SCALE_Y;
-            cylinderY.color = GREEN;
+            if (g_mode == GizmoMode::SCALE) {
+                GizmoRenderItem& centerCube = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition;
+                transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor * 0.2f);
+                centerCube.modelMatrix = transform.to_mat4();
+                centerCube.meshIndex = CUBE;
+                centerCube.flag = GizmoFlag::SCALE;
+                centerCube.color = YELLOW;
 
-            GizmoRenderItem& cylinderZ = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition;
-            transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor);
-            cylinderZ.modelMatrix = transform.to_mat4();
-            cylinderZ.meshIndex = CYLINDER;
-            cylinderZ.flag = GizmoFlag::SCALE_Z;
-            cylinderZ.color = BLUE;
+                GizmoRenderItem& cylinderX = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition;
+                transform.rotation = glm::vec3(0.0f, 0.0f, HELL_PI * -0.5f);
+                transform.scale = glm::vec3(scalingFactor);
+                cylinderX.modelMatrix = transform.to_mat4();
+                cylinderX.meshIndex = CYLINDER;
+                cylinderX.flag = GizmoFlag::SCALE_X;
+                cylinderX.color = RED;
 
-            GizmoRenderItem& coneX = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition + glm::vec3(g_armLength * scalingFactor, 0.0f, 0.0f);
-            transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor * scaleCubeSize);
-            coneX.modelMatrix = transform.to_mat4();
-            coneX.meshIndex = CUBE;
-            coneX.flag = GizmoFlag::SCALE_X;
-            coneX.color = RED;
+                GizmoRenderItem& cylinderY = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition;
+                transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor);
+                cylinderY.modelMatrix = transform.to_mat4();
+                cylinderY.meshIndex = CYLINDER;
+                cylinderY.flag = GizmoFlag::SCALE_Y;
+                cylinderY.color = GREEN;
 
-            GizmoRenderItem& coneY = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition + glm::vec3(0.0f, g_armLength * scalingFactor, 0.0f);
-            transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor * scaleCubeSize);
-            coneY.modelMatrix = transform.to_mat4();
-            coneY.meshIndex = CUBE;
-            coneY.flag = GizmoFlag::SCALE_Y;
-            coneY.color = GREEN;
+                GizmoRenderItem& cylinderZ = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition;
+                transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor);
+                cylinderZ.modelMatrix = transform.to_mat4();
+                cylinderZ.meshIndex = CYLINDER;
+                cylinderZ.flag = GizmoFlag::SCALE_Z;
+                cylinderZ.color = BLUE;
 
-            GizmoRenderItem& coneZ = g_renderItems.emplace_back();
-            transform.position = g_gizmoPosition + glm::vec3(0.0f, 0.0f, g_armLength * scalingFactor);
-            transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-            transform.scale = glm::vec3(scalingFactor * scaleCubeSize);
-            coneZ.modelMatrix = transform.to_mat4();
-            coneZ.meshIndex = CUBE;
-            coneZ.flag = GizmoFlag::SCALE_Z;
-            coneZ.color = BLUE;
-        }
+                GizmoRenderItem& coneX = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition + glm::vec3(g_armLength * scalingFactor, 0.0f, 0.0f);
+                transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor * scaleCubeSize);
+                coneX.modelMatrix = transform.to_mat4();
+                coneX.meshIndex = CUBE;
+                coneX.flag = GizmoFlag::SCALE_X;
+                coneX.color = RED;
 
-        if (g_mode == GizmoMode::ROTATE) {
-            // Sphere 
-            GizmoRenderItem& sphere = g_renderItems.emplace_back();
-            sphere.modelMatrix = transform.to_mat4();
-            sphere.meshIndex = SPHERE;
-            sphere.color = TRANSPARENT;
+                GizmoRenderItem& coneY = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition + glm::vec3(0.0f, g_armLength * scalingFactor, 0.0f);
+                transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor * scaleCubeSize);
+                coneY.modelMatrix = transform.to_mat4();
+                coneY.meshIndex = CUBE;
+                coneY.flag = GizmoFlag::SCALE_Y;
+                coneY.color = GREEN;
 
-            // Scale X
-            GizmoRenderItem& scaleX = g_renderItems.emplace_back();
-            transform.rotation = glm::vec3(0.0f, HELL_PI * 0.5f, 0.0f);
-            scaleX.modelMatrix = transform.to_mat4();
-            scaleX.meshIndex = RING;
-            scaleX.flag = GizmoFlag::ROTATE_X;
-            scaleX.color = RED;
+                GizmoRenderItem& coneZ = g_renderItems[i].emplace_back();
+                transform.position = g_gizmoPosition + glm::vec3(0.0f, 0.0f, g_armLength * scalingFactor);
+                transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor * scaleCubeSize);
+                coneZ.modelMatrix = transform.to_mat4();
+                coneZ.meshIndex = CUBE;
+                coneZ.flag = GizmoFlag::SCALE_Z;
+                coneZ.color = BLUE;
+            }
 
-            // Scale Y
-            GizmoRenderItem& scaleY = g_renderItems.emplace_back();
-            transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
-            scaleY.modelMatrix = transform.to_mat4();
-            scaleY.meshIndex = RING;
-            scaleY.flag = GizmoFlag::ROTATE_Y;
-            scaleY.color = GREEN;
+            if (g_mode == GizmoMode::ROTATE) {
+                // Sphere 
+                GizmoRenderItem& sphere = g_renderItems[i].emplace_back();
+                sphere.modelMatrix = transform.to_mat4();
+                sphere.meshIndex = SPHERE;
+                sphere.color = TRANSPARENT;
 
-            // Scale Z
-            GizmoRenderItem& scaleZ = g_renderItems.emplace_back();
-            transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-            scaleZ.modelMatrix = transform.to_mat4();
-            scaleZ.meshIndex = RING;
-            scaleZ.flag = GizmoFlag::ROTATE_Z;
-            scaleZ.color = BLUE;
-        }
+                // Scale X
+                GizmoRenderItem& scaleX = g_renderItems[i].emplace_back();
+                transform.rotation = glm::vec3(0.0f, HELL_PI * 0.5f, 0.0f);
+                scaleX.modelMatrix = transform.to_mat4();
+                scaleX.meshIndex = RING;
+                scaleX.flag = GizmoFlag::ROTATE_X;
+                scaleX.color = RED;
 
-        for (GizmoRenderItem& renderItem : g_renderItems) {
-            if (renderItem.flag == g_hoverFlag && renderItem.flag != GizmoFlag::NONE) {
-                renderItem.color = ORANGE;
+                // Scale Y
+                GizmoRenderItem& scaleY = g_renderItems[i].emplace_back();
+                transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
+                scaleY.modelMatrix = transform.to_mat4();
+                scaleY.meshIndex = RING;
+                scaleY.flag = GizmoFlag::ROTATE_Y;
+                scaleY.color = GREEN;
+
+                // Scale Z
+                GizmoRenderItem& scaleZ = g_renderItems[i].emplace_back();
+                transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                scaleZ.modelMatrix = transform.to_mat4();
+                scaleZ.meshIndex = RING;
+                scaleZ.flag = GizmoFlag::ROTATE_Z;
+                scaleZ.color = BLUE;
+            }
+
+            for (GizmoRenderItem& renderItem : g_renderItems[i]) {
+                if (renderItem.flag == g_hoverFlag && renderItem.flag != GizmoFlag::NONE) {
+                    renderItem.color = ORANGE;
+                }
             }
         }
     }
 
-    std::vector<GizmoRenderItem>& GetRenderItems() {
-        return g_renderItems;
+    std::vector<GizmoRenderItem>& GetRenderItemsByViewportIndex(int index) {
+        return g_renderItems[index];
     }
 
     void SetPosition(glm::vec3 position) {
@@ -447,10 +450,39 @@ namespace Gizmo {
         }
     }
 
-    float GetScalingFactor(glm::vec3 viewPos) {
-        float screenScaleFactor = 0.08f;
-        float distance = glm::length(g_gizmoPosition - viewPos);
-        return distance * screenScaleFactor;
+    float GetGizmoScalingFactorByViewportIndex(int viewportIndex) {
+        Viewport* viewport = ViewportManager::GetViewportByIndex(viewportIndex);
+        Camera* camera = Editor::GetCameraByIndex(viewportIndex);
+        const Resolutions& resolutions = Config::GetResolutions();
+
+        float desiredGizmoHeightPixels = 75.0f;
+
+        int renderTargetWidth = resolutions.gBuffer.x;
+        int renderTargetHeight = resolutions.gBuffer.y;
+        float viewportWidth = viewport->GetSize().x * renderTargetWidth;
+        float viewportHeight = viewport->GetSize().y * renderTargetHeight;
+
+        if (viewport->IsOrthographic()) {
+            float m_aspect = viewportWidth / viewportHeight;
+            float left = -viewport->GetOrthoSize() * m_aspect;
+            float right = viewport->GetOrthoSize() * m_aspect;
+            float bottom = -viewport->GetOrthoSize();
+            float top = viewport->GetOrthoSize();
+            float worldHeight = top - bottom;
+            float worldPerPixel = worldHeight / viewportHeight;
+            float gizmoHeightInWorld = desiredGizmoHeightPixels * worldPerPixel;
+            return gizmoHeightInWorld;
+        }
+        else {
+            float distance = glm::length(g_gizmoPosition - camera->GetPosition());
+            float fov = viewport->GetPerspectiveFOV();
+            float gizmoHeightInWorld = (desiredGizmoHeightPixels * 2.0f * distance * tan(fov * 0.5f)) / viewportHeight;
+            return gizmoHeightInWorld;
+            // Old approach
+            // float screenFraction = 0.1f;
+            // float distance = glm::length(g_gizmoPosition - camera->GetPosition());
+            // return distance * screenFraction;
+        }
     }
 
     const glm::vec3 GetPosition() {

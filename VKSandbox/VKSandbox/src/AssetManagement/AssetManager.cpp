@@ -11,6 +11,10 @@
 #include "../Renderer/Types/Mesh.hpp"
 #include "../UI/UIBackEnd.h"
 #include "../Util/Util.h"
+#include <unordered_map>
+#include <vector>
+#include <future>
+#include <mutex>
 
 namespace AssetManager {
 
@@ -99,6 +103,12 @@ namespace AssetManager {
             if (BackEnd::GetAPI() == API::OPENGL) {
                 OpenGLBackEnd::UploadVertexData(g_vertices, g_indices);
             }
+
+            // Free all cpu texture data
+            for (Texture& texture : g_textures) {
+                texture.FreeCPUMemory();
+            }
+
             Renderer::InitMain();
             std::cout << "Assets loaded\n";
         }
@@ -262,6 +272,10 @@ namespace AssetManager {
         mesh.aabbMax = aabbMax;
         mesh.extents = aabbMax - aabbMin;
         mesh.boundingSphereRadius = std::max(mesh.extents.x, std::max(mesh.extents.y, mesh.extents.z)) * 0.5f;
+
+        // Remove me
+        mesh.m_vertices = vertices;
+        mesh.m_indices = indices;
 
         g_vertices.reserve(g_vertices.size() + vertices.size());
         g_vertices.insert(std::end(g_vertices), std::begin(vertices), std::end(vertices));
@@ -478,6 +492,12 @@ namespace AssetManager {
 
     std::string& GetMaterialNameByIndex(int index) {
         return g_materials[index].m_name;
+    }
+
+    Mesh* GetCubeMesh() {
+        // Clean me up
+        static Mesh* mesh = GetMeshByIndex(GetModelByIndex(GetModelIndexByName("Cube"))->GetMeshIndices()[0]);
+        return mesh;
     }
 }
 

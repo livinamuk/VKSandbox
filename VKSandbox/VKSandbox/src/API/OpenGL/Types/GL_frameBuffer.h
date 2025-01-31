@@ -17,7 +17,7 @@ struct DepthAttachment {
     GLenum internalFormat = GL_RGBA;
 };
 
-class GLFrameBuffer {
+class OpenGLFrameBuffer {
 private:
     const char* m_name = "undefined";
     GLuint m_handle = 0;
@@ -29,6 +29,9 @@ private:
     static bool StrCmp(const char* queryA, const char* queryB);
 
 public:
+    OpenGLFrameBuffer() = default;
+    OpenGLFrameBuffer(const char* name, int width, int height);
+    OpenGLFrameBuffer(const char* name, const glm::ivec2& resolution);
     void Create(const char* name, int width, int height);
     void Create(const char* name, const glm::ivec2& resolution);
     void CleanUp();

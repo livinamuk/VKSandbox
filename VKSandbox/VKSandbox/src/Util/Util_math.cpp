@@ -32,4 +32,9 @@ namespace Util {
         std::uniform_int_distribution<int> dist(min, max);
         return dist(rng);
     }
+
+    float MapRange(float inValue, float minInRange, float maxInRange, float minOutRange, float maxOutRange) {
+        float x = (inValue - minInRange) / (maxInRange - minInRange);
+        return minOutRange + (maxOutRange - minOutRange) * x;
+    }
 }

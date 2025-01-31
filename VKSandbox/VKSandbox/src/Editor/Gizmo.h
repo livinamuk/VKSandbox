@@ -36,12 +36,13 @@ struct GizmoRenderItem {
 
 namespace Gizmo {
     void Init();
-    void Update(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
+    void Update();
     void SetPosition(glm::vec3 position);
 
-    std::vector<GizmoRenderItem>& GetRenderItems();
+    std::vector<GizmoRenderItem>& GetRenderItemsByViewportIndex(int index);
     DetachedMesh* GetDetachedMeshByIndex(int index);
     const std::string GizmoFlagToString(const GizmoFlag& flag);
     const glm::vec3 GetPosition();
     const bool HasHover();
+    float GetGizmoScalingFactorByViewportIndex(int viewportIndex);
 }

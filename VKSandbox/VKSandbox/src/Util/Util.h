@@ -1,16 +1,18 @@
 #pragma once
+#include "HellEnums.h"
 #include "HellTypes.h"
 #include <vector>
+#include <filesystem>
 
 namespace Util {
     // Math
     glm::ivec2 WorldToScreenCoords(const glm::vec3& worldPos, const glm::mat4& viewProjection, int screenWidth, int screenHeight, bool flipY = false);
     glm::vec3 Vec3Min(const glm::vec3& a, const glm::vec3& b);
     glm::vec3 Vec3Max(const glm::vec3& a, const glm::vec3& b);
-    int CeilSqrt(int number);
     int RandomInt(int min, int max);
     float FInterpTo(float current, float target, float deltaTime, float interpSpeed);
     float RandomFloat(float min, float max);
+    float MapRange(float inValue, float minInRange, float maxInRange, float minOutRange, float maxOutRange);
 
     // Raycasting
     glm::vec3 GetMouseRayDir(glm::mat4 projection, glm::mat4 view, int windowWidth, int windowHeight, int mouseX, int mouseY);
@@ -35,7 +37,9 @@ namespace Util {
     std::string Mat4ToString(glm::mat4 m);
     std::string Lowercase(std::string& str);
     std::string Uppercase(std::string& str);
-    std::string ViewportModeToString(const ViewportMode& viewportMode);
+    std::string ViewportModeToString(const ShadingMode& viewportMode);
+    std::string CameraTypeToString(const CameraView& cameraView);
+    std::string ViewportResizeStateToString(const ViewportResizeState& viewportResizeState);
 
     // File
     std::string GetFilename(const std::string& filepath);
@@ -45,10 +49,6 @@ namespace Util {
     std::string GetFileName(const std::filesystem::directory_entry& entry);
     std::string GetFileNameWithoutExtension(const std::filesystem::directory_entry& entry);
     std::string GetFileExtension(const std::filesystem::directory_entry& entry);
-    FileInfoOld GetFileInfo(std::string filepath);
-    FileInfoOld GetFileInfo(const std::filesystem::directory_entry& filepath);
-    FileInfo GetFileInfoFromPath(const std::string& filepath);
     std::vector<FileInfo> IterateDirectory(const std::string& directory, std::vector<std::string> extensions = {});
-    std::vector<FileInfo> IterateDirectorySorted(const std::string& directory, std::vector<std::string> extensions = {});
     bool FileExists(const std::string_view name);
 }

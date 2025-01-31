@@ -1,4 +1,6 @@
 #include "ImageTools.h"
+#include "HellTypes.h"
+#include "HellEnums.h"
 #include <stdio.h>
 #include <memory.h>
 #include <iostream>
@@ -9,11 +11,11 @@
 #pragma warning(pop)
 #include "tinyexr.h"
 #include "../API/OpenGL/GL_Util.h" // Remove me when you can
-#include "DDS/DDS_Helpers.h"
 #include "cmp_compressonatorlib/compressonator.h"
 #include <mutex>
 #include <fstream>
 #include "DDS.h"
+#include <stb_image.h>
 
 namespace ImageTools {
 

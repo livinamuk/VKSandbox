@@ -1,7 +1,9 @@
 #include "Editor.h"
+#include "Gizmo.h"
 #include "Util.h"
 #include "../Core/Debug.h"
 #include "../Config/Config.h"
+#include "../Input/Input.h"
 #include "../Viewport/ViewportManager.h"
 #include "../UI/UIBackEnd.h"
 
@@ -23,11 +25,40 @@ namespace Editor {
                 std::string text = "";
                 //text += "ProjectionMatrix: \n" + Util::Mat4ToString(viewport->GetProjectionMatrix()) + "\n\n";
                 //text += "ViewMatrix: \n" + Util::Mat4ToString(camera->GetViewMatrix()) + "\n";
-                text += "ViewportMode: " + Util::ViewportModeToString(viewport->GetViewportMode()) + "\n";
+                //text += "ViewportMode: " + Util::ViewportModeToString(viewport->GetViewportMode()) + "\n";
                 text += "Hover: " + Util::BoolToString(viewport->IsHovered()) + "\n";
-                text += "Fuck cunt";
+                //text += "Gizmo scaling factor: " + std::to_string(Gizmo::GetGizmoScalingFactorByViewportIndex(i)) + "\n";
+                text += "Camera View: " + Util::CameraTypeToString(Editor::GetCameraViewByIndex(i)) + "\n";
+
+               // text += "IsActive: " + Util::BoolToString(i == Editor::GetActiveViewportIndex()) + "\n";
+
+
+                //text += "Mouse ray origin: " + Util::Vec3ToString(Editor::GetMouseRayOriginByViewportIndex(i)) + "\n";
+                //text += "Ray dir: " + Util::Vec3ToString(Editor::GetMouseRayDirectionByViewportIndex(i)) + "\n";
+
+               // text += "Cam pos: " + Util::Vec3ToString(camera->GetPosition()) + "\n";
+               // text += "Cam rot: " + Util::Vec3ToString(camera->GetEulerRotation()) + "\n";
+                //text += "Orbit target: " + Util::Vec3ToString(camera->m_orbitTarget) + "\n";
+                //text += "Cam euler: " + Util::Vec3ToString(camera->GetEulerRotation()) + "\n";
                 
-                UIBackEnd::BlitText(text, "StandardFont", xLeft, yTop, 2.0f);
+               // SpaceCoords windowSpaceCoords = viewport->GetWindowSpaceCoords();
+               // SpaceCoords gBufferSpaceCoords = viewport->GetGBufferSpaceCoords();
+               // 
+               // text += "\n";
+               // text += "WINDOW SPACE\n";
+               // text += " width: " + std::to_string(windowSpaceCoords.width) + "\n";
+               // text += " height: " + std::to_string(windowSpaceCoords.height) + "\n";
+               // text += " localMouseX: " + std::to_string(windowSpaceCoords.localMouseX) + "\n";
+               // text += " localMouseY: " + std::to_string(windowSpaceCoords.localMouseY) + "\n";
+               // 
+               // text += "\n";
+               // text += "GBUFFER SPACE\n";
+               // text += " width: " + std::to_string(gBufferSpaceCoords.width) + "\n";
+               // text += " height: " + std::to_string(gBufferSpaceCoords.height) + "\n";
+               // text += " localMouseX: " + std::to_string(gBufferSpaceCoords.localMouseX) + "\n";
+               // text += " localMouseY: " + std::to_string(gBufferSpaceCoords.localMouseY) + "\n";
+
+                UIBackEnd::BlitText(text, "StandardFont", xLeft + 2, yTop + 2, 2.0f);
             }
         }
     }

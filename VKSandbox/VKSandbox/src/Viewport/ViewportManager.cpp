@@ -1,11 +1,14 @@
-#pragma once
+﻿#pragma once
 #include "ViewportManager.h"
 #include "HellDefines.h"
+#include "Util.h"
+#include "../BackEnd/BackEnd.h"
+#include "../Config/Config.h"
 #include "../Core/Game.h"
+#include "../Input/Input.h"
 #include "../Editor/Editor.h"
 
 namespace ViewportManager {
-
     std::vector<Viewport> g_viewports;
 
     void Init() {
@@ -16,7 +19,7 @@ namespace ViewportManager {
         g_viewports[3].SetPerspective(1.0f, NEAR_PLANE, FAR_PLANE);
     }
 
-    void Update() {
+    void UpdateMouseHoverStates() {
         for (Viewport& viewport : g_viewports) {
             viewport.UpdateHover();
         }
@@ -39,12 +42,17 @@ namespace ViewportManager {
             g_viewports[2].Show();
             g_viewports[3].Show();
             for (int i = 0; i < 4; i++) {
+                g_viewports[i].SetViewportMode(Editor::GetViewportModeByIndex(i));
                 Editor::IsViewportOrthographic(i)
                     ? g_viewports[i].SetOrthographic(1.0f, NEAR_PLANE, FAR_PLANE)
                     : g_viewports[i].SetPerspective(1.0f, NEAR_PLANE, FAR_PLANE);
             }
         }
+        // When not in the editor
         else {
+            for (int i = 0; i < 4; i++) {
+                g_viewports[i].SetViewportMode(ShadingMode::SHADED);
+            }
             if (Game::GetSplitscreenMode() == SplitscreenMode::FULLSCREEN) {
                 g_viewports[0].SetPosition(glm::vec2(0.0f, 0.0f));  // Fullscreen
                 g_viewports[0].SetSize(glm::vec2(1.0f, 1.0f));
@@ -87,12 +95,12 @@ namespace ViewportManager {
         }
     }
 
-    Viewport* GetViewportByIndex(int32_t index) {
-        if (index >= 0 && index < g_viewports.size()) {
-            return &g_viewports[index];
+    Viewport* GetViewportByIndex(int32_t viewportIndex) {
+        if (viewportIndex >= 0 && viewportIndex < g_viewports.size()) {
+            return &g_viewports[viewportIndex];
         }
         else {
-            std::cout << "ViewportManager::GetViewportByIndex(int index) failed. " << index << " out of range of size " << g_viewports.size() << "\n";
+            std::cout << "ViewportManager::GetViewportByIndex(int index) failed. " << viewportIndex << " out of range of size " << g_viewports.size() << "\n";
             return nullptr;
         }
     }

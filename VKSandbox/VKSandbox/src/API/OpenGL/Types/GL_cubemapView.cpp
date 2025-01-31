@@ -1,6 +1,10 @@
 #include "GL_cubemapView.h"
 #include <iostream>
 
+CubemapView::CubemapView(const std::vector<GLuint>& tex2D) {
+    CreateCubemap(tex2D);
+}
+
 void CubemapView::CreateCubemap(const std::vector<GLuint>& tex2D) {
     if (tex2D.size() != 6) {
         std::cout << "Cubemap requires exactly 6 textures.\n";

@@ -1,4 +1,5 @@
 #include "Util.h"
+#include "HellDefines.h"
 
 namespace Util {
     std::vector<Vertex> GenerateRingVertices(float sphereRadius, float ringThickness, int segments, int thicknessSegments) {

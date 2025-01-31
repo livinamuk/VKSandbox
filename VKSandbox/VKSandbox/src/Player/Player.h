@@ -1,6 +1,6 @@
 #pragma once
 #include "HellTypes.h"
-#include "../Types/Camera.h"
+#include "Camera/Camera.h"
 
 struct Player {
     void Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex);

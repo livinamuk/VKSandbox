@@ -70,7 +70,7 @@ namespace OpenGLBackEnd {
         glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
 
         // Texture baking PBOs
-        for (int i = 0; i < 32; ++i) {
+        for (int i = 0; i < 64; ++i) {
             PBO& pbo = g_textureBakingPBOs.emplace_back();
             pbo.Init(MAX_DATA_SIZE);
         }
@@ -220,7 +220,6 @@ namespace OpenGLBackEnd {
                 glGenerateTextureMipmap(textureHandle);
             }
         }
-
         // Cleanup bake queue
         BakeQueue::RemoveQueuedTextureBakeByJobID(queuedTextureBake.jobID);
     }
@@ -249,7 +248,6 @@ namespace OpenGLBackEnd {
                             glGenerateTextureMipmap(texture->GetGLTexture().GetHandle());
                         }
                     }
-
                     BakeQueue::RemoveQueuedTextureBakeByJobID(jobID);
                     pbo.SetCustomValue(-1);
                 }

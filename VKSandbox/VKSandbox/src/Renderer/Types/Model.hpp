@@ -1,5 +1,7 @@
 #pragma once
 #include "Common.h"
+#include "HellEnums.h"
+#include "HellTypes.h"
 #include "../File/FileFormats.h"
 #include <string>
 #include <vector>

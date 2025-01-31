@@ -3,6 +3,7 @@
 #include "../AssetManagement/AssetManager.h"
 #include "../Tools/ImageTools.h"
 #include "../Util/Util.h"
+#include "stb_image.h"
 
 void Texture::Load() {
     // Load texture data from disk
@@ -22,6 +23,13 @@ void Texture::Load() {
 
     // Initiate bake states
     m_textureDataLevelBakeStates.resize(m_textureDataLevels.size(), BakeState::AWAITING_BAKE);
+}
+
+void Texture::FreeCPUMemory() {
+    for (TextureData& textureData : m_textureDataLevels) {
+        stbi_image_free(textureData.m_data);
+        textureData.m_data = nullptr;
+    }
 }
 
 const int Texture::GetWidth(int mipmapLevel) {

@@ -2,6 +2,9 @@
 
 namespace Config {
     Resolutions g_resolitions;
+    RendererSettings g_rendererSettings;
+
+    int g_peelCount = 4;
 
     void Init() {
         g_resolitions.gBuffer = { 1920, 1080 };
@@ -14,4 +17,11 @@ namespace Config {
         return g_resolitions;
     }
 
+    const RendererSettings& GetRendererSettings() {
+        return g_rendererSettings;
+    }
+
+    void SetDepthPeelCount(int count) {
+        g_rendererSettings.depthPeelCount = count;
+    }
 }

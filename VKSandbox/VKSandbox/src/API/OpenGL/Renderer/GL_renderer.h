@@ -1,15 +1,25 @@
 #pragma once
 #include "Common.h"
 #include <string>
+#include "../Types/GL_cubemapView.h"
 #include "../Types/GL_detachedMesh.hpp"
+#include "../Types/GL_frameBuffer.h"
 #include "../Types/GL_shader.h"
 
 namespace OpenGLRenderer {
-
     void Init();
     void InitMain();
     void RenderLoadingScreen();
     void RenderGame();
+
+    // Render passes
+    void SkyBoxPass();
+    void GeometryPass();
+    void DebugPass();
+    void HairPass();
+    void RenderHairLayer(const DrawCommands& drawCommands, int peelCount);
+    void UIPass();
+    void EditorPass();
 
     // Debug
     void UpdateDebugLinesMesh();
@@ -26,4 +36,13 @@ namespace OpenGLRenderer {
     // Shaders
     OpenGLShader* GetShader(const std::string& name);
     void HotloadShaders();
+
+    // Framebuffers
+    OpenGLFrameBuffer* GetFrameBuffer(const std::string& name);
+
+    // Framebuffers
+    CubemapView* GetCubemapView(const std::string& name);
+
+    // Multidraw Indirect
+    void MultiDrawIndirect(const std::vector<DrawIndexedIndirectCommand>& commands);
 }

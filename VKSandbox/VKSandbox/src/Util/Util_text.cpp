@@ -41,12 +41,34 @@ namespace Util {
             m[0][3], m[1][3], m[2][3], m[3][3]);
     }
 
-    std::string ViewportModeToString(const ViewportMode& viewportMode) {
+    std::string ViewportModeToString(const ShadingMode& viewportMode) {
         switch (viewportMode) {
-        case ViewportMode::SHADED:            return "SHADED";
-        case ViewportMode::WIREFRAME:         return "WIREFRAME";
-        case ViewportMode::WIREFRAME_OVERLAY: return "WIREFRAME_OVERLAY";
-        default:                              return "UNDEFINDE";
+        case ShadingMode::SHADED:            return "SHADED";
+        case ShadingMode::WIREFRAME:         return "WIREFRAME";
+        case ShadingMode::WIREFRAME_OVERLAY: return "WIREFRAME_OVERLAY";
+        default:                              return "UNDEFINED";
+        }
+    }
+
+    std::string CameraTypeToString(const CameraView& cameraView) {
+        switch (cameraView) {
+        case CameraView::PERSPECTIVE:   return "PERSPECTIVE";
+        case CameraView::FRONT:         return "FRONT";
+        case CameraView::BACK:          return "BACK";
+        case CameraView::TOP:           return "TOP";
+        case CameraView::LEFT:          return "LEFT";
+        case CameraView::RIGHT:         return "RIGHT";
+        default:                        return "UNDEFINED";
+        }
+    }
+
+    std::string ViewportResizeStateToString(const ViewportResizeState& viewportResizeState) {
+        switch (viewportResizeState) {
+        case ViewportResizeState::IDLE:                             return "IDLE";
+        case ViewportResizeState::RESIZING_HORIZONTAL:              return "RESIZING_HORIZONTAL";
+        case ViewportResizeState::RESIZING_VERTICAL:                return "RESIZING_VERTICAL";
+        case ViewportResizeState::RESIZING_HORIZONTAL_VERTICAL:     return "RESIZING_HORIZONTAL_VERTICAL";
+        default:                                                    return "UNDEFINED";
         }
     }
 }

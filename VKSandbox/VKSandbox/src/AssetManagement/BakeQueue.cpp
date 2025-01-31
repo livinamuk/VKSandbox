@@ -3,6 +3,7 @@
 #include "../API/OpenGL/GL_backend.h"
 #include "../API/Vulkan/VK_backend.h"
 #include "../BackEnd/BackEnd.h"
+#include <mutex>
 
 namespace BakeQueue {
 

@@ -58,8 +58,8 @@ namespace BackEnd {
         Audio::Init();
         Input::Init(BackEnd::GetWindowPointer());
         Gizmo::Init();
-        Editor::Init();
         ViewportManager::Init();
+        Editor::Init();
 
         glfwShowWindow(static_cast<GLFWwindow*>(BackEnd::GetWindowPointer()));
         return true;
@@ -117,6 +117,7 @@ namespace BackEnd {
         if (Input::KeyPressed(HELL_KEY_H)) {
             Renderer::HotloadShaders();
         }
+        ViewportManager::UpdateMouseHoverStates();
     }
 
     void CleanUp() {
@@ -134,6 +135,10 @@ namespace BackEnd {
 
     const API GetAPI() {
         return g_api;
+    }
+
+    void SetCursor(int cursor) {
+        GLFWIntegration::SetCursor(cursor);
     }
 
     // Window

@@ -2,8 +2,8 @@
 #include "HellEnums.h"
 #include "HellTypes.h"
 #include <vector>
-#include "../Player/Player.h"
-#include "../Types/Camera.h"
+#include "Camera/Camera.h"
+#include "Player/Player.h"
 
 namespace Game {
     void Create();

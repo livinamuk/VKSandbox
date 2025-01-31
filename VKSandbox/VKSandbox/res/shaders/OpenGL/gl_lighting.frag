@@ -1,5 +1,14 @@
 #version 460 core
-#extension GL_ARB_bindless_texture : enable
+
+#ifndef ENABLE_BINDLESS
+    #define ENABLE_BINDLESS 1
+#endif
+#if ENABLE_BINDLESS == 1
+    #extension GL_ARB_bindless_texture : enable
+#else
+    // Bind regular textures    
+#endif
+
 #include "../common/lighting.glsl"
 #include "../common/post_processing.glsl"
 
@@ -24,9 +33,15 @@ readonly restrict layout(std430, binding = 0) buffer textureSamplersBuffer {
 };
 
 void main() {
+
+#if ENABLE_BINDLESS == 1
     vec4 baseColor = texture(sampler2D(textureSamplers[BaseColorTextureIndex]), TexCoord);
     vec3 normalMap = texture(sampler2D(textureSamplers[NormalTextureIndex]), TexCoord).rgb;   
     vec3 rma = texture(sampler2D(textureSamplers[RMATextureIndex]), TexCoord).rgb;  
+#else
+    // Code path that avoids bindless features
+#endif
+
 	baseColor.rgb = pow(baseColor.rgb, vec3(2.2));
 
 	mat3 tbn = mat3(Tangent, BiTangent, Normal);
@@ -42,7 +57,7 @@ void main() {
     lightPosition = vec3(-3.5, 2, 1);
     lightStrength = 1;
     lightRadius = 15;
-		
+    		
     vec3 directLighting = GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal, WorldPos.xyz, baseColor.rgb, roughness, metallic, ViewPos);
 
     float ambientIntensity = 0.05;

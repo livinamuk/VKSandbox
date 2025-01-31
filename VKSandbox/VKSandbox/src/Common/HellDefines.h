@@ -1,7 +1,7 @@
 #pragma once
 
 #define NEAR_PLANE   0.01f
-#define FAR_PLANE  250.00f
+#define FAR_PLANE  500.00f
 
 #define ORANGE        glm::vec4(1.00f, 0.65f, 0.00f, 1.0f)
 #define BLACK         glm::vec4(0.00f, 0.00f, 0.00f, 1.0f)
@@ -27,3 +27,11 @@
 
 // System audio
 #define AUDIO_SELECT "UI_Select.wav"
+
+// Cursors
+#define HELL_CURSOR_ARROW           0x00036001
+#define HELL_CURSOR_IBEAM           0x00036002
+#define HELL_CURSOR_CROSSHAIR       0x00036003
+#define HELL_CURSOR_HAND            0x00036004
+#define HELL_CURSOR_HRESIZE         0x00036005
+#define HELL_CURSOR_VRESIZE         0x00036006

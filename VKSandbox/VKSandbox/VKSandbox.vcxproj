@@ -10,13 +10,132 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{7B450427-C720-4B08-B545-47EC61219762}</ProjectGuid>
+    <RootNamespace>VkSandbox</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>VkSandbox</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)\$(ProjectName)\Build\Debug\</OutDir>
+    <IntDir>$(SolutionDir)\$(ProjectName)\Build\Intermediate\Debug\</IntDir>
+    <CopyLocalDeploymentContent>false</CopyLocalDeploymentContent>
+    <TargetName>Unloved</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)\$(ProjectName)\Build\Release\</OutDir>
+    <IntDir>$(SolutionDir)\$(ProjectName)\Build\Intermediate\Release\</IntDir>
+    <CopyLocalDeploymentContent>false</CopyLocalDeploymentContent>
+    <TargetName>VkSandbox</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>vendor\assimp\lib;vendor\GLFW\lib\Release;vendor\compressonator\lib;vendor\fmod\lib;vendor\Vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;fmod_vc.lib;assimp-vc143-mt.lib;Compressonator_MD_DLL.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXTask_static_64.lib;PhysXPvdSDK_static_64.lib;PVDRuntime_64.lib;PhysXCharacterKinematic_static_64.lib;vulkan-1.lib;shaderc_combinedd.lib;liblz4_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)vendor\dll\fmod.dll" "$(TargetDir)fmod.dll"
+copy /Y "$(ProjectDir)vendor\dll\assimp-vc143-mt.dll" "$(TargetDir)assimp-vc143-mt.dll"
+copy /Y "$(ProjectDir)vendor\dll\fmod.dll" "$(TargetDir)fmod.dll"
+copy /Y "$(ProjectDir)vendor\dll\Compressonator_MD_DLL.dll" "$(TargetDir)Compressonator_MD_DLL.dll"
+xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r
+
+copy /Y "$(ProjectDir)vendor\dll_debug\PhysX_64.dll" "$(TargetDir)PhysX_64.dll"
+copy /Y "$(ProjectDir)vendor\dll_debug\PhysXCommon_64.dll" "$(TargetDir)PhysXCommon_64.dll"
+copy /Y "$(ProjectDir)vendor\dll_debug\PhysXCooking_64.dll" "$(TargetDir)PhysXCooking_64.dll"
+copy /Y "$(ProjectDir)vendor\dll_debug\PhysXFoundation_64.dll" "$(TargetDir)PhysXFoundation_64.dll"
+copy /Y "$(ProjectDir)vendor\dll_debug\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.dll"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;TRACY_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>src;vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <OptimizeReferences>false</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>vendor\assimp\lib;vendor\GLFW\lib\Release;vendor\compressonator\lib;vendor\fmod\lib;vendor\Vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;Compressonator_MD.lib;CMP_Framework_MD.lib;assimp-vc143-mt.lib;fmod_vc.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)vendor\DLLs\fmod.dll" "$(TargetDir)fmod.dll"
+copy /Y "$(ProjectDir)vendor\DLLs\assimp-vc143-mt.dll" "$(TargetDir)assimp-vc143-mt.dll"
+xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\API\OpenGL\GL_backend.cpp" />
     <ClCompile Include="src\API\OpenGL\GL_util.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer_util.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_DebugPass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_EditorPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_GeometryPass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_HairPass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_LoadingScreen.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_SkyboxPass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_UIPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_cubemapView.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_framebuffer.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_shader.cpp" />
@@ -43,6 +162,10 @@
     <ClCompile Include="src\AssetManagement\BakeQueue.cpp" />
     <ClCompile Include="src\Core\Scene.cpp" />
     <ClCompile Include="src\Editor\Editor_debug.cpp" />
+    <ClCompile Include="src\Editor\Editor_camera.cpp" />
+    <ClCompile Include="src\Editor\Editor_input.cpp" />
+    <ClCompile Include="src\Editor\Editor_mouseRays.cpp" />
+    <ClCompile Include="src\Editor\Editor_ui.cpp" />
     <ClCompile Include="src\Player\Player.cpp" />
     <ClCompile Include="src\Core\Debug.cpp" />
     <ClCompile Include="src\Editor\Editor.cpp" />
@@ -55,7 +178,7 @@
     <ClCompile Include="src\Player\Player_ui.cpp" />
     <ClCompile Include="src\Renderer\RenderDataManager.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
-    <ClCompile Include="src\Types\Camera.cpp" />
+    <ClCompile Include="src\Camera\Camera.cpp" />
     <ClCompile Include="src\Types\GameObject.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -151,7 +274,7 @@
     <ClInclude Include="src\Renderer\Renderer.h" />
     <ClInclude Include="src\Renderer\Types\Mesh.hpp" />
     <ClInclude Include="src\Timer.hpp" />
-    <ClInclude Include="src\Types\Camera.h" />
+    <ClInclude Include="src\Camera\Camera.h" />
     <ClInclude Include="src\Types\GameObject.h" />
     <ClInclude Include="src\Hardcoded.hpp" />
     <ClInclude Include="src\AssetManagement\AssetManager.h" />
@@ -189,107 +312,6 @@
     <ClInclude Include="vendor\VkBootstrap\VkBootstrap.h" />
     <ClInclude Include="vendor\VkBootstrap\VkBootstrapDispatch.h" />
   </ItemGroup>
-  <PropertyGroup Label="Globals">
-    <VCProjectVersion>16.0</VCProjectVersion>
-    <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{7b450427-c720-4b08-b545-47ec61219762}</ProjectGuid>
-    <RootNamespace>grafikaD2</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>VKSandbox</ProjectName>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)\$(ProjectName)\Build\Release\</OutDir>
-    <IntDir>$(SolutionDir)\$(ProjectName)\Build\Intermediate\Release\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)\$(ProjectName)\Build\Debug\</OutDir>
-    <IntDir>$(SolutionDir)\$(ProjectName)\Build\Intermediate\Debug\</IntDir>
-  </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\fmod\include;vendor\compressonator\include;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;vendor\VkBootstrap;src\Util;src\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <Optimization>MaxSpeed</Optimization>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>vendor\GLFW\lib\Release;vendor\fmod\lib;vendor\Vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;fmod_vc.lib;assimp-vc143-mt.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
-    </Link>
-    <PostBuildEvent>
-      <Command>copy /Y "$(ProjectDir)vendor\DLLs\fmod.dll" "$(TargetDir)fmod.dll"
-copy /Y "$(ProjectDir)vendor\DLLs\assimp-vc143-mt.dll" "$(TargetDir)assimp-vc143-mt.dll"
-xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <ExceptionHandling>Async</ExceptionHandling>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>vendor\assimp\lib;vendor\GLFW\lib\Release;vendor\compressonator\lib;vendor\fmod\lib;vendor\Vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;Compressonator_MD.lib;CMP_Framework_MD.lib;assimp-vc143-mt.lib;fmod_vc.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-    </Link>
-    <PostBuildEvent>
-      <Command>copy /Y "$(ProjectDir)vendor\DLLs\fmod.dll" "$(TargetDir)fmod.dll"
-copy /Y "$(ProjectDir)vendor\DLLs\assimp-vc143-mt.dll" "$(TargetDir)assimp-vc143-mt.dll"
-xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
