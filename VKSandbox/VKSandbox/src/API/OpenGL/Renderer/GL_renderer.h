@@ -6,6 +6,18 @@
 #include "../Types/GL_frameBuffer.h"
 #include "../Types/GL_shader.h"
 
+struct OpenGLRasterizerState {
+    GLboolean depthTestEnabled;
+    GLboolean blendEnable;
+    GLboolean cullfaceEnable;
+    GLboolean stencilEnable;
+    GLboolean depthMask;
+    GLfloat pointSize;
+    GLenum blendFuncSrcfactor;
+    GLenum blendFuncDstfactor;
+    GLenum depthFunc;
+};
+
 namespace OpenGLRenderer {
     void Init();
     void InitMain();
@@ -15,6 +27,7 @@ namespace OpenGLRenderer {
     // Render passes
     void SkyBoxPass();
     void GeometryPass();
+    void LightingPass();
     void DebugPass();
     void HairPass();
     void RenderHairLayer(const DrawCommands& drawCommands, int peelCount);
@@ -41,7 +54,13 @@ namespace OpenGLRenderer {
     OpenGLFrameBuffer* GetFrameBuffer(const std::string& name);
 
     // Framebuffers
-    CubemapView* GetCubemapView(const std::string& name);
+    OpenGLCubemapView* GetCubemapView(const std::string& name);
+
+    // Rasterizer State
+    void InitRasterizerStates();
+    OpenGLRasterizerState* CreateRasterizerState(const std::string& name);
+    OpenGLRasterizerState* GetRasterizerState(const std::string& name);
+    void SetRasterizerState(const std::string& name);
 
     // Multidraw Indirect
     void MultiDrawIndirect(const std::vector<DrawIndexedIndirectCommand>& commands);

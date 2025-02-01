@@ -1,0 +1,106 @@
+#version 430 core
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+#include "../common/lighting.glsl"
+#include "../common/post_processing.glsl"
+#include "../common/types.glsl"
+#include "../common/util.glsl"
+
+layout(binding = 0) uniform sampler2D BaseColorTexture;
+layout(binding = 1) uniform sampler2D NormalTexture;
+layout(binding = 2) uniform sampler2D RMATexture;
+layout(binding = 3) uniform sampler2D DepthTexture;
+layout(binding = 4) uniform sampler2D WorldPositionTexture;
+layout(binding = 5) uniform sampler2D MousePickTexture;
+
+layout(rgba16f, binding = 0) uniform image2D outputImage;
+
+readonly restrict layout(std430, binding = 1) buffer rendererDataBuffer {
+	RendererData rendererData;
+};
+
+readonly restrict layout(std430, binding = 2) buffer viewportDataBuffer {
+	ViewportData viewportData[];
+};
+
+void main() {
+	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);   
+    ivec2 outputImageSize = imageSize(outputImage);
+    vec2 uv_screenspace = vec2(pixelCoords) / vec2(outputImageSize);
+
+    // Don't process out of bounds pixels
+    if (pixelCoords.x >= outputImageSize.x || pixelCoords.y >= outputImageSize.y) {
+        return;
+    }    
+    
+    vec4 WOLRD_POS_FROM_TEXTURE = texture(WorldPositionTexture, uv_screenspace);
+
+    // Inputs
+    vec4 baseColor = texture(BaseColorTexture, uv_screenspace);
+    vec4 normal = texture(NormalTexture, uv_screenspace);
+    vec4 rma = texture(RMATexture, uv_screenspace);
+    baseColor.rgb = pow(baseColor.rgb, vec3(2.2));
+
+    float roughness = rma.r;
+    float metallic = rma.g;
+    
+    vec2 renderTargetSize = vec2(rendererData.gBufferWidth, rendererData.gBufferHeight);
+    int splitScreenMode = rendererData.splitscreenMode;
+    int viewportIndex = GetViewportIndex(pixelCoords, renderTargetSize, splitScreenMode);
+
+    float clipSpaceXMin = viewportData[viewportIndex].clipSpaceXMin;
+    float clipSpaceXMax = viewportData[viewportIndex].clipSpaceXMax;
+    float clipSpaceYMin = viewportData[viewportIndex].clipSpaceYMin;
+    float clipSpaceYMax = viewportData[viewportIndex].clipSpaceYMax;
+    mat4 inverseProjection = viewportData[viewportIndex].inverseProjection;
+    mat4 inverseView = viewportData[viewportIndex].inverseView;
+    vec3 viewPos = inverseView[3].xyz;
+
+    // Position from depth reconstruction
+    float z = texture(DepthTexture, uv_screenspace).r;
+    vec2 clipSpaceTexCoord = uv_screenspace;
+	clipSpaceTexCoord.x = (clipSpaceTexCoord.x - clipSpaceXMin) / (clipSpaceXMax - clipSpaceXMin);
+	clipSpaceTexCoord.y = (clipSpaceTexCoord.y - clipSpaceYMin) / (clipSpaceYMax - clipSpaceYMin);
+	vec4 clipSpacePosition = vec4(clipSpaceTexCoord * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = inverseProjection * clipSpacePosition;
+    viewSpacePosition /= viewSpacePosition.w;
+    vec4 worldSpacePosition = inverseView * viewSpacePosition;
+
+    worldSpacePosition.rgb = WOLRD_POS_FROM_TEXTURE.rgb;
+
+    vec3 lightPosition = (vec3(7, 0, 10) * 0.5) + vec3(0, 0.125, 1);
+    vec3 lightColor = vec3(1, 0.98, 0.94);
+    float lightRadius = 5;
+    float lightStrength = 2;
+        
+    lightPosition = vec3(-3.5, 2, 1);
+    lightStrength = 1;
+    lightRadius = 15;
+    		  
+
+    vec3 directLighting = GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal.xyz, worldSpacePosition.xyz, baseColor.rgb, roughness, metallic, viewPos);
+
+    float ambientIntensity = 0.05;
+    vec3 ambientColor = baseColor.rgb * lightColor;
+    vec3 ambientLighting = ambientColor * ambientIntensity;
+
+    float finalAlpha = baseColor.a;
+    
+    vec3 finalColor = directLighting.rgb + ambientLighting;
+
+    // Tone mapping
+	finalColor = mix(finalColor, Tonemap_ACES(finalColor), 1.0);
+	finalColor = pow(finalColor, vec3(1.0/2.2));
+	finalColor = mix(finalColor, Tonemap_ACES(finalColor), 0.235);
+    
+    finalColor.rgb = finalColor.rgb * finalAlpha;    
+    vec4 outputColor = vec4(finalColor, finalAlpha);
+    
+    imageStore(outputImage, pixelCoords, outputColor);
+
+    
+  //.  imageStore(outputImage, pixelCoords, vec4(normal.rgb * 0.5 + 0.5, 1.0));
+   // imageStore(outputImage, pixelCoords, vec4(normal.rgb, 1.0));
+
+//   imageStore(outputImage, pixelCoords, vec4(rma.rgb, 1.0));
+}

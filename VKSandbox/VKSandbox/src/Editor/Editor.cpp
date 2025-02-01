@@ -13,6 +13,7 @@ namespace Editor {
 
     #define ORTHO_CAMERA_DISTANCE_FROM_ORIGIN 250.0f // Rethink this
 
+    EditorMesh g_editorMesh;
     int g_activeViewportIndex = 3;
     bool g_isOpen = false;
     bool g_isOrthographic[4];
@@ -41,6 +42,9 @@ namespace Editor {
     }
 
     void Init() {        
+
+        g_editorMesh.Init(glm::vec3(0.5f, 1.45f, 2.53));
+        g_editorMesh.RecalculateMesh();
 
         // Top left
         g_cameras[0].SetPosition(glm::vec3(0, ORTHO_CAMERA_DISTANCE_FROM_ORIGIN, 0.0f));
@@ -243,5 +247,9 @@ namespace Editor {
 
     float GetSplitY() {
         return g_splitY;
+    }
+
+    EditorMesh& GetEditorMesh() {
+        return g_editorMesh;
     }
 }

@@ -17,7 +17,7 @@ namespace OpenGLRenderer {
         if (!Editor::IsOpen()) return;
 
         gBuffer->Bind();
-        gBuffer->DrawBuffers({ "Color", "MousePick" });
+        gBuffer->DrawBuffers({ "FinalLighting", "MousePick" });
 
         for (int i = 0; i < 4; i++) {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);

@@ -1,5 +1,6 @@
 #include "RenderDataManager.h"
 #include "HellDefines.h"
+#include "../Camera/Frustum.h"
 #include "../Core/Game.h"
 #include "../Core/Scene.h"
 #include "../Config/Config.h"
@@ -44,6 +45,58 @@ namespace RenderDataManager {
             g_viewportData[i].projectionView = g_viewportData[i].projection * g_viewportData[i].view;
             g_viewportData[i].inverseProjectionView = glm::inverse(g_viewportData[i].projectionView);
             g_viewportData[i].skyboxProjectionView = viewport->GetPerpsectiveMatrix() * g_viewportData[i].view;
+
+            // Clipspace range
+            if (Game::GetSplitscreenMode() == SplitscreenMode::FULLSCREEN) {
+                g_viewportData[i].clipSpaceXMin = 0.0f;
+                g_viewportData[i].clipSpaceXMax = 1.0f;
+                g_viewportData[i].clipSpaceYMin = 0.0f;
+                g_viewportData[i].clipSpaceYMax = 1.0f;
+            }
+            else if (Game::GetSplitscreenMode() == SplitscreenMode::TWO_PLAYER) {
+                if (i == 0) {
+                    g_viewportData[i].clipSpaceXMin = 0.0f;
+                    g_viewportData[i].clipSpaceXMax = 1.0f;
+                    g_viewportData[i].clipSpaceYMin = 0.5f;
+                    g_viewportData[i].clipSpaceYMax = 1.0f;
+                }
+                if (i == 1) {
+                    g_viewportData[i].clipSpaceXMin = 0.0f;
+                    g_viewportData[i].clipSpaceXMax = 1.0f;
+                    g_viewportData[i].clipSpaceYMin = 0.0f;
+                    g_viewportData[i].clipSpaceYMax = 0.5f;
+                }
+            }
+            else if (Game::GetSplitscreenMode() == SplitscreenMode::FOUR_PLAYER) {
+                if (i == 0) {
+                    g_viewportData[i].clipSpaceXMin = 0.0f;
+                    g_viewportData[i].clipSpaceXMax = 0.5f;
+                    g_viewportData[i].clipSpaceYMin = 0.5f;
+                    g_viewportData[i].clipSpaceYMax = 1.0f;
+                }
+                if (i == 1) {
+                    g_viewportData[i].clipSpaceXMin = 0.5f;
+                    g_viewportData[i].clipSpaceXMax = 1.0f;
+                    g_viewportData[i].clipSpaceYMin = 0.5f;
+                    g_viewportData[i].clipSpaceYMax = 1.0f;
+                }
+                if (i == 2) {
+                    g_viewportData[i].clipSpaceXMin = 0.0f;
+                    g_viewportData[i].clipSpaceXMax = 0.5f;
+                    g_viewportData[i].clipSpaceYMin = 0.0f;
+                    g_viewportData[i].clipSpaceYMax = 0.5f;
+                }
+                if (i == 3) {
+                    g_viewportData[i].clipSpaceXMin = 0.5f;
+                    g_viewportData[i].clipSpaceXMax = 1.0f;
+                    g_viewportData[i].clipSpaceYMin = 0.0f;
+                    g_viewportData[i].clipSpaceYMax = 0.5f;
+                }
+            }
+
+
+
+
         }
     }
 
@@ -98,13 +151,37 @@ namespace RenderDataManager {
     }
 
     void CreateDrawCommands(DrawCommands& drawCommands, std::vector<RenderItem>& renderItems) {
+        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
+        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
+        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
+        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
+        for (RenderItem& renderItem : renderItems) {
+            Util::UpdateRenderItemAABB(renderItem);
+        }
+
+        // Put this somewhere better
+        // Put this somewhere better
+        // Put this somewhere better
+        // Put this somewhere better
+        // Put this somewhere better
+        // Put this somewhere better
+        Frustum frustum;    
+
         // Clear any commands from last frame
         for (int i = 0; i < 4; i++) {
-            drawCommands.perPlayer[i].clear();
+            drawCommands.perViewport[i].clear();
         }
-        // Iterate the local players and build the draw commands
-        for (int i = 0; i < Game::GetLocalPlayerCount(); i++) {
-            Player* player = Game::GetLocalPlayerByIndex(i);
+
+        // Iterate the local players and build the draw commands        SHOULD BE VIEWPORT COUNT!!!!!!!!!!!!!
+        // Iterate the local players and build the draw commands        SHOULD BE VIEWPORT COUNT!!!!!!!!!!!!!
+        // Iterate the local players and build the draw commands        SHOULD BE VIEWPORT COUNT!!!!!!!!!!!!!
+        // Iterate the local players and build the draw commands        SHOULD BE VIEWPORT COUNT!!!!!!!!!!!!!
+        for (int i = 0; i < 4; i++) {
+            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+            if (!viewport->IsVisible()) continue;
+
+            glm::mat4 projectionView = g_viewportData[i].projectionView;
+            frustum.Update(projectionView);
 
             // Store the instance offset for this player
             int instanceStart = g_instanceData.size();
@@ -114,11 +191,16 @@ namespace RenderDataManager {
 
             // Append new render items to the global instance data
             for (const RenderItem& renderItem : renderItems) {
-                g_instanceData.push_back(renderItem);
+                // Frustum cull it
+                AABB aabb(renderItem.aabbMin, renderItem.aabbMax);
+                if (frustum.IntersectsAABB(aabb)) {
+                    g_instanceData.push_back(renderItem);
+                }
             }
+
             // Create indirect draw commands using the stored offset
             std::span<RenderItem> instanceView(g_instanceData.begin() + instanceStart, g_instanceData.end());
-            CreateMultiDrawIndirectCommands(drawCommands.perPlayer[i], instanceView, i, instanceStart);
+            CreateMultiDrawIndirectCommands(drawCommands.perViewport[i], instanceView, i, instanceStart);
         }
     }
 

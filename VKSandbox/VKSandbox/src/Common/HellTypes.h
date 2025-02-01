@@ -25,6 +25,8 @@ struct BlitRect {
 struct RenderItem {
     glm::mat4 modelMatrix;
     glm::mat4 inverseModelMatrix;
+    glm::vec4 aabbMin;
+    glm::vec4 aabbMax;
     int meshIndex;
     int baseColorTextureIndex;
     int normalMapTextureIndex;
@@ -159,6 +161,10 @@ struct ViewportData {
     glm::mat4 projectionView;
     glm::mat4 inverseProjectionView;
     glm::mat4 skyboxProjectionView;
+    float clipSpaceXMin;
+    float clipSpaceXMax;
+    float clipSpaceYMin;
+    float clipSpaceYMax;
 };
 
 struct RendererData {
@@ -187,7 +193,7 @@ struct DrawIndexedIndirectCommand {
 };
 
 struct DrawCommands {
-    std::vector<DrawIndexedIndirectCommand> perPlayer[4]; // One for each splitscreen player
+    std::vector<DrawIndexedIndirectCommand> perViewport[4]; // One for each splitscreen player
 };
 
 struct DrawCommandsSet {

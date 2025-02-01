@@ -2,6 +2,7 @@
 #include "HellTypes.h"
 #include "Camera/Camera.h"
 #include "Viewport/Viewport.h"
+#include "Types/EditorMesh.h"
 #include <string>
 
 namespace Editor {
@@ -43,4 +44,6 @@ namespace Editor {
     EditorObjectType GetSelectedObjectType();
     EditorObjectType GetHoveredObjectType();
     ViewportResizeState GetViewportResizeState();
+
+    EditorMesh& GetEditorMesh();
 }

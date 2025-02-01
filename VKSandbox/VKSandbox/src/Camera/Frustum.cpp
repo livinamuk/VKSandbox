@@ -1,8 +1,7 @@
 #include "Frustum.h"
-#include "../Util.hpp"
+#include "Util.h"
 
 void Frustum::Update(const glm::mat4& projectionView) {
-
     // Left clipping plane
     m_planes[0].normal.x = projectionView[0][3] + projectionView[0][0];
     m_planes[0].normal.y = projectionView[1][3] + projectionView[1][0];
@@ -47,23 +46,6 @@ void Frustum::Update(const glm::mat4& projectionView) {
     }
 }
 
-void Frustum::UpdateFromTile(const glm::mat4& viewMatrix, float fov, float nearPlane, float farPlane, int x1, int y1, int x2, int y2, int viewportWidth, int viewportHeight) {
-    float aspectRatio = (float)viewportWidth / (float)viewportHeight;
-    float nearHeight = 2.0f * tan(fov / 2.0f) * nearPlane;
-    float nearWidth = nearHeight * aspectRatio;
-    float leftNDC = static_cast<float>(x1) / (float)viewportWidth;
-    float rightNDC = static_cast<float>(x2) / (float)viewportWidth;
-    float bottomNDC = static_cast<float>(y1) / (float)viewportHeight;
-    float topNDC = static_cast<float>(y2) / (float)viewportHeight;
-    float left = (leftNDC - 0.5f) * nearWidth;
-    float right = (rightNDC - 0.5f) * nearWidth;
-    float bottom = (bottomNDC - 0.5f) * nearHeight;
-    float top = (topNDC - 0.5f) * nearHeight;
-    glm::mat4 tileProj = glm::frustum(left, right, bottom, top, nearPlane, farPlane);
-    glm::mat4 viewProj = tileProj * viewMatrix;
-    Update(viewProj);
-}
-
 bool Frustum::IntersectsAABB(const AABB& aabb) {
     glm::vec3 aabbCorners[8] = {
         glm::vec3(aabb.boundsMin.x, aabb.boundsMin.y, aabb.boundsMin.z), // Near-bottom-left
@@ -90,7 +72,7 @@ bool Frustum::IntersectsAABB(const AABB& aabb) {
 }
 
 
-bool Frustum::IntersectsAABB(const RenderItem3D& renderItem) {
+bool Frustum::IntersectsAABB(const RenderItem& renderItem) {
     glm::vec3 aabbCorners[8] = {
         glm::vec3(renderItem.aabbMin.x, renderItem.aabbMin.y, renderItem.aabbMax.z), // Near-bottom-left
         glm::vec3(renderItem.aabbMax.x, renderItem.aabbMin.y, renderItem.aabbMin.z), // Near-bottom-right
@@ -129,7 +111,7 @@ bool Frustum::IntersectsAABBFast(const AABB& aabb) {
     return true;
 }
 
-bool Frustum::IntersectsAABBFast(const RenderItem3D& renderItem) {
+bool Frustum::IntersectsAABBFast(const RenderItem& renderItem) {
     for (int i = 0; i < 6; ++i) {
         glm::vec3 min_corner = glm::vec3(
             m_planes[i].normal.x > 0 ? renderItem.aabbMax.x : renderItem.aabbMin.x,
@@ -143,15 +125,15 @@ bool Frustum::IntersectsAABBFast(const RenderItem3D& renderItem) {
     return true;
 }
 
-bool Frustum::IntersectsSphere(const Sphere& sphere) {
-    for (int i = 0; i < 6; ++i) {
-        float distance = SignedDistance(sphere.origin, m_planes[i]);
-        if (distance + sphere.radius < 0) {
-            return false;
-        }
-    }
-    return true;
-}
+//bool Frustum::IntersectsSphere(const Sphere& sphere) {
+//    for (int i = 0; i < 6; ++i) {
+//        float distance = SignedDistance(sphere.origin, m_planes[i]);
+//        if (distance + sphere.radius < 0) {
+//            return false;
+//        }
+//    }
+//    return true;
+//}
 
 bool Frustum::IntersectsPoint(const glm::vec3 point) {
     bool insideFrustum = true;

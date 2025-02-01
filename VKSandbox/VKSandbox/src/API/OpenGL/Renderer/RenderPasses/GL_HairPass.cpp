@@ -20,8 +20,12 @@ namespace OpenGLRenderer {
         hairFrameBuffer->Bind();
         hairFrameBuffer->ClearAttachment("Composite", 0, 0, 0, 0);
         hairFrameBuffer->SetViewport();
-        glEnable(GL_CULL_FACE);
-        glDisable(GL_BLEND);
+
+
+        
+        
+        
+        
         glBindVertexArray(OpenGLBackEnd::GetVertexDataVAO());
 
         const DrawCommandsSet& drawInfoSet = RenderDataManager::GetDrawInfoSet();
@@ -35,8 +39,8 @@ namespace OpenGLRenderer {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, hairFrameBuffer->GetColorAttachmentHandleByName("Composite"));
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, gBuffer->GetColorAttachmentHandleByName("Color"));
-        glBindImageTexture(0, gBuffer->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
+        glBindTexture(GL_TEXTURE_2D, gBuffer->GetColorAttachmentHandleByName("FinalLighting"));
+        glBindImageTexture(0, gBuffer->GetColorAttachmentHandleByName("FinalLighting"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
         glDispatchCompute((gBuffer->GetWidth() + 7) / 8, (gBuffer->GetHeight() + 7) / 8, 1);
 
         // Cleanup
@@ -60,6 +64,7 @@ namespace OpenGLRenderer {
         hairFrameBuffer->Bind();
         hairFrameBuffer->ClearAttachment("ViewspaceDepthPrevious", 1.0f);
 
+
         for (int j = 0; j < peelCount; j++) {
 
             // Viewspace depth pass
@@ -67,18 +72,22 @@ namespace OpenGLRenderer {
                 Viewport* viewport = ViewportManager::GetViewportByIndex(i);
                 if (viewport->IsVisible()) {
                     OpenGLRendererUtil::SetViewport(*hairFrameBuffer, *viewport);
+
                     OpenGLRendererUtil::SetScissor(*hairFrameBuffer, *viewport);
+
                     OpenGLRendererUtil::BlitFrameBufferDepth(*gBuffer, *hairFrameBuffer, *viewport);
+
                     hairFrameBuffer->Bind();
                     hairFrameBuffer->ClearAttachment("ViewspaceDepth", 0.0f);
                     hairFrameBuffer->DrawBuffer("ViewspaceDepth");
-                    ;
+
                     depthPeelShader->Use();
 
-                    glDepthFunc(GL_LESS);
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, hairFrameBuffer->GetColorAttachmentHandleByName("ViewspaceDepthPrevious"));
-                    MultiDrawIndirect(drawCommands.perPlayer[i]);
+
+                    SetRasterizerState("HairViewspaceDepth");
+                    MultiDrawIndirect(drawCommands.perViewport[i]);
                 }
             }
             // Color pass
@@ -94,8 +103,9 @@ namespace OpenGLRenderer {
                     hairLightingShader->Use();
 
                     glBindTextureUnit(0, hairFrameBuffer->GetColorAttachmentHandleByName("ViewspaceDepth"));
-                    glDepthFunc(GL_EQUAL);
-                    MultiDrawIndirect(drawCommands.perPlayer[i]);
+
+                    SetRasterizerState("HairLighting");
+                    MultiDrawIndirect(drawCommands.perViewport[i]);
                 }
             }
             // Composite

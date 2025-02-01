@@ -7,6 +7,10 @@ struct ViewportData {
     mat4 projectionView;
     mat4 inverseProjectionView;
     mat4 skyboxProjectionView;
+    float clipSpaceXMin;
+    float clipSpaceXMax;
+    float clipSpaceYMin;
+    float clipSpaceYMax;
 };
 
 struct RendererData {
@@ -22,6 +26,8 @@ struct RendererData {
 struct RenderItem {
     mat4 modelMatrix;
     mat4 inverseModelMatrix;
+    vec4 aabbMin;
+    vec4 aabbMax;
     int meshIndex;
     int baseColorTextureIndex;
     int normalMapTextureIndex;

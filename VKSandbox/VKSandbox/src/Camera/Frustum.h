@@ -13,12 +13,11 @@ struct Frustum {
 
 public:
     void Update(const glm::mat4& projectionView);
-    void UpdateFromTile(const glm::mat4& viewMatrix, float fov, float nearPlane, float farPlane, int x1, int y1, int x2, int y2, int viewportWidth, int viewportHeight);
     bool IntersectsAABB(const AABB& aabb);
-    bool IntersectsAABB(const RenderItem3D& renderItem);
+    bool IntersectsAABB(const RenderItem& renderItem);
     bool IntersectsAABBFast(const AABB& aabb);
-    bool IntersectsAABBFast(const RenderItem3D& renderItem);
-    bool IntersectsSphere(const Sphere& sphere);
+    bool IntersectsAABBFast(const RenderItem& renderItem);
+    //bool IntersectsSphere(const Sphere& sphere);
     bool IntersectsPoint(const glm::vec3 point);
     std::vector<glm::vec3> GetFrustumCorners();
 

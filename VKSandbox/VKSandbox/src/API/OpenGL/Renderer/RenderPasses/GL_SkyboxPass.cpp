@@ -16,11 +16,11 @@ namespace OpenGLRenderer {
         Mesh* mesh = AssetManager::GetCubeMesh();
         if (!mesh) return;
 
-        CubemapView* skyboxCubemapView = GetCubemapView("SkyboxNightSky");
+        OpenGLCubemapView* skyboxCubemapView = GetCubemapView("SkyboxNightSky");
         if (!skyboxCubemapView) return;
 
         gBuffer->Bind();
-        gBuffer->DrawBuffer("Color");       
+        gBuffer->DrawBuffer("BaseColor");       
         shader->Use();
         
         glEnable(GL_DEPTH_TEST);

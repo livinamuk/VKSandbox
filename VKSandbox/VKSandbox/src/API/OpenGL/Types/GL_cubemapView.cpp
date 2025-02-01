@@ -1,11 +1,11 @@
 #include "GL_cubemapView.h"
 #include <iostream>
 
-CubemapView::CubemapView(const std::vector<GLuint>& tex2D) {
+OpenGLCubemapView::OpenGLCubemapView(const std::vector<GLuint>& tex2D) {
     CreateCubemap(tex2D);
 }
 
-void CubemapView::CreateCubemap(const std::vector<GLuint>& tex2D) {
+void OpenGLCubemapView::CreateCubemap(const std::vector<GLuint>& tex2D) {
     if (tex2D.size() != 6) {
         std::cout << "Cubemap requires exactly 6 textures.\n";
         return;
@@ -45,6 +45,6 @@ void CubemapView::CreateCubemap(const std::vector<GLuint>& tex2D) {
 }
 
 
-GLuint CubemapView::GetHandle() const {
+GLuint OpenGLCubemapView::GetHandle() const {
     return m_handle;
 }

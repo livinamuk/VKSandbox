@@ -133,7 +133,9 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_EditorPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_GeometryPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_HairPass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_LightingPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_LoadingScreen.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\GL_rasterizerStates.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_SkyboxPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_UIPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_cubemapView.cpp" />
@@ -157,6 +159,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\API\Vulkan\vk_util.cpp" />
     <ClCompile Include="src\BackEnd\BackEnd.cpp" />
     <ClCompile Include="src\BackEnd\GLFWIntegration.cpp" />
+    <ClCompile Include="src\Camera\Frustum.cpp" />
     <ClCompile Include="src\Config\Config.cpp" />
     <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\AssetManagement\BakeQueue.cpp" />
@@ -166,6 +169,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\Editor\Editor_input.cpp" />
     <ClCompile Include="src\Editor\Editor_mouseRays.cpp" />
     <ClCompile Include="src\Editor\Editor_ui.cpp" />
+    <ClCompile Include="src\Editor\Types\EditorMesh.cpp" />
     <ClCompile Include="src\Player\Player.cpp" />
     <ClCompile Include="src\Core\Debug.cpp" />
     <ClCompile Include="src\Editor\Editor.cpp" />
@@ -185,6 +189,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\AssetManagement\AssetManager.cpp" />
     <ClCompile Include="src\Util\Util_file.cpp" />
     <ClCompile Include="src\Util\Util_raycasting.cpp" />
+    <ClCompile Include="src\Util\Util_rendering.cpp" />
     <ClCompile Include="src\Util\Util_text.cpp" />
     <ClCompile Include="src\Viewport\Viewport.cpp" />
     <ClCompile Include="src\UI\FontSpriteSheet.cpp" />
@@ -205,6 +210,8 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <None Include="res\shaders\common\constants.glsl" />
     <None Include="res\shaders\common\types.glsl" />
     <None Include="res\shaders\common\util.glsl" />
+    <None Include="res\shaders\OpenGL\gl_editor_mesh.frag" />
+    <None Include="res\shaders\OpenGL\gl_editor_mesh.vert" />
     <None Include="res\shaders\OpenGL\gl_gizmo.frag" />
     <None Include="res\shaders\OpenGL\gl_gizmo.vert" />
     <None Include="res\shaders\OpenGL\gl_hair_final_composite.comp" />
@@ -213,6 +220,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <None Include="res\shaders\OpenGL\gl_hair_layer_composite.comp" />
     <None Include="res\shaders\OpenGL\gl_hair_lighting.frag" />
     <None Include="res\shaders\OpenGL\gl_hair_lighting.vert" />
+    <None Include="res\shaders\OpenGL\gl_lighting.comp" />
     <None Include="res\shaders\OpenGL\gl_skybox.frag" />
     <None Include="res\shaders\OpenGL\gl_skybox.vert" />
     <None Include="res\shaders\OpenGL\gl_solid_color.frag" />
@@ -258,10 +266,12 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClInclude Include="src\API\Vulkan\vk_util.h" />
     <ClInclude Include="src\BackEnd\BackEnd.h" />
     <ClInclude Include="src\BackEnd\GLFWIntegration.h" />
+    <ClInclude Include="src\Camera\Frustum.h" />
     <ClInclude Include="src\Common\HellDefines.h" />
     <ClInclude Include="src\Config\Config.h" />
     <ClInclude Include="src\Core\Audio.h" />
     <ClInclude Include="src\AssetManagement\BakeQueue.h" />
+    <ClInclude Include="src\Editor\Types\EditorMesh.h" />
     <ClInclude Include="src\Player\Player.h" />
     <ClInclude Include="src\Core\Debug.h" />
     <ClInclude Include="src\Editor\Editor.h" />

@@ -1,4 +1,4 @@
-#include "GL_renderer.h"
+﻿#include "GL_renderer.h"
 #include "GL_renderer_util.h"
 #include "../GL_backend.h"
 #include "../GL_Util.h"
@@ -32,7 +32,8 @@ namespace OpenGLRenderer {
 
     std::unordered_map<std::string, OpenGLShader> g_shaders;
     std::unordered_map<std::string, OpenGLFrameBuffer> g_frameBuffers;
-    std::unordered_map<std::string, CubemapView> g_cubemapViews;
+    std::unordered_map<std::string, OpenGLCubemapView> g_cubemapViews;
+    std::unordered_map<std::string, OpenGLRasterizerState> g_rasterizerStates;
 
     struct SSBOs {
         SSBO samplers;
@@ -40,19 +41,23 @@ namespace OpenGLRenderer {
         SSBO rendererData;
         SSBO instanceData;
     } g_ssbos;
-    
+
     IndirectBuffer g_indirectBuffer;
 
     struct Cubemaps {
-        CubemapView g_skyboxView;
+        OpenGLCubemapView g_skyboxView;
     } g_cubemaps;
 
     void Init() {
         const Resolutions& resolutions = Config::GetResolutions();
 
         g_frameBuffers["GBuffer"] = OpenGLFrameBuffer("GBuffer", resolutions.gBuffer);
-        g_frameBuffers["GBuffer"].CreateAttachment("Color", GL_RGBA16F);
+        g_frameBuffers["GBuffer"].CreateAttachment("BaseColor", GL_RGBA8);
+        g_frameBuffers["GBuffer"].CreateAttachment("Normal", GL_RGBA16F);
+        g_frameBuffers["GBuffer"].CreateAttachment("RMA", GL_RGBA8);
         g_frameBuffers["GBuffer"].CreateAttachment("MousePick", GL_RG16UI, GL_NEAREST, GL_NEAREST);
+        g_frameBuffers["GBuffer"].CreateAttachment("FinalLighting", GL_RGBA16F);
+        g_frameBuffers["GBuffer"].CreateAttachment("WorldSpacePosition", GL_RGBA16F);
         g_frameBuffers["GBuffer"].CreateDepthAttachment(GL_DEPTH32F_STENCIL8);
 
         g_frameBuffers["Hair"] = OpenGLFrameBuffer("Hair", resolutions.hair);
@@ -68,7 +73,6 @@ namespace OpenGLRenderer {
         g_frameBuffers["UI"] = OpenGLFrameBuffer("UI", resolutions.ui);
         g_frameBuffers["UI"].CreateAttachment("Color", GL_RGBA8, GL_NEAREST, GL_NEAREST);
 
-
         int framebufferHandle = g_frameBuffers["GBuffer"].GetHandle();
         int attachmentSlot = g_frameBuffers["GBuffer"].GetColorAttachmentSlotByName("MousePick");
         OpenGLBackEnd::SetMousePickHandles(framebufferHandle, attachmentSlot);
@@ -83,12 +87,14 @@ namespace OpenGLRenderer {
         g_indirectBuffer.PreAllocate(sizeof(DrawIndexedIndirectCommand) * MAX_INDIRECT_DRAW_COMMAND_COUNT);
 
         // Load shaders
+        g_shaders["EditorMesh"] = OpenGLShader({ "gl_editor_mesh.vert", "gl_editor_mesh.frag" });
         g_shaders["Gizmo"] = OpenGLShader({ "gl_gizmo.vert", "gl_gizmo.frag" });
         g_shaders["HairDepthPeel"] = OpenGLShader({ "gl_hair_depth_peel.vert", "gl_hair_depth_peel.frag" });
         g_shaders["HairFinalComposite"] = OpenGLShader({ "gl_hair_final_composite.comp" });
         g_shaders["HairLayerComposite"] = OpenGLShader({ "gl_hair_layer_composite.comp" });
         g_shaders["HairLighting"] = OpenGLShader({ "gl_hair_lighting.vert", "gl_hair_lighting.frag" });
-        g_shaders["Lighting"] = OpenGLShader({ "gl_lighting.vert", "gl_lighting.frag" });
+        g_shaders["Lighting"] = OpenGLShader({ "gl_lighting.comp" });
+        g_shaders["GBuffer"] = OpenGLShader({ "gl_gBuffer.vert", "gl_gBuffer.frag" });
         g_shaders["SolidColor"] = OpenGLShader({ "gl_solid_color.vert", "gl_solid_color.frag" });
         g_shaders["Skybox"] = OpenGLShader({ "gl_skybox.vert", "gl_skybox.frag" });
         g_shaders["UI"] = OpenGLShader({ "gl_ui.vert", "gl_ui.frag" });
@@ -103,7 +109,8 @@ namespace OpenGLRenderer {
             AssetManager::GetTextureByName("NightSky_Front")->GetGLTexture().GetHandle(),
             AssetManager::GetTextureByName("NightSky_Back")->GetGLTexture().GetHandle()
         };
-        g_cubemapViews["SkyboxNightSky"] = CubemapView(textures);
+        g_cubemapViews["SkyboxNightSky"] = OpenGLCubemapView(textures);
+        InitRasterizerStates();
     }
 
     void UpdateSSBOS() {
@@ -143,25 +150,34 @@ namespace OpenGLRenderer {
 
         g_frameBuffers["GBuffer"].Bind();
         g_frameBuffers["GBuffer"].SetViewport();
-        g_frameBuffers["GBuffer"].ClearAttachment("Color", 0, 0, 0, 0);
+
+        // Write a framebuffer method to everything below in one go
+        // Write a framebuffer method to everything below in one go
+        // Write a framebuffer method to everything below in one go
+        // Write a framebuffer method to everything below in one go
+        g_frameBuffers["GBuffer"].ClearAttachment("BaseColor", 0, 0, 0, 0);
+        g_frameBuffers["GBuffer"].ClearAttachment("Normal", 0, 0, 0, 0);
+        g_frameBuffers["GBuffer"].ClearAttachment("RMA", 0, 0, 0, 0);
         g_frameBuffers["GBuffer"].ClearAttachment("MousePick", 0, 0);
+        g_frameBuffers["GBuffer"].ClearAttachment("WorldSpacePosition", 0, 0);        
         g_frameBuffers["GBuffer"].ClearDepthAttachment();
 
         SkyBoxPass();
         GeometryPass();
+        LightingPass();
         HairPass();
         EditorPass();
         DebugPass();
 
-        OpenGLFrameBuffer& mainFrameBuffer = g_frameBuffers["GBuffer"];
+        OpenGLFrameBuffer& gBuffer = g_frameBuffers["GBuffer"];
         OpenGLFrameBuffer& hairFrameBuffer = g_frameBuffers["Hair"];
-        OpenGLFrameBuffer& presentFrameBuffer = g_frameBuffers["FinalImage"];
+        OpenGLFrameBuffer& finalImageBuffer = g_frameBuffers["FinalImage"];
 
         // Downscale blit
-        OpenGLRendererUtil::BlitFrameBuffer(mainFrameBuffer, presentFrameBuffer, "Color", "Color", GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        OpenGLRendererUtil::BlitFrameBuffer(gBuffer, finalImageBuffer, "FinalLighting", "Color", GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
         // Blit to swapchain
-        OpenGLRendererUtil::BlitToDefaultFrameBuffer(presentFrameBuffer, "Color", GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        OpenGLRendererUtil::BlitToDefaultFrameBuffer(finalImageBuffer, "Color", GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
         UIPass();
     }
@@ -199,8 +215,61 @@ namespace OpenGLRenderer {
         return (it != g_frameBuffers.end()) ? &it->second : nullptr;
     }
 
-    CubemapView* GetCubemapView(const std::string& name) {
+    OpenGLCubemapView* GetCubemapView(const std::string& name) {
         auto it = g_cubemapViews.find(name);
         return (it != g_cubemapViews.end()) ? &it->second : nullptr;
     }
+
+    OpenGLRasterizerState* GetRasterizerState(const std::string& name) {
+        auto it = g_rasterizerStates.find(name);
+        return (it != g_rasterizerStates.end()) ? &it->second : nullptr;
+    }
+
+    OpenGLRasterizerState* CreateRasterizerState(const std::string& name) {
+        g_rasterizerStates[name] = OpenGLRasterizerState();
+        return &g_rasterizerStates[name];
+    }
+
+    void SetRasterizerState(const std::string& name) {
+        OpenGLRasterizerState* rasterizerState = GetRasterizerState(name);
+        if (!rasterizerState) {
+            std::cout << "OpenGLRenderer::SetRasterizerState(const std::string& name) failed!" << name << " does not exist!\n";
+            return;
+        }
+
+        // check if this is required to set depth mask later
+        // check if this is required to set depth mask later
+        // check if this is required to set depth mask later
+        glEnable(GL_DEPTH_TEST);
+
+        rasterizerState->blendEnable ?      glEnable(GL_BLEND)      : glDisable(GL_BLEND);
+        rasterizerState->cullfaceEnable ?   glEnable(GL_CULL_FACE)  : glDisable(GL_CULL_FACE);
+        rasterizerState->depthMask ?        glDepthMask(GL_TRUE) : glDepthMask(GL_FALSE);
+        rasterizerState->depthTestEnabled ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+
+        glBlendFunc(rasterizerState->blendFuncSrcfactor, rasterizerState->blendFuncDstfactor);
+        glPointSize(rasterizerState->pointSize);
+        glDepthFunc(rasterizerState->depthFunc);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//if (rasterizerState->depthTestEnabled) {
+//    glEnable(GL_DEPTH_TEST);
+//}
+//else {
+//    glDisable(GL_DEPTH_TEST);
+//}
+//

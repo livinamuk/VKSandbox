@@ -8,9 +8,7 @@ uniform int mousePickType;
 uniform int mousePickIndex;
 
 void main() {
-
     FragOut.rgb = color;
-	FragOut.a = 1.0;
-    
+	FragOut.a = 1.0;    
     MousePickOut.rg = uvec2(mousePickType, mousePickIndex);
 }

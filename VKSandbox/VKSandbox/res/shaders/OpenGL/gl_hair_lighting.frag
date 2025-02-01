@@ -13,8 +13,8 @@ readonly restrict layout(std430, binding = 0) buffer textureSamplersBuffer {
 	uvec2 textureSamplers[];
 };
 
-readonly restrict layout(std430, binding = 1) buffer rendereDataBuffer {
-	RendererData rendereData;
+readonly restrict layout(std430, binding = 1) buffer rendererDataBuffer {
+	RendererData rendererData;
 };
 
 in vec2 TexCoord;
@@ -70,7 +70,7 @@ void main() {
     finalColor.rgb = finalColor.rgb * finalAlpha;
     FragOut = vec4(finalColor, finalAlpha);
 
-    vec2 uv_screenspace = gl_FragCoord.xy / vec2(rendereData.hairBufferWidth, rendereData.hairBufferHeight);
+    vec2 uv_screenspace = gl_FragCoord.xy / vec2(rendererData.hairBufferWidth, rendererData.hairBufferHeight);
     float ViewSpaceDepth = texture2D(ViewSpaceDepthTexture, uv_screenspace).r;
     ViewSpaceDepthPreviousOut = vec4(ViewSpaceDepth, 0, 0, 0);
 }

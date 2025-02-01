@@ -108,6 +108,15 @@ namespace OpenGLRenderer {
             ViewportManager::UpdateViewports();
         }
 
+        if (false) {
+            for (RenderItem& renderItem : Scene::GetRenderItems()) {
+                Util::UpdateRenderItemAABB(renderItem);
+                AABB aabb(renderItem.aabbMin, renderItem.aabbMax);
+                DrawAABB(aabb, WHITE);
+            }
+        }
+
+
         const std::vector<ViewportData>& viewportData = RenderDataManager::GetViewportData();
 
         if (false) {
@@ -153,12 +162,80 @@ namespace OpenGLRenderer {
         }
 
         gBuffer->Bind();
-        gBuffer->DrawBuffer("Color");
+        gBuffer->DrawBuffer("FinalLighting");
 
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
         glPointSize(8.0f);
         glDisable(GL_DEPTH_TEST);
+
+
+
+
+
+        EditorMesh& editorMesh = Editor::GetEditorMesh();
+        for (int i = 0; i < 8; i++) {
+            DrawPoint(editorMesh.m_corners[i], YELLOW);
+        }
+
+
+
+        for (int i = 0; i < 8; i++) {
+            DrawPoint(editorMesh.m_corners[i], YELLOW);
+        }
+
+
+
+      // const Resolutions& resolutions = Config::GetResolutions();
+      //
+      //
+      // Viewport* viewport = Editor::GetActiveViewport();
+      // int viewportIndex = Editor::GetActiveViewportIndex();
+      // glm::mat4 projectionView = viewportData[viewportIndex].projectionView;
+      //
+      // int width = resolutions.gBuffer.x;
+      // int height = resolutions.gBuffer.y;
+      // int mouseX = Input::GetMouseX();
+      // int mouseY = Input::GetMouseY();
+      // int threshold = 50;
+      //
+      // for (int i = 0; i < 8; i++) {
+      //
+      //     glm::vec3 vertexPosition = editorMesh.m_corners[i];
+      //     glm::ivec2 screenPos = Util::WorldToScreenCoords(vertexPosition, projectionView, width, height, true);
+      //
+      //     if (mouseX < screenPos.x + threshold &&
+      //         mouseX > screenPos.x - threshold &&
+      //         mouseY < screenPos.y + threshold &&
+      //         mouseY > screenPos.y - threshold) {
+      //         std::cout << " POINT overlapped \n";
+      //
+      //         DrawPoint(editorMesh.m_corners[i], BLUE);
+      //     }
+      //
+      // }
+
+
+//
+// glm::ivec2 WorldToScreenCoords(const glm::vec3 & worldPos, const glm::mat4 & viewProjection, int screenWidth, int screenHeight, bool flipY = false);
+//
+//
+// g_hoveredVertexIndex = -1;
+// if (g_selectedObjectType == ObjectType::CSG_OBJECT_ADDITIVE_WALL_PLANE) {
+//     CSGPlane& csgPlane = Scene::g_csgAdditiveWallPlanes[g_selectedObjectIndex];
+//     for (int i = 0; i < 4; i++) {
+//         glm::vec3 worldPos = csgPlane.m_veritces[i];
+//         glm::ivec2 screenPos = Util::CalculateScreenSpaceCoordinates(worldPos, mvp, PRESENT_WIDTH, PRESENT_HEIGHT, true);
+//        
+//     }
+// }
+
+
+
+
+
+
+
 
         shader->Use();
         shader->SetMat4("model", glm::mat4(1));
@@ -188,6 +265,16 @@ namespace OpenGLRenderer {
                 glBindVertexArray(g_debugPointsMesh.GetVAO());
                 glDrawElements(GL_POINTS, g_debugPointsMesh.GetIndexCount(), GL_UNSIGNED_INT, 0);
             }
+
+            //glEnable(GL_CULL_FACE);
+            //
+            //editorMesh.RecalculateMesh();
+            //shader->SetBool("useUniformColor", true);
+            //shader->SetVec4("uniformColor", GREEN);
+            //OpenGLDetachedMesh& mesh = editorMesh.m_glMesh;
+            //glBindVertexArray(mesh.GetVAO());
+            //glDrawElements(GL_TRIANGLES, mesh.GetIndexCount(), GL_UNSIGNED_INT, 0);
+
         }
     }
 }

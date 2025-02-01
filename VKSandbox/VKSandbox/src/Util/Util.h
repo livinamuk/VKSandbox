@@ -51,4 +51,7 @@ namespace Util {
     std::string GetFileExtension(const std::filesystem::directory_entry& entry);
     std::vector<FileInfo> IterateDirectory(const std::string& directory, std::vector<std::string> extensions = {});
     bool FileExists(const std::string_view name);
+
+    // Rendering
+    void UpdateRenderItemAABB(RenderItem& renderItem);
 }
