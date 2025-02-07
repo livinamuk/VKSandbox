@@ -5,7 +5,7 @@
 namespace VulkanSynchronizationManager {
     bool Init();
     void Destroy();
-    VkSemaphore GetImageAvailableSemaphore(size_t frameIndex);
+    //VkSemaphore GetImageAvailableSemaphore(size_t frameIndex);
     VkSemaphore GetRenderFinishedSemaphore(size_t frameIndex); 
     VkSemaphore GetUploadSemaphore(size_t frameIndex);
     VkFence GetInFlightFence(size_t frameIndex);

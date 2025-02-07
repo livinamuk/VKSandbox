@@ -12,9 +12,11 @@
 #include "../Core/Debug.h"
 #include "../Core/Game.h"
 #include "../Core/Scene.h"
+#include "../Core/WeaponManager.h"
 #include "../Editor/Editor.h"
 #include "../Editor/Gizmo.h"
 #include "../Input/Input.h"
+#include "../Input/InputMulti.h"
 #include "../Renderer/Renderer.h"
 #include "../Renderer/RenderDataManager.h"
 #include "../UI/UIBackEnd.h"
@@ -22,6 +24,7 @@
 
 #include "GLFWIntegration.h"
 
+#define NOMINMAX
 #ifdef _WIN32
 #include <windows.h>
 #include <tlhelp32.h>
@@ -37,9 +40,14 @@ namespace BackEnd {
     API g_api = API::UNDEFINED;
     int g_presentTargetWidth = 0;
     int g_presentTargetHeight = 0;
+    bool g_renderDocFound = false;
+
+    void CheckForRenderDoc();
 
     bool Init(API api, int windowWidth, int windowHeight, WindowedMode windowMode) {
         g_api = api;
+        CheckForRenderDoc();
+
         Config::Init();
         if (!GLFWIntegration::Init(api, windowWidth, windowHeight, windowMode)) {
             return false;
@@ -57,9 +65,11 @@ namespace BackEnd {
         UIBackEnd::Init();
         Audio::Init();
         Input::Init(BackEnd::GetWindowPointer());
+        InputMulti::Init();
         Gizmo::Init();
         ViewportManager::Init();
         Editor::Init();
+        WeaponManager::Init();
 
         glfwShowWindow(static_cast<GLFWwindow*>(BackEnd::GetWindowPointer()));
         return true;
@@ -80,6 +90,7 @@ namespace BackEnd {
 
         const Resolutions& resolutions = Config::GetResolutions();
 
+        Editor::Update(Game::GetDeltaTime());
         Game::Update();
         Scene::SetMaterials();
         Scene::Update(Game::GetDeltaTime());
@@ -93,7 +104,6 @@ namespace BackEnd {
         int y = textureHeight - (Input::GetMouseY() * aspectY);
         BackEnd::UpdateMousePicking(x, y);
 
-        Editor::Update();
         Debug::Update();
         RenderDataManager::Update();
         UIBackEnd::Update();
@@ -107,6 +117,7 @@ namespace BackEnd {
 
     void UpdateSubSystems() {
         Input::Update();
+        InputMulti::Update();
         Audio::Update();
         if (Input::KeyPressed(HELL_KEY_ESCAPE)) {
             BackEnd::ForceCloseWindow();
@@ -235,10 +246,13 @@ namespace BackEnd {
         }
     }
 
-    bool IsRenderDocActive() {
+    void CheckForRenderDoc() {
         #ifdef _WIN32
         HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, GetCurrentProcessId());
-        if (snapshot == INVALID_HANDLE_VALUE) return false;
+        if (snapshot == INVALID_HANDLE_VALUE) {
+            g_renderDocFound = false;
+        }
+
         MODULEENTRY32 moduleEntry;
         moduleEntry.dwSize = sizeof(MODULEENTRY32);
         bool found = false;
@@ -254,10 +268,15 @@ namespace BackEnd {
             } while (Module32Next(snapshot, &moduleEntry));
         }
         CloseHandle(snapshot);
-        return found;
+
+        g_renderDocFound = found;
         #else
-        return false;
+        g_renderDocActive = false;
         #endif
+    }
+
+    bool RenderDocFound() {
+        return g_renderDocFound;
     }
 }
 

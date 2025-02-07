@@ -110,22 +110,6 @@ namespace Input {
         else
             g_middleMousePressed = false;
         g_middleMouseDownLastFrame = g_middleMouseDown;
-
-        // Wrap mouse
-        if (LeftMouseDown() || RightMouseDown() || MiddleMouseDown()) {
-            if (g_mouseX == 0) {
-                glfwSetCursorPos(g_window, BackEnd::GetFullScreenWidth() - 2, g_mouseY);
-            }
-            if (g_mouseX == BackEnd::GetFullScreenWidth() - 1) {
-                glfwSetCursorPos(g_window, 1, g_mouseY);
-            }
-            if (g_mouseY == 0) {
-                glfwSetCursorPos(g_window, g_mouseX, BackEnd::GetFullScreenHeight() - 2);
-            }
-            if (g_mouseY == BackEnd::GetFullScreenHeight() - 1) {
-                glfwSetCursorPos(g_window, g_mouseX, 1);
-            }
-        }
     }
 
     bool KeyPressed(unsigned int keycode) {
@@ -222,6 +206,12 @@ namespace Input {
 
     void SetCursorPosition(int x, int y) {
         glfwSetCursorPos(g_window, static_cast<double>(x), static_cast<double>(y));
+        g_mouseX = x;
+        g_mouseY = y;
+        g_mouseOffsetX = 0;
+        g_mouseOffsetY = 0;
+        g_mouseXPreviousFrame = x;
+        g_mouseYPreviousFrame = y;
     }
 
     void MouseScrollCallback(GLFWwindow* /*window*/, double /*xoffset*/, double yoffset) {

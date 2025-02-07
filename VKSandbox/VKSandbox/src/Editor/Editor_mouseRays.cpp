@@ -8,12 +8,14 @@ namespace Editor {
 
     void UpdateMouseRays() {
         for (int i = 0; i < 4; i++) {
-            const Camera* camera = GetCameraByIndex(i);
+            //const Camera* camera = GetCameraByIndex(i);
             const Viewport* viewport = ViewportManager::GetViewportByIndex(i);
             const SpaceCoords gBufferSpaceCoords = viewport->GetGBufferSpaceCoords();
 
             const glm::mat4 projectionMatrix = viewport->GetProjectionMatrix();
-            const glm::mat4 viewMatrix = camera->GetViewMatrix();
+            //const glm::mat4 viewMatrix = camera->GetViewMatrix();
+
+            const glm::mat4 viewMatrix = Editor::GetViewportViewMatrix(i);
             const glm::mat4 projectionViewMatrix = projectionMatrix * viewMatrix;
             const glm::mat4 inverseProjectionViewMatrix = glm::inverse(projectionViewMatrix);
         
@@ -32,8 +34,8 @@ namespace Editor {
             }
             // Perspective
             else {
-                g_mouseRayOrigins[i] = camera->GetPosition();
-                g_mouseRayDirections[i] = Util::GetMouseRayDir(projectionMatrix, viewMatrix, gBufferSpaceCoords.width, gBufferSpaceCoords.height, gBufferSpaceCoords.localMouseX, gBufferSpaceCoords.localMouseY);
+               // g_mouseRayOrigins[i] = camera->GetPosition();
+               // g_mouseRayDirections[i] = Util::GetMouseRayDir(projectionMatrix, viewMatrix, gBufferSpaceCoords.width, gBufferSpaceCoords.height, gBufferSpaceCoords.localMouseX, gBufferSpaceCoords.localMouseY);
             }
         }
     }

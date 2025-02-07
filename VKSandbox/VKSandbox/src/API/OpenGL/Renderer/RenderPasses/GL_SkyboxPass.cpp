@@ -33,7 +33,7 @@ namespace OpenGLRenderer {
         for (int i = 0; i < 4; i++) {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
             if (viewport->IsVisible()) {
-                OpenGLRendererUtil::SetViewport(*gBuffer, *viewport);
+                OpenGLRendererUtil::SetViewport(gBuffer, viewport);
                 glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), 1, mesh->baseVertex, i);
             }
         }

@@ -3,10 +3,20 @@
 #ifndef ENABLE_BINDLESS
     #define ENABLE_BINDLESS 1
 #endif
+
 #if ENABLE_BINDLESS == 1
-    #extension GL_ARB_bindless_texture : enable
+    #extension GL_ARB_bindless_texture : enable        
+    readonly restrict layout(std430, binding = 0) buffer textureSamplersBuffer {
+	    uvec2 textureSamplers[];
+    };    
+    in flat int BaseColorTextureIndex;
+    in flat int NormalTextureIndex;
+    in flat int RMATextureIndex;
+
 #else
-    // Bind regular textures    
+    layout (binding = 0) uniform sampler2D baseColorTexture;
+    layout (binding = 1) uniform sampler2D normalTexture;
+    layout (binding = 2) uniform sampler2D rmaTexture;
 #endif
 
 #include "../common/lighting.glsl"
@@ -25,25 +35,20 @@ in vec3 BiTangent;
 in vec4 WorldPos;
 in vec3 ViewPos;
 
-in flat int BaseColorTextureIndex;
-in flat int NormalTextureIndex;
-in flat int RMATextureIndex;
 in flat int MousePickType;
 in flat int MousePickIndex;
 
-readonly restrict layout(std430, binding = 0) buffer textureSamplersBuffer {
-	uvec2 textureSamplers[];
-};
-
 void main() {
-
 #if ENABLE_BINDLESS == 1
     vec4 baseColor = texture(sampler2D(textureSamplers[BaseColorTextureIndex]), TexCoord);
     vec3 normalMap = texture(sampler2D(textureSamplers[NormalTextureIndex]), TexCoord).rgb;   
     vec3 rma = texture(sampler2D(textureSamplers[RMATextureIndex]), TexCoord).rgb;  
 #else
-    // Code path that avoids bindless features
+    vec4 baseColor = texture2D(baseColorTexture, TexCoord);
+    vec3 normalMap = texture2D(normalTexture, TexCoord).rgb;
+    vec3 rma = texture2D(rmaTexture, TexCoord).rgb;
 #endif
+
     mat3 tbn = mat3(normalize(Tangent), normalize(BiTangent), normalize(Normal));
     normalMap.rgb = normalMap.rgb * 2.0 - 1.0;
     normalMap = normalize(normalMap);

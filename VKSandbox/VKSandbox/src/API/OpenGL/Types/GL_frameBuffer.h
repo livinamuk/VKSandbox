@@ -9,12 +9,14 @@
 struct ColorAttachment {
     const char* name = "undefined";
     GLuint handle = 0;
-    GLenum internalFormat = GL_RGBA;
+    GLenum internalFormat = 0;;
+    GLenum format = 0;
+    GLenum type = 0;
 };
 
 struct DepthAttachment {
     GLuint handle = 0;
-    GLenum internalFormat = GL_RGBA;
+    GLenum internalFormat = 0;
 };
 
 class OpenGLFrameBuffer {
@@ -41,12 +43,12 @@ public:
     void SetViewport();
     void DrawBuffers(std::vector<const char*> attachmentNames);
     void DrawBuffer(const char* attachmentName);
-    //void ClearAttachmentR(const char* attachmentName, float r);
-    //void ClearAttachmentRTEST(const char* attachmentName, float r);
-    //void ClearAttachmentRG(const char* attachmentName, float r, float g);
-    //void ClearAttachmentRGB(const char* attachmentName, float r, float g, float b);
-    //void ClearAttachmentRGBA(const char* attachmentName, float r, float g, float b, float a);
-    void ClearAttachment(const char* attachmentName, float r, float g = 0.0f, float b = 0.0f, float a = 0.0f);
+    void ClearAttachment(const char* attachmentName, GLfloat r, GLfloat g = 0.0f, GLfloat b = 0.0f, GLfloat a = 0.0f);
+    void ClearAttachmentI(const char* attachmentName, GLint r, GLint g = 0, GLint b = 0, GLint a = 0);
+    void ClearAttachmentUI(const char* attachmentName, GLint r, GLint g = 0, GLint b = 0, GLint a = 0);
+    void ClearAttachmenSubRegion(const char* attachmentName, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLfloat r, GLfloat g = 0.0f, GLfloat b = 0.0f, GLfloat a = 0.0f);
+    void ClearAttachmenSubRegionInt(const char* attachmentName, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLint r, GLint g = 0.0f, GLint b = 0.0f, GLint a = 0.0f);
+    void ClearAttachmenSubRegionUInt(const char* attachmentName, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLuint r, GLuint g = 0.0f, GLuint b = 0.0f, GLuint a = 0.0f);
     void ClearDepthAttachment();
     GLuint GetHandle() const;
     GLuint GetWidth() const;

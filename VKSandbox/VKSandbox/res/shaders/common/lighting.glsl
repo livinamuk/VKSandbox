@@ -8,6 +8,6 @@ vec3 GetDirectLighting(vec3 lightPos, vec3 lightColor, float radius, float stren
 	float lightAttenuation = smoothstep(radius, 0, length(lightPos - WorldPos));
 	float irradiance = max(dot(lightDir, Normal), 0.0) ;
 	irradiance *= lightAttenuation * lightRadiance;
-	vec3 brdf = microfacetBRDF(lightDir, viewDir, Normal, baseColor, metallic, fresnelReflect, roughness, WorldPos);
-	return brdf * irradiance * clamp(lightColor, 0, 1);
+	vec3 brdf = microfacetBRDF(lightDir, viewDir, Normal, baseColor, metallic, fresnelReflect, roughness);
+    return brdf * irradiance * clamp(lightColor, 0, 1);
 }

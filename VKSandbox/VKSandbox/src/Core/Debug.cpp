@@ -79,7 +79,7 @@ namespace Debug {
         AddText("Hovered Viewport Index: " + std::to_string(hoveredViewportIndex));
         AddText("Mouse ray origin: " + Util::Vec3ToString(Editor::GetMouseRayOriginByViewportIndex(hoveredViewportIndex)));
         AddText("Mouse ray direction: " + Util::Vec3ToString(Editor::GetMouseRayDirectionByViewportIndex(hoveredViewportIndex)));
-        AddText("Hovered viewport cam position: " + Util::Vec3ToString(Editor::GetCameraByIndex(hoveredViewportIndex)->GetPosition()));
+        //AddText("Hovered viewport cam position: " + Util::Vec3ToString(Editor::GetCameraByIndex(hoveredViewportIndex)->GetPosition()));
 
 
         //AddText("MousePick: " + std::to_string(BackEnd::GetMousePickR()) + ", " + std::to_string(BackEnd::GetMousePickG()));

@@ -1,7 +1,14 @@
 #include "GLFWIntegration.h"
 #include <glad/glad.h>
+#define NOMINMAX
+#include <Windows.h>
+#ifdef _MSC_VER
+#undef GetObject
+#endif
 #define GLFW_INCLUDE_VULKAN
+#define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 #include <Vulkan/vulkan.h>
 #include <iostream>
 #include <string>
@@ -92,6 +99,10 @@ namespace GLFWIntegration {
     void SetCursor(int cursor) {
         g_currentCursor = cursor;
         glfwSetCursor(g_window, g_cursorsPtrs[cursor]);
+    }
+
+    void* GetWin32Window() {
+        return glfwGetWin32Window(g_window);
     }
 
     void MakeContextCurrent() {

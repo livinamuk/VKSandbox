@@ -23,7 +23,7 @@ namespace OpenGLRenderer {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
             if (viewport->IsVisible()) {
 
-                OpenGLRendererUtil::SetViewport(*gBuffer, *viewport);
+                OpenGLRendererUtil::SetViewport(gBuffer, viewport);
 
 
                 glEnable(GL_DEPTH_TEST);

@@ -5,6 +5,7 @@
 #include "../Types/GL_detachedMesh.hpp"
 #include "../Types/GL_frameBuffer.h"
 #include "../Types/GL_shader.h"
+#include "../Types/GL_ssbo.hpp"
 
 struct OpenGLRasterizerState {
     GLboolean depthTestEnabled;
@@ -24,7 +25,11 @@ namespace OpenGLRenderer {
     void RenderLoadingScreen();
     void RenderGame();
 
+    // Compute passes
+    void ComputeSkinningPass();
+
     // Render passes
+    void HeightMapPass();
     void SkyBoxPass();
     void GeometryPass();
     void LightingPass();
@@ -46,15 +51,12 @@ namespace OpenGLRenderer {
     inline OpenGLDetachedMesh g_debugLinesMesh;
     inline OpenGLDetachedMesh g_debugPointsMesh;
 
-    // Shaders
-    OpenGLShader* GetShader(const std::string& name);
     void HotloadShaders();
 
-    // Framebuffers
-    OpenGLFrameBuffer* GetFrameBuffer(const std::string& name);
-
-    // Framebuffers
     OpenGLCubemapView* GetCubemapView(const std::string& name);
+    OpenGLFrameBuffer* GetFrameBuffer(const std::string& name);
+    OpenGLShader* GetShader(const std::string& name);
+    OpenGLSSBO* GetSSBO(const std::string& name);
 
     // Rasterizer State
     void InitRasterizerStates();
@@ -62,6 +64,7 @@ namespace OpenGLRenderer {
     OpenGLRasterizerState* GetRasterizerState(const std::string& name);
     void SetRasterizerState(const std::string& name);
 
-    // Multidraw Indirect
+    // Drawing
     void MultiDrawIndirect(const std::vector<DrawIndexedIndirectCommand>& commands);
+    void SplitMultiDrawIndirect(OpenGLShader* shader, const std::vector<DrawIndexedIndirectCommand>& commands);
 }

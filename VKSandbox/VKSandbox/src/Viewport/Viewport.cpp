@@ -139,6 +139,7 @@ void Viewport::SetViewportMode(ShadingMode viewportMode) {
 
 void Viewport::SetOrthoSize(float value) {
     m_orthoSize = value;
+    m_orthoSize = std::max(m_orthoSize, 0.1f);
     UpdateProjectionMatrices();
 }
 

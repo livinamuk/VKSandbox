@@ -9,8 +9,8 @@ namespace BackEnd {
     void UpdateGame();
     void UpdateSubSystems();
     void EndFrame();
-    void CleanUp();
-    bool IsRenderDocActive();
+    void CleanUp(); 
+    bool RenderDocFound();
 
     // API
     void SetAPI(API api);

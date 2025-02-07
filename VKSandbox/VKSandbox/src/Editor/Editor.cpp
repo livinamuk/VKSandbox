@@ -11,84 +11,83 @@
 
 namespace Editor {
 
-    #define ORTHO_CAMERA_DISTANCE_FROM_ORIGIN 250.0f // Rethink this
-
     EditorMesh g_editorMesh;
     int g_activeViewportIndex = 3;
     bool g_isOpen = false;
     bool g_isOrthographic[4];
-    float g_splitX = 0.4f;
-    float g_splitY = 0.4f;
-    Camera g_cameras[4];
+    float g_OrthographicSizes[4];
+    float g_verticalDividerXPos = 0.0f;
+    float g_splitY = 0.0f;
     uint16_t g_selectedObjectIndex = 0;
     uint16_t g_hoveredObjectIndex = 0;
     EditorObjectType g_selectedObjectType = EditorObjectType::NONE;
     EditorObjectType g_hoveredObjectType = EditorObjectType::NONE;
     ShadingMode g_shadingModes[4];
-    CameraView g_cameraViews[4];
+    //CameraView g_cameraViews[4];
+    
+    float g_orthoCameraDistances[4];
     ViewportResizeState g_viewportResizeState;
 
-    void SetViewportToFrontView(uint32_t viewportindex, glm::vec3 viewportOrigin) {
-        Camera* camera = GetCameraByIndex(viewportindex);
-        g_cameras[viewportindex].SetPosition(viewportOrigin + glm::vec3(0.0f, 0.0F, ORTHO_CAMERA_DISTANCE_FROM_ORIGIN));
-        g_cameras[viewportindex].SetEulerRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-        g_cameraViews[viewportindex] = CameraView::FRONT;
-        g_isOrthographic[viewportindex] = true;
-        ViewportManager::UpdateViewports();
+    void Init() {
+        if (BackEnd::GetAPI() == API::OPENGL) {
+            g_editorMesh.Init(glm::vec3(0.5f, 1.45f, 2.53));
+            g_editorMesh.RecalculateMesh();
+        }
+        ResetViewports();
     }
 
-    void SetViewportResizeState(ViewportResizeState viewportResizeState) {
-        g_viewportResizeState = viewportResizeState;
-    }
-
-    void Init() {        
-
-        g_editorMesh.Init(glm::vec3(0.5f, 1.45f, 2.53));
-        g_editorMesh.RecalculateMesh();
+    void ResetViewports() {
+        float ORTHO_CAMERA_DISTANCE_FROM_ORIGIN = 250.0f;
+        g_orthoCameraDistances[0] = ORTHO_CAMERA_DISTANCE_FROM_ORIGIN;
+        g_orthoCameraDistances[1] = ORTHO_CAMERA_DISTANCE_FROM_ORIGIN;
+        g_orthoCameraDistances[2] = ORTHO_CAMERA_DISTANCE_FROM_ORIGIN;
+        g_orthoCameraDistances[3] = ORTHO_CAMERA_DISTANCE_FROM_ORIGIN;
 
         // Top left
-        g_cameras[0].SetPosition(glm::vec3(0, ORTHO_CAMERA_DISTANCE_FROM_ORIGIN, 0.0f));
-        g_cameras[0].SetEulerRotation(glm::vec3(HELL_PI * -0.5f, HELL_PI * -0.5f, 0.0f));
-        g_shadingModes[0] = ShadingMode::WIREFRAME;
-        g_cameraViews[0] = CameraView::TOP;
-        g_isOrthographic[0] = true;
+        SetViewportView(0, Gizmo::GetPosition(), CameraView::TOP);
+        //g_cameras[0].SetPosition(glm::vec3(0, g_orthoCameraDistances[0], 0.0f));
+        //g_cameras[0].SetEulerRotation(glm::vec3(HELL_PI * -0.5f, HELL_PI * -0.5f, 0.0f));
+
+        //g_shadingModes[0] = ShadingMode::WIREFRAME;
+        //g_cameraViews[0] = CameraView::TOP;
+        //g_isOrthographic[0] = true;
 
         // Top right
-        SetViewportToFrontView(1, glm::vec3(0.0f, 0.8f, 0.0f));
+        SetViewportView(1, Gizmo::GetPosition(), CameraView::FRONT);
 
         // Bottom left
-        g_cameras[2].SetPosition(glm::vec3(-ORTHO_CAMERA_DISTANCE_FROM_ORIGIN, 0.8f, 0.0f));
-        g_cameras[2].SetEulerRotation(glm::vec3(0.0f, HELL_PI * -0.5f, 0.0f));
-        g_shadingModes[2] = ShadingMode::WIREFRAME;
-        g_cameraViews[2] = CameraView::LEFT;
-        g_isOrthographic[2] = true;
+        SetViewportView(2, Gizmo::GetPosition(), CameraView::LEFT);
+        //g_cameras[2].SetPosition(glm::vec3(-g_orthoCameraDistances[2], 0.8f, 0.0f));
+        //g_cameras[2].SetEulerRotation(glm::vec3(0.0f, HELL_PI * -0.5f, 0.0f));
+      //g_shadingModes[2] = ShadingMode::WIREFRAME;
+      //g_cameraViews[2] = CameraView::LEFT;
+      //g_isOrthographic[2] = true;
 
         // Bottom right
-        g_cameras[3].SetPosition(glm::vec3(-2.09f, 1.45f, 0.68f));
-        g_cameras[3].SetEulerRotation(glm::vec3(-0.30f, -1.32f, 0.0f));
-        g_shadingModes[3] = ShadingMode::SHADED;
-        g_cameraViews[3] = CameraView::PERSPECTIVE;
-        g_isOrthographic[3] = false;
-
-        for (int i = 0; i < 4; i++) {
-            //g_isOrthographic[i] = false;
-        }
+        SetViewportView(3, Gizmo::GetPosition(), CameraView::RIGHT);
+        //g_cameras[3].SetPosition(glm::vec3(-2.09f, 1.45f, 0.68f));
+        //g_cameras[3].SetEulerRotation(glm::vec3(-0.30f, -1.32f, 0.0f));
+        //g_shadingModes[3] = ShadingMode::SHADED;
+        //g_cameraViews[3] = CameraView::PERSPECTIVE;
+        //g_isOrthographic[3] = false;
     }
 
-    void Update() {
+    void Update(float deltaTime) {
         if (!IsOpen()) return;
 
-        Gizmo::Update();
-        UpdateCamera();
         UpdateMouseRays();
+        UpdateCamera();
+        UpdateDividers();
         UpdateInput();
         UpdateUI();
         // Translate the selected object
         if (g_selectedObjectType == EditorObjectType::GAME_OBJECT) {
-            Scene::g_gameObjects[g_selectedObjectIndex].m_transform.position = Gizmo::GetPosition();
+            Scene::GetGameObjects()[g_selectedObjectIndex].m_transform.position = Gizmo::GetPosition();
         }
-
+        UpdateCursor();
         UpdateDebug();
+        UpdateCameraInterpolation(deltaTime);
+        Gizmo::Update();
     }
 
     void Open() {
@@ -151,7 +150,7 @@ namespace Editor {
     }
 
     void SetSplitX(float value) {
-        g_splitX = value;
+        g_verticalDividerXPos = value;
         ViewportManager::UpdateViewports();
     }
 
@@ -197,15 +196,15 @@ namespace Editor {
         }
     }
 
-    Camera* GetCameraByIndex(uint32_t index) {
-        if (index >= 0 && index < 4) {
-            return &g_cameras[index];
-        }
-        else {
-            std::cout << "Game::GetCameraByIndex(int index) failed. " << index << " out of range of editor viewport count 4\n";
-            return nullptr;
-        }
-    }
+    //Camera* GetCameraByIndex(uint32_t index) {
+    //    if (index >= 0 && index < 4) {
+    //        return &g_cameras[index];
+    //    }
+    //    else {
+    //        std::cout << "Game::GetCameraByIndex(int index) failed. " << index << " out of range of editor viewport count 4\n";
+    //        return nullptr;
+    //    }
+    //}
 
     Viewport* GetActiveViewport() {
         if (g_activeViewportIndex >= 0 && g_activeViewportIndex < 4) {
@@ -217,39 +216,64 @@ namespace Editor {
         }
     }
 
-    ShadingMode GetViewportModeByIndex(uint32_t index) {
-        if (index >= 0 && index < 4) {
-            return g_shadingModes[index];
+    ShadingMode GetViewportModeByIndex(uint32_t viewportIndex) {
+        if (viewportIndex >= 0 && viewportIndex < 4) {
+            return g_shadingModes[viewportIndex];
         }
         else {
-            std::cout << "Editor::GetViewportModeByIndex(int index) failed. " << index << " out of range of editor viewport count 4\n";
+            std::cout << "Editor::GetViewportModeByIndex(uint32_t viewportIndex) failed. " << viewportIndex << " out of range of editor viewport count 4\n";
             return ShadingMode::SHADED;
         }
     }
 
-    CameraView GetCameraViewByIndex(uint32_t index) {
-        if (index >= 0 && index < 4) {
-            return g_cameraViews[index];
+    //void SetCameraView(uint32_t cameraViewIndex, CameraView cameraView) {
+    //    if (cameraViewIndex >= 0 && cameraViewIndex < 4) {
+    //        g_cameraViews[cameraViewIndex] = cameraView;
+    //    }
+    //    else {
+    //        std::cout << "Editor::SetCameraViewByIndex(uint32_t cameraViewIndex, CameraView cameraView) failed. " << cameraViewIndex << " out of range of editor viewport count 4\n";
+    //    }
+    //}
+
+    void SetViewportOrthoSize(uint32_t viewportIndex, float size) {
+        if (viewportIndex >= 0 && viewportIndex < 4) {
+            g_OrthographicSizes[viewportIndex] = size;
         }
         else {
-            std::cout << "Editor::GetViewportTypeByIndex(int index) failed. " << index << " out of range of editor viewport count 4\n";
-            return CameraView::PERSPECTIVE;
+            std::cout << "Editor::SetViewportOrthoSize(uint32_t viewportIndex, float size) failed. " << viewportIndex << " out of range of editor viewport count 4\n";
         }
     }
+
+ 
 
     ViewportResizeState GetViewportResizeState() {
         return g_viewportResizeState;
     }
 
-    float GetSplitX() {
-        return g_splitX;
+    float GetVerticalDividerXPos() {
+        return g_verticalDividerXPos;
     }
 
-    float GetSplitY() {
+    float GetHorizontalDividerYPos() {
         return g_splitY;
     }
 
     EditorMesh& GetEditorMesh() {
         return g_editorMesh;
     }
+
+    void SetViewportResizeState(ViewportResizeState viewportResizeState) {
+        g_viewportResizeState = viewportResizeState;
+    }
+
+    void SetViewportOrthographicState(uint32_t index, bool state) {
+        if (index >= 0 && index < 4) {
+            g_isOrthographic[index] = state;
+        }
+        else {
+            std::cout << "Editor::SetViewportOrthographicStateByIndex(uint32_t index, bool state) failed. " << index << " out of range of editor viewport count 4\n";
+        }
+    }
+
+
 }

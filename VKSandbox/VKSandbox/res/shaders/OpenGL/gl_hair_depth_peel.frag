@@ -3,7 +3,7 @@
 #include "../common/util.glsl"
 
 layout (location = 0) out vec4 FragOut;
-layout (binding = 0) uniform sampler2D previousDepthTexture;
+layout (binding = 3) uniform sampler2D previousDepthTexture;
 
 readonly restrict layout(std430, binding = 1) buffer rendereDataBuffer {
 	RendererData rendereData;

@@ -1,7 +1,8 @@
-#include "../GL_renderer.h" 
-#include "../GL_renderer_util.h" 
-#include "../../GL_backend.h"
-#include "../Config/Config.h"
+#include "API/OpenGL/Renderer/GL_renderer.h" 
+#include "API/OpenGL/Renderer/GL_renderer_util.h" 
+#include "API/OpenGL/GL_backend.h"
+#include "BackEnd/BackEnd.h"
+#include "Config/Config.h"
 #include "Viewport/ViewportManager.h"
 #include "Renderer/RenderDataManager.h"
 
@@ -49,6 +50,7 @@ namespace OpenGLRenderer {
     }
 
     void RenderHairLayer(const DrawCommands& drawCommands, int peelCount) {
+        const Resolutions& resolutions = Config::GetResolutions();
         OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
         OpenGLFrameBuffer* hairFrameBuffer = GetFrameBuffer("Hair");
         OpenGLShader* depthPeelShader = GetShader("HairDepthPeel");
@@ -64,48 +66,55 @@ namespace OpenGLRenderer {
         hairFrameBuffer->Bind();
         hairFrameBuffer->ClearAttachment("ViewspaceDepthPrevious", 1.0f);
 
-
         for (int j = 0; j < peelCount; j++) {
 
             // Viewspace depth pass
             for (int i = 0; i < 4; i++) {
                 Viewport* viewport = ViewportManager::GetViewportByIndex(i);
                 if (viewport->IsVisible()) {
-                    OpenGLRendererUtil::SetViewport(*hairFrameBuffer, *viewport);
-
-                    OpenGLRendererUtil::SetScissor(*hairFrameBuffer, *viewport);
-
-                    OpenGLRendererUtil::BlitFrameBufferDepth(*gBuffer, *hairFrameBuffer, *viewport);
+                    OpenGLRendererUtil::SetViewport(hairFrameBuffer, viewport);
+                    OpenGLRendererUtil::BlitFrameBufferDepth(gBuffer, hairFrameBuffer, viewport);
+                    OpenGLRendererUtil::ClearFrameBufferByViewport(hairFrameBuffer, "ViewspaceDepth", viewport, 0.0f);
 
                     hairFrameBuffer->Bind();
-                    hairFrameBuffer->ClearAttachment("ViewspaceDepth", 0.0f);
                     hairFrameBuffer->DrawBuffer("ViewspaceDepth");
 
                     depthPeelShader->Use();
 
-                    glActiveTexture(GL_TEXTURE0);
-                    glBindTexture(GL_TEXTURE_2D, hairFrameBuffer->GetColorAttachmentHandleByName("ViewspaceDepthPrevious"));
+                    glBindTextureUnit(3, hairFrameBuffer->GetColorAttachmentHandleByName("ViewspaceDepthPrevious"));
 
                     SetRasterizerState("HairViewspaceDepth");
-                    MultiDrawIndirect(drawCommands.perViewport[i]);
+
+                    if (BackEnd::RenderDocFound()) {
+                        SplitMultiDrawIndirect(depthPeelShader, drawCommands.perViewport[i]);
+                    }
+                    else {
+                        MultiDrawIndirect(drawCommands.perViewport[i]);
+                    }
                 }
             }
             // Color pass
             for (int i = 0; i < 4; i++) {
                 Viewport* viewport = ViewportManager::GetViewportByIndex(i);
                 if (viewport->IsVisible()) {
-                    OpenGLRendererUtil::SetViewport(*hairFrameBuffer, *viewport);
-                    OpenGLRendererUtil::SetScissor(*hairFrameBuffer, *viewport);
+                    OpenGLRendererUtil::SetViewport(hairFrameBuffer, viewport);
+                    OpenGLRendererUtil::ClearFrameBufferByViewport(hairFrameBuffer, "Lighting", viewport, 0.0f, 0.0f, 0.0f, 0.0f);
+
                     hairFrameBuffer->Bind();
-                    hairFrameBuffer->ClearAttachment("Lighting", 0, 0, 0, 0);
                     hairFrameBuffer->DrawBuffers({ "Lighting", "ViewspaceDepthPrevious" });
 
                     hairLightingShader->Use();
 
-                    glBindTextureUnit(0, hairFrameBuffer->GetColorAttachmentHandleByName("ViewspaceDepth"));
+                    glBindTextureUnit(3, hairFrameBuffer->GetColorAttachmentHandleByName("ViewspaceDepth"));
 
                     SetRasterizerState("HairLighting");
-                    MultiDrawIndirect(drawCommands.perViewport[i]);
+
+                    if (BackEnd::RenderDocFound()) {
+                        SplitMultiDrawIndirect(hairLightingShader, drawCommands.perViewport[i]);
+                    }
+                    else {
+                        MultiDrawIndirect(drawCommands.perViewport[i]);
+                    }
                 }
             }
             // Composite

@@ -24,6 +24,9 @@ namespace GLFWIntegration {
     const WindowedMode& GetWindowedMode();
     void SetCursor(int);
 
+    // Windows only
+    void* GetWin32Window();
+
     // OpenGL only
     void MakeContextCurrent();
 

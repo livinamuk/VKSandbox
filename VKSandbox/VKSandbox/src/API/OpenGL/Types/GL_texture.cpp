@@ -1,13 +1,11 @@
 ﻿#include <iostream>
 #include "GL_texture.h"
-#include "../../../Util/Util.h"
-//#include "DDS/DDS_Helpers.h"
+#include "BackEnd/BackEnd.h"
+#include "Util/Util.h"
 #include <stb_image.h>
-#include "../Tools/ImageTools.h"
+#include "Tools/ImageTools.h"
 #include "../GL_Util.h"
 #include "tinyexr.h"
-
-#define ALLOW_BINDLESS_TEXTURES 1
 
 GLuint64 OpenGLTexture::GetBindlessID() {
     return m_bindlessID;
@@ -104,19 +102,19 @@ void OpenGLTexture::SetMagFilter(TextureFilter filter) {
 }
 
 void OpenGLTexture::MakeBindlessTextureResident() {
-#if ALLOW_BINDLESS_TEXTURES
+    if (BackEnd::RenderDocFound()) return;
+        
     if (m_bindlessID == 0) {
         m_bindlessID = glGetTextureHandleARB(m_handle);
     }
     glMakeTextureHandleResidentARB(m_bindlessID);
-#endif
 }
 
 void OpenGLTexture::MakeBindlessTextureNonResident() {
-#if ALLOW_BINDLESS_TEXTURES
+    if (BackEnd::RenderDocFound()) return;
+
     if (m_bindlessID != 0) {
         glMakeTextureHandleNonResidentARB(m_bindlessID);
         m_bindlessID = 0;
     }
-#endif
 }

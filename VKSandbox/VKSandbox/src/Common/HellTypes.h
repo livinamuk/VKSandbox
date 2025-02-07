@@ -4,9 +4,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <vector>
 #include <iostream>
 #include "HellEnums.h"
+#include "Input/keycodes.h"
 
 struct BlitRegion {
     int32_t originX = 0;
@@ -23,10 +25,10 @@ struct BlitRect {
 };
 
 struct RenderItem {
-    glm::mat4 modelMatrix;
-    glm::mat4 inverseModelMatrix;
-    glm::vec4 aabbMin;
-    glm::vec4 aabbMax;
+    glm::mat4 modelMatrix = glm::mat4(1);
+    glm::mat4 inverseModelMatrix = glm::mat4(1);
+    glm::vec4 aabbMin = glm::vec4(0);
+    glm::vec4 aabbMax = glm::vec4(0);
     int meshIndex;
     int baseColorTextureIndex;
     int normalMapTextureIndex;
@@ -35,6 +37,21 @@ struct RenderItem {
     int mousePickIndex;
     int padding0;
     int padding1;
+};
+
+struct SkinnedRenderItem {
+    glm::mat4 modelMatrix = glm::mat4(1);
+    glm::mat4 inverseModelMatrix = glm::mat4(1);
+    glm::vec4 aabbMin = glm::vec4(0);
+    glm::vec4 aabbMax = glm::vec4(0);
+    int srcMeshIndex;
+    int baseColorTextureIndex;
+    int normalTextureIndex;
+    int rmaTextureIndex;
+    int baseVertex;
+    int padding0;
+    int padding1;
+    int padding2;
 };
 
 struct RenderItem2D {
@@ -85,6 +102,19 @@ struct Vertex {
     glm::vec3 tangent = glm::vec3(0);
 };
 
+struct WeightedVertex {
+    glm::vec3 position = glm::vec3(0);
+    glm::vec3 normal = glm::vec3(0);
+    glm::vec2 uv = glm::vec2(0);
+    glm::vec3 tangent = glm::vec3(0);
+    glm::ivec4 boneID = glm::ivec4(0);
+    glm::vec4 weight = glm::vec4(0);
+
+    bool operator==(const Vertex& other) const {
+        return position == other.position && normal == other.normal && uv == other.uv;
+    }
+};
+
 struct TextureData {
     int m_width = 0;
     int m_height = 0;
@@ -130,6 +160,28 @@ struct Transform {
 		m = glm::scale(m, scale);
 		return m;
 	};
+};
+
+struct AnimatedTransform {
+    AnimatedTransform() = default;
+    AnimatedTransform(glm::mat4 matrix) {
+        glm::vec3 skew;
+        glm::vec4 perspective;
+        glm::decompose(matrix, scale, rotation, translation, skew, perspective);
+    }
+    glm::mat4 to_mat4() {
+        glm::mat4 m = glm::translate(glm::mat4(1), translation);
+        m *= glm::mat4_cast(rotation);
+        m = glm::scale(m, scale);
+        return m;
+    };
+    glm::vec3 to_forward_vector() {
+        glm::quat q = glm::quat(rotation);
+        return glm::normalize(q * glm::vec3(0.0f, 0.0f, 1.0f));
+    }
+    glm::vec3 translation = glm::vec3(0);
+    glm::quat rotation = glm::quat(1, 0, 0, 0);
+    glm::vec3 scale = glm::vec3(1);
 };
 
 struct Material {
@@ -256,4 +308,66 @@ public: // make private later
             (point.y >= boundsMin.y && point.y <= boundsMax.y) &&
             (point.z >= boundsMin.z && point.z <= boundsMax.z);
     }
+};
+
+struct WeaponState {
+    bool has = false;
+    bool useSlideOffset = false;
+    bool hasScope = false;
+    bool hasSilencer = false;
+    int ammoInMag = 0;
+    std::string name = "UNDEFINED_STRING";
+};
+
+struct AmmoState {
+    std::string name = "UNDEFINED_STRING";
+    int ammoOnHand = 0;
+};
+
+struct WaterState {
+    float heightBeneathWater = 0;
+    float heightAboveWater = 0;
+
+    bool cameraUnderWater = false;
+    bool feetUnderWater = false;
+    bool wading = false;
+    bool swimming = false;
+
+    // Previous frame
+    bool cameraUnderWaterPrevious = false;
+    bool feetUnderWaterPrevious = false;
+    bool wadingPrevious = true;
+    bool swimmingPrevious = true;
+};
+
+struct PlayerControls {
+    unsigned int WALK_FORWARD = HELL_KEY_W;
+    unsigned int WALK_BACKWARD = HELL_KEY_S;
+    unsigned int WALK_LEFT = HELL_KEY_A;
+    unsigned int WALK_RIGHT = HELL_KEY_D;
+    unsigned int INTERACT = HELL_KEY_E;
+    unsigned int RELOAD = HELL_KEY_R;
+    unsigned int FIRE = HELL_MOUSE_LEFT;
+    unsigned int ADS = HELL_MOUSE_RIGHT;
+    unsigned int JUMP = HELL_KEY_SPACE;
+    unsigned int CROUCH = HELL_KEY_WIN_CONTROL; // different mapping to the standard glfw HELL_KEY_LEFT_CONTROL
+    unsigned int NEXT_WEAPON = HELL_KEY_Q;
+    unsigned int ESCAPE = HELL_KEY_WIN_ESCAPE;
+    unsigned int DEBUG_FULLSCREEN = HELL_KEY_G;
+    unsigned int DEBUG_ONE = HELL_KEY_1;
+    unsigned int DEBUG_TWO = HELL_KEY_2;
+    unsigned int DEBUG_THREE = HELL_KEY_3;
+    unsigned int DEBUG_FOUR = HELL_KEY_4;
+    unsigned int MELEE = HELL_KEY_V;
+    unsigned int FLASHLIGHT = HELL_KEY_F;
+};
+
+struct Bullet {
+    glm::vec3 spawnPosition;
+    glm::vec3 direction;
+    Weapon type;
+    uint32_t raycastFlags;
+    glm::vec3 parentPlayersViewRotation;
+    int damage = 0;
+    int parentPlayerIndex = -1;
 };

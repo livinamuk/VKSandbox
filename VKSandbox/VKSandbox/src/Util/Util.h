@@ -3,16 +3,20 @@
 #include "HellTypes.h"
 #include <vector>
 #include <filesystem>
+#include <assimp/matrix3x3.h>
+#include <assimp/matrix4x4.h>
 
 namespace Util {
     // Math
-    glm::ivec2 WorldToScreenCoords(const glm::vec3& worldPos, const glm::mat4& viewProjection, int screenWidth, int screenHeight, bool flipY = false);
-    glm::vec3 Vec3Min(const glm::vec3& a, const glm::vec3& b);
-    glm::vec3 Vec3Max(const glm::vec3& a, const glm::vec3& b);
     int RandomInt(int min, int max);
+    void NormalizeWeights(std::vector<float>& weights); 
+    void InterpolateQuaternion(glm::quat& Out, const glm::quat& Start, const glm::quat& End, float pFactor);
     float FInterpTo(float current, float target, float deltaTime, float interpSpeed);
     float RandomFloat(float min, float max);
     float MapRange(float inValue, float minInRange, float maxInRange, float minOutRange, float maxOutRange);
+    glm::ivec2 WorldToScreenCoords(const glm::vec3& worldPos, const glm::mat4& viewProjection, int screenWidth, int screenHeight, bool flipY = false);
+    glm::vec3 Vec3Min(const glm::vec3& a, const glm::vec3& b);
+    glm::vec3 Vec3Max(const glm::vec3& a, const glm::vec3& b);
 
     // Raycasting
     glm::vec3 GetMouseRayDir(glm::mat4 projection, glm::mat4 view, int windowWidth, int windowHeight, int mouseX, int mouseY);
@@ -38,10 +42,12 @@ namespace Util {
     std::string Lowercase(std::string& str);
     std::string Uppercase(std::string& str);
     std::string ViewportModeToString(const ShadingMode& viewportMode);
-    std::string CameraTypeToString(const CameraView& cameraView);
+    std::string CameraViewToString(const CameraView& cameraView);
     std::string ViewportResizeStateToString(const ViewportResizeState& viewportResizeState);
 
     // File
+    const char* CopyConstChar(const char* text);
+    bool StrCmp(const char* queryA, const char* queryB);
     std::string GetFilename(const std::string& filepath);
     std::string GetFileName(const std::string& filepath);
     std::string RemoveFileExtension(const std::string& filename);
@@ -54,4 +60,18 @@ namespace Util {
 
     // Rendering
     void UpdateRenderItemAABB(RenderItem& renderItem);
+    AABB ComputeWorldAABB(glm::vec3& localAabbMin, glm::vec3& localAabbMax, glm::mat4& modelMatrix);
+
+    // Animation
+    float SmoothStep(float t);
+    float SmoothStepReverse(float t);
+    float SteepSlowDownCurve(float t);
+    float EaseOut(float t);
+    glm::mat4 Mat4InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ);
+    glm::mat4 Mat4InitRotateTransform(float RotateX, float RotateY, float RotateZ);
+    glm::mat4 Mat4InitTranslationTransform(float x, float y, float z);
+    AnimatedTransform BlendTransforms(const AnimatedTransform& transformA, const AnimatedTransform& transformB, float blendFactor);
+    AnimatedTransform BlendMultipleTransforms(const std::vector<AnimatedTransform>& transforms, const std::vector<float>& weights);
+    glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4& from);
+    glm::mat4 aiMatrix3x3ToGlm(const aiMatrix3x3& from);
 }

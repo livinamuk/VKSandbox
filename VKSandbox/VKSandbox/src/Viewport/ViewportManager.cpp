@@ -27,8 +27,8 @@ namespace ViewportManager {
 
     void UpdateViewports() {
         if (Editor::IsOpen()) {
-            float splitX = Editor::GetSplitX();
-            float splitY = Editor::GetSplitY();
+            float splitX = Editor::GetVerticalDividerXPos();
+            float splitY = Editor::GetHorizontalDividerYPos();
             g_viewports[0].SetPosition(glm::vec2(0.0f,   1.0f - splitY));  // Top-left
             g_viewports[1].SetPosition(glm::vec2(splitX, 1.0f - splitY));  // Top-right
             g_viewports[2].SetPosition(glm::vec2(0.0f,   0.0f));           // Bottom-left
@@ -44,7 +44,7 @@ namespace ViewportManager {
             for (int i = 0; i < 4; i++) {
                 g_viewports[i].SetViewportMode(Editor::GetViewportModeByIndex(i));
                 Editor::IsViewportOrthographic(i)
-                    ? g_viewports[i].SetOrthographic(1.0f, NEAR_PLANE, FAR_PLANE)
+                    ? g_viewports[i].SetOrthographic(g_viewports[i].GetOrthoSize(), NEAR_PLANE, FAR_PLANE)
                     : g_viewports[i].SetPerspective(1.0f, NEAR_PLANE, FAR_PLANE);
             }
         }

@@ -29,4 +29,27 @@ namespace Util {
         renderItem.aabbMin = glm::vec4(aabbMin, 0.0f);
         renderItem.aabbMax = glm::vec4(aabbMax, 0.0f);
     }
+
+    AABB ComputeWorldAABB(glm::vec3& localAabbMin, glm::vec3& localAabbMax, glm::mat4& modelMatrix) {
+        glm::vec3 worldAabbMin = glm::vec3(std::numeric_limits<float>::max());
+        glm::vec3 worldAabbMax = glm::vec3(-std::numeric_limits<float>::max());
+
+        std::vector<glm::vec3> corners = {
+            modelMatrix* glm::vec4(localAabbMin.x, localAabbMax.y, localAabbMax.z, 1.0f),
+            modelMatrix* glm::vec4(localAabbMax.x, localAabbMax.y, localAabbMax.z, 1.0f),
+            modelMatrix* glm::vec4(localAabbMin.x, localAabbMin.y, localAabbMax.z, 1.0f),
+            modelMatrix* glm::vec4(localAabbMax.x, localAabbMin.y, localAabbMax.z, 1.0f),
+            modelMatrix* glm::vec4(localAabbMin.x, localAabbMax.y, localAabbMin.z, 1.0f),
+            modelMatrix* glm::vec4(localAabbMax.x, localAabbMax.y, localAabbMin.z, 1.0f),
+            modelMatrix* glm::vec4(localAabbMin.x, localAabbMin.y, localAabbMin.z, 1.0f),
+            modelMatrix* glm::vec4(localAabbMax.x, localAabbMin.y, localAabbMin.z, 1.0f)
+        };
+
+        for (glm::vec3& corner : corners) {
+            worldAabbMin = glm::min(worldAabbMin, corner);
+            worldAabbMax = glm::max(worldAabbMax, corner);
+        }
+
+        return AABB(worldAabbMin, worldAabbMax);
+    }
 }

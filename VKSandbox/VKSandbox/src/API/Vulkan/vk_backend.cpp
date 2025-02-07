@@ -23,30 +23,28 @@ namespace VulkanBackEnd {
         else {
             std::cout << "Made it to the end!\n";
 
-
-
             // put this shit somewhere better
-            VkFenceCreateInfo uploadFenceCreateInfo = {};
-            uploadFenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-            uploadFenceCreateInfo.flags = 0;
-            uploadFenceCreateInfo.pNext = nullptr;
-
-            VkDevice device = VulkanDeviceManager::GetDevice();
-            vkCreateFence(device, &uploadFenceCreateInfo, nullptr, &g_uploadContext.uploadFence);
-
-            VkCommandPoolCreateInfo uploadCommandPoolInfo = {};
-            uploadCommandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-            uploadCommandPoolInfo.flags = 0;
-            uploadCommandPoolInfo.pNext = nullptr;
-
-            vkCreateCommandPool(device, &uploadCommandPoolInfo, nullptr, &g_uploadContext.commandPool);
-            VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
-            commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-            commandBufferAllocateInfo.commandPool = g_uploadContext.commandPool;
-            commandBufferAllocateInfo.commandBufferCount = 1;
-            commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-            commandBufferAllocateInfo.pNext = nullptr;
-            vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &g_uploadContext.commandBuffer);
+            //VkFenceCreateInfo uploadFenceCreateInfo = {};
+            //uploadFenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+            //uploadFenceCreateInfo.flags = 0;
+            //uploadFenceCreateInfo.pNext = nullptr;
+            //
+            //VkDevice device = VulkanDeviceManager::GetDevice();
+            //vkCreateFence(device, &uploadFenceCreateInfo, nullptr, &g_uploadContext.uploadFence);
+            //
+            //VkCommandPoolCreateInfo uploadCommandPoolInfo = {};
+            //uploadCommandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+            //uploadCommandPoolInfo.flags = 0;
+            //uploadCommandPoolInfo.pNext = nullptr;
+            //
+            //vkCreateCommandPool(device, &uploadCommandPoolInfo, nullptr, &g_uploadContext.commandPool);
+            //VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
+            //commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+            //commandBufferAllocateInfo.commandPool = g_uploadContext.commandPool;
+            //commandBufferAllocateInfo.commandBufferCount = 1;
+            //commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            //commandBufferAllocateInfo.pNext = nullptr;
+            //vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &g_uploadContext.commandBuffer);
 
             return true;
         }

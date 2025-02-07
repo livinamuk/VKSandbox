@@ -2,8 +2,15 @@
 #include <glad/glad.h>
 #include <cstdint>
 
-struct SSBO {
+struct OpenGLSSBO {
 public:
+
+    OpenGLSSBO() = default;
+
+    OpenGLSSBO(size_t size) {
+        PreAllocate(size);
+    }
+
     uint32_t GetHandle() const {
         return m_handle;
     }

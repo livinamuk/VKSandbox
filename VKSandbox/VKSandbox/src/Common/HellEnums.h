@@ -13,6 +13,8 @@ enum class WindowedMode {
 
 enum Alignment {
     CENTERED,
+    CENTERED_HORIZONTAL,
+    CENTERED_VERTICAL,
     TOP_LEFT,
     TOP_RIGHT,
     BOTTOM_LEFT,
@@ -94,11 +96,14 @@ enum class ShadingMode {
 
 enum class CameraView {
     PERSPECTIVE,
+    ORTHO,
     FRONT,
     BACK,
-    TOP,
+    RIGHT,
     LEFT,
-    RIGHT
+    TOP,
+    BOTTOM,
+    UNDEFINED
 };
 
 enum struct ViewportResizeState {
@@ -107,3 +112,50 @@ enum struct ViewportResizeState {
     RESIZING_VERTICAL,
     RESIZING_HORIZONTAL_VERTICAL,
 };
+
+enum WeaponAction {
+    IDLE = 0,
+    FIRE,
+    RELOAD,
+    RELOAD_FROM_EMPTY,
+    DRAW_BEGIN,
+    DRAWING,
+    SPAWNING,
+    RELOAD_SHOTGUN_BEGIN,
+    RELOAD_SHOTGUN_SINGLE_SHELL,
+    RELOAD_SHOTGUN_DOUBLE_SHELL,
+    RELOAD_SHOTGUN_END,
+    RELOAD_REVOLVER_BEGIN,
+    RELOAD_REVOLVER_LOOP,
+    RELOAD_REVOLVER_END,
+    ADS_IN,
+    ADS_OUT,
+    ADS_IDLE,
+    ADS_FIRE,
+    MELEE
+};
+
+enum class ShellEjectionState {
+    IDLE, AWAITING_SHELL_EJECTION
+};
+
+enum InputType {
+    KEYBOARD_AND_MOUSE,
+    CONTROLLER
+};
+
+// Fix me
+
+enum VB_TYPES {
+    INDEX_BUFFER,
+    POS_VB,
+    NORMAL_VB,
+    TEXCOORD_VB,
+    TANGENT_VB,
+    BITANGENT_VB,
+    BONE_VB,
+    SMOOTH_NORMAL_VB,
+    NUM_VBs
+};
+
+enum Weapon { KNIFE = 0, GLOCK, SHOTGUN, AKS74U, MP7, WEAPON_COUNT };

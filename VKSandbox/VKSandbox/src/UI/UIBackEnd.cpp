@@ -101,6 +101,12 @@ namespace UIBackEnd {
             location.x -= texWidth;
             location.y -= texHeight;
             break;
+        case Alignment::CENTERED_HORIZONTAL:
+            location.x -= texWidth * 0.5f;
+            break;
+        case Alignment::CENTERED_VERTICAL:
+            location.y -= texHeight * 0.5f;
+            break;
         }
         // Calculate normalized device coordinates for quad
         const Resolutions& resolutions = Config::GetResolutions();

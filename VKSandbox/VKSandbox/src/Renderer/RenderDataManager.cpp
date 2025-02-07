@@ -14,6 +14,7 @@ namespace RenderDataManager {
     RendererData g_rendererData;
     std::vector<ViewportData> g_viewportData;
     std::vector<RenderItem> g_instanceData;
+    uint32_t g_baseSkinnedVertex;
 
     void UpdateViewportData();
     void UpdateRendererData();
@@ -27,6 +28,8 @@ namespace RenderDataManager {
         UpdateViewportData();
         UpdateRendererData();
         UpdateDrawCommandsSet();
+
+
     }
 
     void UpdateViewportData() {
@@ -35,13 +38,18 @@ namespace RenderDataManager {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
             if (!viewport->IsVisible()) continue;
 
-            Camera* camera = Editor::IsOpen() ? Editor::GetCameraByIndex(i) : Game::GetLocalPlayerCameraByIndex(i);
-            if (!camera) continue;
+            glm::mat4 viewMatrix = glm::mat4(1);
+            if (Editor::IsOpen()) {
+                viewMatrix = Editor::GetViewportViewMatrix(i);
+            }
+            else {
+                viewMatrix = Game::GetLocalPlayerCameraByIndex(i)->GetViewMatrix();
+            }
 
             g_viewportData[i].projection = viewport->GetProjectionMatrix();
             g_viewportData[i].inverseProjection = glm::inverse(g_viewportData[i].projection);
-            g_viewportData[i].view = camera->GetViewMatrix();
-            g_viewportData[i].inverseView = camera->GetInverseViewMatrix();
+            g_viewportData[i].view = viewMatrix;
+            g_viewportData[i].inverseView = glm::inverse(g_viewportData[i].view);
             g_viewportData[i].projectionView = g_viewportData[i].projection * g_viewportData[i].view;
             g_viewportData[i].inverseProjectionView = glm::inverse(g_viewportData[i].projectionView);
             g_viewportData[i].skyboxProjectionView = viewport->GetPerpsectiveMatrix() * g_viewportData[i].view;
@@ -165,17 +173,14 @@ namespace RenderDataManager {
         // Put this somewhere better
         // Put this somewhere better
         // Put this somewhere better
-        Frustum frustum;    
+        Frustum frustum;
 
         // Clear any commands from last frame
         for (int i = 0; i < 4; i++) {
             drawCommands.perViewport[i].clear();
         }
 
-        // Iterate the local players and build the draw commands        SHOULD BE VIEWPORT COUNT!!!!!!!!!!!!!
-        // Iterate the local players and build the draw commands        SHOULD BE VIEWPORT COUNT!!!!!!!!!!!!!
-        // Iterate the local players and build the draw commands        SHOULD BE VIEWPORT COUNT!!!!!!!!!!!!!
-        // Iterate the local players and build the draw commands        SHOULD BE VIEWPORT COUNT!!!!!!!!!!!!!
+        // Iterate the viewports and build the draw commands
         for (int i = 0; i < 4; i++) {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
             if (!viewport->IsVisible()) continue;
@@ -205,12 +210,23 @@ namespace RenderDataManager {
     }
 
     int EncodeBaseInstance(int playerIndex, int instanceOffset) {
-        return (playerIndex << PLAYER_INDEX_SHIFT) | instanceOffset;
+        return (playerIndex << VIEWPORT_INDEX_SHIFT) | instanceOffset;
     }
 
     void DecodeBaseInstance(int baseInstance, int& playerIndex, int& instanceOffset) {
-        playerIndex = baseInstance >> PLAYER_INDEX_SHIFT;
-        instanceOffset = baseInstance & ((1 << PLAYER_INDEX_SHIFT) - 1);
+        playerIndex = baseInstance >> VIEWPORT_INDEX_SHIFT;
+        instanceOffset = baseInstance & ((1 << VIEWPORT_INDEX_SHIFT) - 1);
+    }
+
+    void ResetBaseSkinnedVertex() {
+        g_baseSkinnedVertex = 0;
+    }
+    void IncrementBaseSkinnedVertex(uint32_t vertexCount) {
+        g_baseSkinnedVertex += vertexCount;
+    }
+
+    uint32_t GetBaseSkinnedVertex() {
+        return g_baseSkinnedVertex;
     }
 
     const RendererData& GetRendererData() {

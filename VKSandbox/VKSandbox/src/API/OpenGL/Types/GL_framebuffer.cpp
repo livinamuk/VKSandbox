@@ -37,6 +37,8 @@ void OpenGLFrameBuffer::CreateAttachment(const char* name, GLenum internalFormat
     ColorAttachment& colorAttachment = m_colorAttachments.emplace_back();
     colorAttachment.name = name;
     colorAttachment.internalFormat = internalFormat;
+    colorAttachment.format = OpenGLUtil::GLInternalFormatToGLFormat(internalFormat);
+    colorAttachment.type = OpenGLUtil::GLInternalFormatToGLType(internalFormat);
     glCreateTextures(GL_TEXTURE_2D, 1, &colorAttachment.handle);
     glTextureStorage2D(colorAttachment.handle, 1, internalFormat, m_width, m_height);
     glTextureParameteri(colorAttachment.handle, GL_TEXTURE_MIN_FILTER, minFilter);
@@ -46,8 +48,8 @@ void OpenGLFrameBuffer::CreateAttachment(const char* name, GLenum internalFormat
     glNamedFramebufferTexture(m_handle, GL_COLOR_ATTACHMENT0 + m_colorAttachments.size() - 1, colorAttachment.handle, 0); 
     std::string debugLabel = "Texture (FBO: " + std::string(m_name) + " Tex: " + std::string(name) + ")";
     glObjectLabel(GL_TEXTURE, colorAttachment.handle, static_cast<GLsizei>(debugLabel.length()), debugLabel.c_str());
-
 }
+
 
 void OpenGLFrameBuffer::CreateDepthAttachment(GLenum internalFormat, GLenum minFilter, GLenum magFilter) {
     m_depthAttachment.internalFormat = internalFormat;
@@ -84,68 +86,85 @@ void OpenGLFrameBuffer::DrawBuffer(const char* attachmentName) {
     }
 }
 
-/*void GLFrameBuffer::ClearAttachmentR(const char* attachmentName, float r) {
-    for (size_t i = 0; i < m_colorAttachments.size(); i++) {
-        if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
-            glNamedFramebufferDrawBuffer(m_handle, GL_COLOR_ATTACHMENT0 + i);
-            glClearNamedFramebufferfv(m_handle, GL_COLOR, static_cast<GLint>(i), &r);
-        }
-    }
-}
-void GLFrameBuffer::ClearAttachmentRTEST(const char* attachmentName, float r) {
-    for (size_t i = 0; i < m_colorAttachments.size(); i++) {
-        if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
-            glBindFramebuffer(GL_FRAMEBUFFER, m_handle); // Ensure framebuffer is active
-            glViewport(0, 0, m_width, m_height);         // Ensure viewport is set
-
-            GLfloat clearValues[1] = { r };
-
-            glNamedFramebufferDrawBuffer(m_handle, GL_COLOR_ATTACHMENT0 + i); // Ensure it's active
-            glClearNamedFramebufferfv(m_handle, GL_COLOR, static_cast<GLint>(i), clearValues);
-            glNamedFramebufferDrawBuffer(m_handle, GL_NONE); // Restore state
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0); // Unbind
-        }
-    }
-}
-
-void GLFrameBuffer::ClearAttachmentRG(const char* attachmentName, float r, float g) {
-    for (size_t i = 0; i < m_colorAttachments.size(); i++) {
-        if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
-            const GLfloat clearColor[2] = { r, g };
-            glNamedFramebufferDrawBuffer(m_handle, GL_COLOR_ATTACHMENT0 + i);
-            glClearNamedFramebufferfv(m_handle, GL_COLOR, static_cast<GLint>(i), clearColor);
-        }
-    }
-}
-
-void GLFrameBuffer::ClearAttachmentRGB(const char* attachmentName, float r, float g, float b) {
-    for (size_t i = 0; i < m_colorAttachments.size(); i++) {
-        if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
-            const GLfloat clearColor[3] = { r, g, b };
-            glNamedFramebufferDrawBuffer(m_handle, GL_COLOR_ATTACHMENT0 + i);
-            glClearNamedFramebufferfv(m_handle, GL_COLOR, static_cast<GLint>(i), clearColor);
-        }
-    }
-}
-
-void GLFrameBuffer::ClearAttachmentRGBA(const char* attachmentName, float r, float g, float b, float a) {
-    for (size_t i = 0; i < m_colorAttachments.size(); i++) {
-        if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
-            const GLfloat clearColor[4] = { r, g, b, a };
-            glNamedFramebufferDrawBuffer(m_handle, GL_COLOR_ATTACHMENT0 + i);
-            glClearNamedFramebufferfv(m_handle, GL_COLOR, static_cast<GLint>(i), clearColor);
-        }
-    }
-}
-*/
-
-void OpenGLFrameBuffer::ClearAttachment(const char* attachmentName, float r, float g, float b, float a) {
+void OpenGLFrameBuffer::ClearAttachment(const char* attachmentName, GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
     for (int i = 0; i < m_colorAttachments.size(); i++) {
         if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
-            glDrawBuffer(GL_COLOR_ATTACHMENT0 + i);
-            glClearColor(r, g, b, a);
-            glClear(GL_COLOR_BUFFER_BIT);
+            GLuint texture = m_colorAttachments[i].handle;
+            GLenum internalFormat = m_colorAttachments[i].internalFormat;
+            GLenum format = m_colorAttachments[i].format;
+            GLenum type = m_colorAttachments[i].type;
+            GLfloat clearColor[4] = { r, g, b, a };
+            glClearTexSubImage(texture, 0, 0, 0, 0, GetWidth(), GetHeight(), 1, format, type, clearColor);
+            return;
+        }
+    }
+}
+
+void OpenGLFrameBuffer::ClearAttachmentI(const char* attachmentName, GLint r, GLint g, GLint b, GLint a) {
+    for (int i = 0; i < m_colorAttachments.size(); i++) {
+        if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
+            GLuint texture = m_colorAttachments[i].handle;
+            GLenum internalFormat = m_colorAttachments[i].internalFormat;
+            GLenum format = m_colorAttachments[i].format;
+            GLenum type = m_colorAttachments[i].type;
+            GLint clearColor[4] = { r, g, b, a };
+            glClearTexSubImage(texture, 0, 0, 0, 0, GetWidth(), GetHeight(), 1, format, type, clearColor);
+            return;
+        }
+    }
+}
+
+void OpenGLFrameBuffer::ClearAttachmentUI(const char* attachmentName, GLint r, GLint g, GLint b, GLint a) {
+    for (int i = 0; i < m_colorAttachments.size(); i++) {
+        if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
+            GLuint texture = m_colorAttachments[i].handle;
+            GLenum internalFormat = m_colorAttachments[i].internalFormat;
+            GLenum format = m_colorAttachments[i].format;
+            GLenum type = m_colorAttachments[i].type;
+            GLuint clearColor[4] = { r, g, b, a };
+            glClearTexSubImage(texture, 0, 0, 0, 0, GetWidth(), GetHeight(), 1, format, type, clearColor);
+            return;
+        }
+    }
+}
+
+void OpenGLFrameBuffer::ClearAttachmenSubRegion(const char* attachmentName, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
+    for (int i = 0; i < m_colorAttachments.size(); i++) {
+        if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
+            GLuint texture = m_colorAttachments[i].handle;
+            GLenum internalFormat = m_colorAttachments[i].internalFormat;
+            GLenum format = m_colorAttachments[i].format;
+            GLenum type = m_colorAttachments[i].type;
+            GLfloat clearColor[4] = { r, g, b, a };
+            glClearTexSubImage(texture, 0, xOffset, yOffset, 0, width, height, 1, format, type, clearColor);
+            return;
+        }
+    }
+}
+
+void OpenGLFrameBuffer::ClearAttachmenSubRegionInt(const char* attachmentName, GLint xOffset, GLint yOffset, GLsizei width, GLsizei  height, GLint r, GLint g, GLint b, GLint a) {
+    for (int i = 0; i < m_colorAttachments.size(); i++) {
+        if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
+            GLuint texture = m_colorAttachments[i].handle;
+            GLenum internalFormat = m_colorAttachments[i].internalFormat;
+            GLenum format = m_colorAttachments[i].format;
+            GLenum type = m_colorAttachments[i].type;
+            GLuint clearColor[4] = { r, g, b, a };
+            glClearTexSubImage(texture, 0, xOffset, yOffset, 0, width, height, 1, format, type, clearColor);
+            return;
+        }
+    }
+}
+
+void OpenGLFrameBuffer::ClearAttachmenSubRegionUInt(const char* attachmentName, GLint xOffset, GLint yOffset, GLsizei width, GLsizei  height, GLuint r, GLuint g, GLuint b, GLuint a) {
+    for (int i = 0; i < m_colorAttachments.size(); i++) {
+        if (StrCmp(attachmentName, m_colorAttachments[i].name)) {
+            GLuint texture = m_colorAttachments[i].handle;
+            GLenum internalFormat = m_colorAttachments[i].internalFormat;
+            GLenum format = m_colorAttachments[i].format;
+            GLenum type = m_colorAttachments[i].type;
+            GLuint clearColor[4] = { r, g, b, a };
+            glClearTexSubImage(texture, 0, xOffset, yOffset, 0, width, height, 1, format, type, clearColor);
             return;
         }
     }

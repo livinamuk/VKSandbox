@@ -1,6 +1,13 @@
 #include "Util.h"
 
 namespace Util {
+    bool StrCmp(const char* queryA, const char* queryB) {
+        if (strcmp(queryA, queryB) == 0)
+            return true;
+        else
+            return false;
+    }
+
     std::string Lowercase(std::string& str) {
         std::string result;
         for (auto& c : str) {
@@ -50,15 +57,17 @@ namespace Util {
         }
     }
 
-    std::string CameraTypeToString(const CameraView& cameraView) {
+    std::string CameraViewToString(const CameraView& cameraView) {
         switch (cameraView) {
         case CameraView::PERSPECTIVE:   return "PERSPECTIVE";
+        case CameraView::ORTHO:         return "ORTHOGRAPHIC";
         case CameraView::FRONT:         return "FRONT";
         case CameraView::BACK:          return "BACK";
         case CameraView::TOP:           return "TOP";
+        case CameraView::BOTTOM:        return "BOTTOM";
         case CameraView::LEFT:          return "LEFT";
         case CameraView::RIGHT:         return "RIGHT";
-        default:                        return "UNDEFINED";
+        default:                        return "UNDEFINED"; 
         }
     }
 
@@ -70,5 +79,11 @@ namespace Util {
         case ViewportResizeState::RESIZING_HORIZONTAL_VERTICAL:     return "RESIZING_HORIZONTAL_VERTICAL";
         default:                                                    return "UNDEFINED";
         }
+    }
+
+    const char* CopyConstChar(const char* text) {
+        char* b = new char[strlen(text) + 1] {};
+        std::copy(text, text + strlen(text), b);
+        return b;
     }
 }

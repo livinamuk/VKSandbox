@@ -28,6 +28,12 @@ namespace OpenGLBackEnd {
     GLuint g_vertexDataVAO = 0;
     GLuint g_vertexDataVBO = 0;
     GLuint g_vertexDataEBO = 0;
+    GLuint g_weightedVertexDataVAO = 0;
+    GLuint g_weightedVertexDataVBO = 0;
+    GLuint g_weightedVertexDataEBO = 0;
+    GLuint g_skinnedVertexDataVAO = 0;
+    GLuint g_skinnedVertexDataVBO = 0;
+    GLuint g_allocatedSkinnedVertexBufferSize = 0;
     std::vector<GLuint64> g_bindlessTextureIDs;
 
     void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei /*length*/, const char* message, const void* /*userParam*/);
@@ -113,6 +119,72 @@ namespace OpenGLBackEnd {
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+    }
+
+    void OpenGLBackEnd::UploadWeightedVertexData(std::vector<WeightedVertex>& vertices, std::vector<uint32_t>& indices) {
+
+        if (vertices.empty() || indices.empty()) {
+            return;
+        }
+
+        if (g_weightedVertexDataVAO != 0) {
+            glDeleteVertexArrays(1, &g_weightedVertexDataVAO);
+            glDeleteBuffers(1, &g_weightedVertexDataVBO);
+            glDeleteBuffers(1, &g_weightedVertexDataEBO);
+        }
+
+        glGenVertexArrays(1, &g_weightedVertexDataVAO);
+        glGenBuffers(1, &g_weightedVertexDataVBO);
+        glGenBuffers(1, &g_weightedVertexDataEBO);
+
+        glBindVertexArray(g_weightedVertexDataVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, g_weightedVertexDataVBO);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(WeightedVertex), &vertices[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_weightedVertexDataEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), &indices[0], GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(WeightedVertex), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(WeightedVertex), (void*)offsetof(WeightedVertex, normal));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(WeightedVertex), (void*)offsetof(WeightedVertex, uv));
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(WeightedVertex), (void*)offsetof(WeightedVertex, tangent));
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_INT, sizeof(WeightedVertex), (void*)offsetof(WeightedVertex, boneID));
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(WeightedVertex), (void*)offsetof(WeightedVertex, weight));
+
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    void OpenGLBackEnd::AllocateSkinnedVertexBufferSpace(int vertexCount) {
+        if (g_skinnedVertexDataVAO == 0) {
+            glGenVertexArrays(1, &g_skinnedVertexDataVAO);
+        }
+        if (g_allocatedSkinnedVertexBufferSize < vertexCount * sizeof(Vertex)) {
+            if (g_skinnedVertexDataVBO != 0) {
+                glDeleteBuffers(1, &g_skinnedVertexDataVBO);
+            }
+            glBindVertexArray(g_skinnedVertexDataVAO);
+            glGenBuffers(1, &g_skinnedVertexDataVBO);
+            glBindBuffer(GL_ARRAY_BUFFER, g_skinnedVertexDataVBO);
+            glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+            glEnableVertexAttribArray(3);
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+            glEnableVertexAttribArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            g_allocatedSkinnedVertexBufferSize = vertexCount * sizeof(Vertex);
+        }
     }
 
     void SetMousePickHandles(GLuint frameBufferHandle, GLuint attachmentSlot) {
@@ -325,22 +397,6 @@ namespace OpenGLBackEnd {
         g_textureBakingPBOs.clear();
     }
 
-    GLuint GetVertexDataVAO() {
-        return g_vertexDataVAO;
-    }
-
-    GLuint GetVertexDataVBO() {
-        return g_vertexDataVBO;
-    }
-
-    GLuint GetVertexDataEBO() {
-        return g_vertexDataEBO;
-    }
-
-    const std::vector<GLuint64>& GetBindlessTextureIDs() {
-        return g_bindlessTextureIDs;
-    }
-
     void UpdateBindlessTextures() {
         g_bindlessTextureIDs.clear();
         g_bindlessTextureIDs.reserve(AssetManager::GetTextureCount());
@@ -389,4 +445,15 @@ namespace OpenGLBackEnd {
         case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
         }    std::cout << "\n\n\n";
     }
+
+    GLuint GetVertexDataVAO() { return g_vertexDataVAO; }
+    GLuint GetVertexDataVBO() { return g_vertexDataVBO; }
+    GLuint GetVertexDataEBO() { return g_vertexDataEBO; }
+    GLuint GetWeightedVertexDataVAO() { return g_weightedVertexDataVAO; }
+    GLuint GetWeightedVertexDataVBO() { return g_weightedVertexDataVBO; }
+    GLuint GetWeightedVertexDataEBO() { return g_weightedVertexDataEBO; }
+    GLuint GetSkinnedVertexDataVAO() { return g_skinnedVertexDataVAO; }
+    GLuint GetSkinnedVertexDataVBO() { return g_skinnedVertexDataVBO; }
+    const std::vector<GLuint64>& GetBindlessTextureIDs() { return g_bindlessTextureIDs; }
+
 }

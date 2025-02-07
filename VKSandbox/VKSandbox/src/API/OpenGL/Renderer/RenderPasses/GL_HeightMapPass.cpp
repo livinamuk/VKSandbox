@@ -1,0 +1,85 @@
+#include "../GL_renderer.h" 
+#include "../GL_renderer_util.h" 
+#include "../../GL_backend.h"
+#include "../../Types/GL_heightmapMesh.h"
+#include "../Config/Config.h"
+#include "AssetManagement/AssetManager.h"
+#include "Viewport/ViewportManager.h"
+#include "Renderer/RenderDataManager.h"
+
+namespace OpenGLRenderer {
+
+    OpenGLHeightMapMesh g_heightMapMesh;
+
+    void HeightMapPass() {
+        OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
+        OpenGLFrameBuffer* heightmapFBO = GetFrameBuffer("HeightMap");
+        OpenGLShader* imageDataShader = GetShader("HeightMapImageGeneration");
+        OpenGLShader* vertexBufferShader = GetShader("HeightMapVertexGeneration");
+        OpenGLShader* colorShader = GetShader("HeightMapColor");
+
+        if (!gBuffer) return;
+        if (!heightmapFBO) return;
+        if (!imageDataShader) return;
+        if (!vertexBufferShader) return;
+
+        // Create vertex buffer if it doesn't exist
+        int heightMapSize = 256;
+        if (g_heightMapMesh.GetVAO() == 0) {
+            g_heightMapMesh.Create(heightMapSize);
+        }
+
+        // Create height map data
+        imageDataShader->Use();
+        glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
+        glDispatchCompute((heightmapFBO->GetWidth() + 7) / 8, (heightmapFBO->GetHeight() + 7) / 8, 1);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+        // Write the data to a vertex buffer buffer
+        vertexBufferShader->Use();
+        glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
+
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, g_heightMapMesh.GetVBO());
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, g_heightMapMesh.GetEBO());
+
+        // Dispatch compute shader
+        glDispatchCompute((heightMapSize + 15) / 16, (heightMapSize + 15) / 16, 1);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+
+        gBuffer->Bind();
+        gBuffer->DrawBuffers({ "BaseColor", "Normal", "RMA", "MousePick", "WorldSpacePosition" });
+        colorShader->Use();
+
+        Transform transform;
+        transform.position = glm::vec3(0, -5, 0);
+        transform.scale = glm::vec3(0.25f, 5.0, 0.25f);
+        glm::mat4 modelMatrix = transform.to_mat4();
+        glm::mat4 inverseModelMatrix = glm::inverse(modelMatrix);
+
+        colorShader->SetMat4("modelMatrix", modelMatrix);
+        colorShader->SetMat4("inverseModelMatrix", inverseModelMatrix);
+
+        glEnable(GL_DEPTH_TEST);
+        glPointSize(8);
+
+        Material* material = AssetManager::GetDefaultMaterial();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, AssetManager::GetTextureByIndex(material->m_basecolor)->GetGLTexture().GetHandle());
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, AssetManager::GetTextureByIndex(material->m_normal)->GetGLTexture().GetHandle());
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, AssetManager::GetTextureByIndex(material->m_rma)->GetGLTexture().GetHandle());
+
+        int indexCount = (heightMapSize - 1) * (heightMapSize - 1) * 6;
+        glBindVertexArray(g_heightMapMesh.GetVAO());
+
+        for (int i = 0; i < 4; i++) {
+            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+            if (viewport->IsVisible()) {
+                OpenGLRendererUtil::SetViewport(gBuffer, viewport);
+                glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * 0), 1, 0, i);
+            }
+        }
+        glBindVertexArray(0);
+    }
+}

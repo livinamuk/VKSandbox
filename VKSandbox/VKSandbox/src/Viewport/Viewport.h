@@ -21,7 +21,7 @@ public:
     void Show();
     void Hide();
     void SetViewportMode(ShadingMode viewportMode);
-    void NextViewportMode();
+    //void NextViewportMode();
     void SetOrthoSize(float value);
     const bool IsVisible() const;
     const bool IsOrthographic() const;

@@ -21,7 +21,7 @@ namespace Gizmo {
 
     float g_gizmoSize = 1.0f;
     float g_armLength = 1.0f;
-    glm::vec3 g_gizmoPosition = glm::vec3(2.76f, 0.0f, 6.2f);// glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 g_gizmoPosition = glm::vec3(0.0, 0.0f, 0.0f);// glm::vec3(0.0f, 0.0f, 0.0f);
     std::vector<GizmoRenderItem> g_renderItems[4];
     std::vector<DetachedMesh> g_meshes;
     GizmoFlag g_hoverFlag = GizmoFlag::NONE;
@@ -94,12 +94,14 @@ namespace Gizmo {
     void UpdateInput() {
         int viewportIndex = Editor::GetHoveredViewportIndex();
         const Viewport* viewport = ViewportManager::GetViewportByIndex(viewportIndex);
-        const Camera* camera = Editor::GetCameraByIndex(viewportIndex);
+        //const Camera* camera = Editor::GetCameraByIndex(viewportIndex);
         const glm::vec3 rayOrigin = Editor::GetMouseRayOriginByViewportIndex(viewportIndex);
         const glm::vec3 rayDir = Editor::GetMouseRayDirectionByViewportIndex(viewportIndex);
 
+        glm::mat4 viewMatrix = Editor::GetViewportViewMatrix(viewportIndex);
+
         glm::mat4 projectionMatrix = viewport->GetProjectionMatrix();
-        glm::mat4 viewMatrix = camera->GetViewMatrix();
+        //glm::mat4 viewMatrix = camera->GetViewMatrix();
         glm::mat4 projectionView = projectionMatrix * viewMatrix;
         glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
         glm::vec3 camRight = glm::vec3(inverseViewMatrix[0]);
@@ -237,9 +239,11 @@ namespace Gizmo {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
             if (!viewport->IsVisible()) continue;
 
-            Camera* camera = Editor::GetCameraByIndex(i);
+            //Camera* camera = Editor::GetCameraByIndex(i);
             glm::mat4 projectionMatrix = viewport->GetProjectionMatrix();
-            glm::mat4 viewMatrix = camera->GetViewMatrix();
+
+            glm::mat4 viewMatrix = Editor::GetViewportViewMatrix(i);
+            //glm::mat4 viewMatrix = camera->GetViewMatrix();
             glm::mat4 projectionView = projectionMatrix * viewMatrix;
             glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
             glm::vec3 camRight = glm::vec3(inverseViewMatrix[0]);
@@ -452,7 +456,8 @@ namespace Gizmo {
 
     float GetGizmoScalingFactorByViewportIndex(int viewportIndex) {
         Viewport* viewport = ViewportManager::GetViewportByIndex(viewportIndex);
-        Camera* camera = Editor::GetCameraByIndex(viewportIndex);
+
+       // Camera* camera = Editor::GetCameraByIndex(viewportIndex);
         const Resolutions& resolutions = Config::GetResolutions();
 
         float desiredGizmoHeightPixels = 75.0f;
@@ -474,10 +479,12 @@ namespace Gizmo {
             return gizmoHeightInWorld;
         }
         else {
-            float distance = glm::length(g_gizmoPosition - camera->GetPosition());
-            float fov = viewport->GetPerspectiveFOV();
-            float gizmoHeightInWorld = (desiredGizmoHeightPixels * 2.0f * distance * tan(fov * 0.5f)) / viewportHeight;
-            return gizmoHeightInWorld;
+           //float distance = glm::length(g_gizmoPosition - camera->GetPosition());
+           //float fov = viewport->GetPerspectiveFOV();
+           //float gizmoHeightInWorld = (desiredGizmoHeightPixels * 2.0f * distance * tan(fov * 0.5f)) / viewportHeight;
+           //return gizmoHeightInWorld;
+
+
             // Old approach
             // float screenFraction = 0.1f;
             // float distance = glm::length(g_gizmoPosition - camera->GetPosition());

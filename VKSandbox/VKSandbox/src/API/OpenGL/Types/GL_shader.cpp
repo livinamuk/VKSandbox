@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "BackEnd/BackEnd.h"
 
 void ParseFile(const std::string& filepath, std::string& outputString, std::vector<std::string>& lineToFile, std::vector<std::string>& includedPaths);
 int GetErrorLineNumber(const std::string& error);
@@ -231,6 +232,7 @@ void ParseFile(const std::string& filepath, std::string& outputString, std::vect
     std::ifstream file(filepath);
     std::string line;
     int lineNumber = 0;
+    bool versionInserted = false;
     while (std::getline(file, line)) {
         // Handle includes
         if (line.find("#include") != std::string::npos) {
@@ -247,6 +249,13 @@ void ParseFile(const std::string& filepath, std::string& outputString, std::vect
         else {
             outputString += line + "\n";
             lineToFile.emplace_back(filename + " (line " + std::to_string(lineNumber++) + ")");
+
+            // Insert the define after the first #version directive
+            if (BackEnd::RenderDocFound() && !versionInserted && line.rfind("#version", 0) == 0) {
+                outputString += "#define ENABLE_BINDLESS 0\n";
+                lineToFile.emplace_back(filename + " (line " + std::to_string(lineNumber++) + ")");
+                versionInserted = true;
+            }
         }
     }
 }

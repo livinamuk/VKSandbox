@@ -30,7 +30,15 @@ namespace OpenGLBackEnd {
 
     // Buffers
     void UploadVertexData(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
+    void UploadWeightedVertexData(std::vector<WeightedVertex>& vertices, std::vector<uint32_t>& indices);
+    void AllocateSkinnedVertexBufferSpace(int vertexCount);
+
     GLuint GetVertexDataVAO();
     GLuint GetVertexDataVBO();
     GLuint GetVertexDataEBO();
+    GLuint GetWeightedVertexDataVAO();
+    GLuint GetWeightedVertexDataVBO();
+    GLuint GetWeightedVertexDataEBO();
+    GLuint GetSkinnedVertexDataVAO();
+    GLuint GetSkinnedVertexDataVBO();
 }

@@ -127,12 +127,14 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
   <ItemGroup>
     <ClCompile Include="src\API\OpenGL\GL_backend.cpp" />
     <ClCompile Include="src\API\OpenGL\GL_util.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\ComputePasses\GL_ComputeSkinningPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer_util.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_DebugPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_EditorPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_GeometryPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_HairPass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_HeightMapPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_LightingPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_LoadingScreen.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_rasterizerStates.cpp" />
@@ -140,6 +142,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_UIPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_cubemapView.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_framebuffer.cpp" />
+    <ClCompile Include="src\API\OpenGL\Types\GL_heightmapMesh.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_shader.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_texture.cpp" />
     <ClCompile Include="src\API\Vulkan\Managers\vk_command_manager.cpp" />
@@ -157,6 +160,13 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\API\Vulkan\vk_backend.cpp" />
     <ClCompile Include="src\API\Vulkan\Renderer\vk_renderer.cpp" />
     <ClCompile Include="src\API\Vulkan\vk_util.cpp" />
+    <ClCompile Include="src\AssetManagement\AssetManager_animation.cpp" />
+    <ClCompile Include="src\AssetManagement\AssetManager_material.cpp" />
+    <ClCompile Include="src\AssetManagement\AssetManager_mesh.cpp" />
+    <ClCompile Include="src\AssetManagement\AssetManager_model.cpp" />
+    <ClCompile Include="src\AssetManagement\AssetManager_skinnedMesh.cpp" />
+    <ClCompile Include="src\AssetManagement\AssetManager_skinnedModel.cpp" />
+    <ClCompile Include="src\AssetManagement\AssetManager_texture.cpp" />
     <ClCompile Include="src\BackEnd\BackEnd.cpp" />
     <ClCompile Include="src\BackEnd\GLFWIntegration.cpp" />
     <ClCompile Include="src\Camera\Frustum.cpp" />
@@ -164,12 +174,16 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\AssetManagement\BakeQueue.cpp" />
     <ClCompile Include="src\Core\Scene.cpp" />
+    <ClCompile Include="src\Core\WeaponManager.cpp" />
     <ClCompile Include="src\Editor\Editor_debug.cpp" />
     <ClCompile Include="src\Editor\Editor_camera.cpp" />
+    <ClCompile Include="src\Editor\Editor_dividers.cpp" />
     <ClCompile Include="src\Editor\Editor_input.cpp" />
     <ClCompile Include="src\Editor\Editor_mouseRays.cpp" />
     <ClCompile Include="src\Editor\Editor_ui.cpp" />
     <ClCompile Include="src\Editor\Types\EditorMesh.cpp" />
+    <ClCompile Include="src\Editor\Editor_cursor.cpp" />
+    <ClCompile Include="src\Input\InputMulti.cpp" />
     <ClCompile Include="src\Player\Player.cpp" />
     <ClCompile Include="src\Core\Debug.cpp" />
     <ClCompile Include="src\Editor\Editor.cpp" />
@@ -178,15 +192,24 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\File\File.cpp" />
     <ClCompile Include="src\Core\Game.cpp" />
     <ClCompile Include="src\Player\Player_camera.cpp" />
+    <ClCompile Include="src\Player\Player_Input.cpp" />
     <ClCompile Include="src\Player\Player_movement.cpp" />
     <ClCompile Include="src\Player\Player_ui.cpp" />
+    <ClCompile Include="src\Player\Player_viewWeapon.cpp" />
+    <ClCompile Include="src\Player\Player_WeaponLogic.cpp" />
     <ClCompile Include="src\Renderer\RenderDataManager.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Camera\Camera.cpp" />
+    <ClCompile Include="src\Renderer\Types\Animation.cpp" />
+    <ClCompile Include="src\Renderer\Types\AnimationLayer.cpp" />
+    <ClCompile Include="src\Renderer\Types\AnimationState.cpp" />
+    <ClCompile Include="src\Renderer\Types\SkinnedModel.cpp" />
+    <ClCompile Include="src\Types\AnimatedGameObject.cpp" />
     <ClCompile Include="src\Types\GameObject.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\AssetManagement\AssetManager.cpp" />
+    <ClCompile Include="src\Util\Util_animation.cpp" />
     <ClCompile Include="src\Util\Util_file.cpp" />
     <ClCompile Include="src\Util\Util_raycasting.cpp" />
     <ClCompile Include="src\Util\Util_rendering.cpp" />
@@ -207,6 +230,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="vendor\VkBootstrap\VkBootstrap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\Hell2024\Hell2024\Hell2024\res\shaders\OpenGL\GL_computeSkinning.comp" />
     <None Include="res\shaders\common\constants.glsl" />
     <None Include="res\shaders\common\types.glsl" />
     <None Include="res\shaders\common\util.glsl" />
@@ -220,6 +244,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <None Include="res\shaders\OpenGL\gl_hair_layer_composite.comp" />
     <None Include="res\shaders\OpenGL\gl_hair_lighting.frag" />
     <None Include="res\shaders\OpenGL\gl_hair_lighting.vert" />
+    <None Include="res\shaders\OpenGL\gl_height-map_image_generation.comp" />
     <None Include="res\shaders\OpenGL\gl_lighting.comp" />
     <None Include="res\shaders\OpenGL\gl_skybox.frag" />
     <None Include="res\shaders\OpenGL\gl_skybox.vert" />
@@ -242,6 +267,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClInclude Include="src\API\OpenGL\GL_util.h" />
     <ClInclude Include="src\API\OpenGL\Types\GL_cubemapView.h" />
     <ClInclude Include="src\API\OpenGL\Types\GL_detachedMesh.hpp" />
+    <ClInclude Include="src\API\OpenGL\Types\GL_heightmapMesh.h" />
     <ClInclude Include="src\API\OpenGL\Types\GL_indirectBuffer.hpp" />
     <ClInclude Include="src\API\OpenGL\Types\GL_mesh2D.hpp" />
     <ClInclude Include="src\API\OpenGL\Types\GL_frameBuffer.h" />
@@ -271,7 +297,9 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClInclude Include="src\Config\Config.h" />
     <ClInclude Include="src\Core\Audio.h" />
     <ClInclude Include="src\AssetManagement\BakeQueue.h" />
+    <ClInclude Include="src\Core\WeaponManager.h" />
     <ClInclude Include="src\Editor\Types\EditorMesh.h" />
+    <ClInclude Include="src\Input\InputMulti.h" />
     <ClInclude Include="src\Player\Player.h" />
     <ClInclude Include="src\Core\Debug.h" />
     <ClInclude Include="src\Editor\Editor.h" />
@@ -282,9 +310,15 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClInclude Include="src\Core\Game.h" />
     <ClInclude Include="src\Renderer\RenderDataManager.h" />
     <ClInclude Include="src\Renderer\Renderer.h" />
+    <ClInclude Include="src\Renderer\Types\Animation.h" />
+    <ClInclude Include="src\Renderer\Types\AnimationLayer.h" />
+    <ClInclude Include="src\Renderer\Types\AnimationState.h" />
     <ClInclude Include="src\Renderer\Types\Mesh.hpp" />
+    <ClInclude Include="src\Renderer\Types\SkinnedMesh.hpp" />
+    <ClInclude Include="src\Renderer\Types\SkinnedModel.h" />
     <ClInclude Include="src\Timer.hpp" />
     <ClInclude Include="src\Camera\Camera.h" />
+    <ClInclude Include="src\Types\AnimatedGameObject.h" />
     <ClInclude Include="src\Types\GameObject.h" />
     <ClInclude Include="src\Hardcoded.hpp" />
     <ClInclude Include="src\AssetManagement\AssetManager.h" />

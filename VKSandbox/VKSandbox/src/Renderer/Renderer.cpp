@@ -40,4 +40,40 @@ namespace Renderer {
             //VulkanRenderer::HotloadShaders();
         }
     }
+
+    void DrawPoint(glm::vec3 position, glm::vec3 color) {
+        if (BackEnd::GetAPI() == API::OPENGL) {
+            OpenGLRenderer::DrawPoint(position, color);
+        }
+        else if (BackEnd::GetAPI() == API::VULKAN) {
+            // TODO
+        }
+    }
+
+    void DrawLine(glm::vec3 begin, glm::vec3 end, glm::vec3 color) {
+        if (BackEnd::GetAPI() == API::OPENGL) {
+            OpenGLRenderer::DrawLine(begin, end, color);
+        }
+        else if (BackEnd::GetAPI() == API::VULKAN) {
+            // TODO
+        }
+    }
+
+    void DrawAABB(AABB& aabb, glm::vec3 color) {
+        if (BackEnd::GetAPI() == API::OPENGL) {
+            OpenGLRenderer::DrawAABB(aabb, color);
+        }
+        else if (BackEnd::GetAPI() == API::VULKAN) {
+            // TODO
+        }
+    }
+
+    void DrawAABB(AABB& aabb, glm::vec3 color, glm::mat4 worldTransform) {
+        if (BackEnd::GetAPI() == API::OPENGL) {
+            OpenGLRenderer::DrawAABB(aabb, color, worldTransform);
+        }
+        else if (BackEnd::GetAPI() == API::VULKAN) {
+            // TODO
+        }
+    }
 }

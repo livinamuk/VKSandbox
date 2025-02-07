@@ -16,4 +16,6 @@ namespace OpenGLUtil {
     size_t CalculateCompressedDataSize(GLenum format, int width, int height);
     GLint TextureWrapModeToGLEnum(TextureWrapMode wrapMode);
     GLint TextureFilterToGLEnum(TextureFilter filter);
+    GLenum GLInternalFormatToGLType(GLenum internalFormat);
+    GLenum GLInternalFormatToGLFormat(GLenum internalFormat);
 }

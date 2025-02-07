@@ -1,56 +1,54 @@
 #include "../common/constants.glsl"
 
-float D_GGX(float NoH, float roughness) {
-  float alpha = roughness * roughness;
-  float alpha2 = alpha * alpha;
-  float NoH2 = NoH * NoH;
-  float b = (NoH2 * (alpha2 - 1.0) + 1.0);
-  return alpha2 / (PI * b * b);
+float DistributionGGX(vec3 N, vec3 H, float roughness) {
+    float a = roughness*roughness;
+    float a2 = a*a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+    float nom   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+    return nom / denom;
 }
 
-float G1_GGX_Schlick(float NdotV, float roughness) {
-  //float r = roughness; // original
-  float r = 0.5 + 0.5 * roughness; // Disney remapping
-  float k = (r * r) / 2.0;
-  float denom = NdotV * (1.0 - k) + k;
-  return NdotV / denom;
+float GeometrySchlickGGX(float NdotV, float roughness) {
+    float r = (roughness + 1.0);
+    //float r = 0.5 + 0.5 * roughness; // Disney remapping
+    float k = (r*r) / 8.0;
+    float nom   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+    return nom / denom;
 }
 
-float G_Smith(float NoV, float NoL, float roughness) {
-  float g1_l = G1_GGX_Schlick(NoL, roughness);
-  float g1_v = G1_GGX_Schlick(NoV, roughness);
-  return g1_l * g1_v;
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+    return ggx1 * ggx2;
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0) {
+vec3 FresnelSchlick(float cosTheta, vec3 F0) {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-vec3 microfacetBRDF(in vec3 L, in vec3 V, in vec3 N, in vec3 baseColor, in float metallicness, in float fresnelReflect, in float roughness, in vec3 WorldPos) {
-  // Half vector
-  vec3 H = normalize(V + L);
-
-  // Dot products
-  float NoV = clamp(dot(N, V), 0.0, 1.0);
-  float NoL = clamp(dot(N, L), 0.0, 1.0);
-  float NoH = clamp(dot(N, H), 0.0, 1.0);
-  float VoH = clamp(dot(V, H), 0.0, 1.0);
-  
-  // Base reflectance (F0)
-  vec3 f0 = vec3(0.16 * (fresnelReflect * fresnelReflect));
-  f0 = mix(f0, baseColor, metallicness);
-
-  // Fresnel term
-  vec3 F = fresnelSchlick(VoH, f0);
-  
-  // Specular microfacet BRDF
-  float D = D_GGX(NoH, roughness);
-  float G = G_Smith(NoV, NoL, roughness);
-  vec3 specular = (D * G * F) / max(4.0 * NoV * NoL, 0.001);
-
-  // Energy-conserving diffuse
-  vec3 notSpecular = (1.0 - F) * (1.0 - metallicness);
-  vec3 diffuse = notSpecular * baseColor / PI;
-
-  return diffuse + specular;
+vec3 microfacetBRDF(in vec3 L, in vec3 V, vec3 N, in vec3 baseColor, in float metallic, in float fresnelReflect, in float roughness) {
+    vec3 H = normalize(V + L);
+    float NoV = clamp(dot(N, V), 0.0, 1.0);
+    float NoL = clamp(dot(N, L), 0.0, 1.0);
+    float NoH = clamp(dot(N, H), 0.0, 1.0);
+    float VoH = clamp(dot(V, H), 0.0, 1.0);
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, baseColor, metallic);
+    float NDF = DistributionGGX(N, H, roughness);   
+    float G   = GeometrySmith(N, V, L, roughness);      
+    vec3 F    = FresnelSchlick(max(dot(H, V), 0.0), F0);
+    vec3 numerator    = NDF * G * F; 
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+    vec3 specular = numerator / denominator;
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic;	  
+    float NdotL = max(dot(N, L), 0.0);        
+    return (kD * baseColor / PI + specular);
 }

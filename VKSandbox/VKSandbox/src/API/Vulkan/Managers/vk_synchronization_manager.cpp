@@ -4,14 +4,14 @@
 
 namespace VulkanSynchronizationManager {
 
-    std::vector<VkSemaphore> g_imageAvailableSemaphores;
+    //std::vector<VkSemaphore> g_imageAvailableSemaphores;
     std::vector<VkSemaphore> g_renderFinishedSemaphores;
     std::vector<VkSemaphore> g_uploadSemaphores;
     std::vector<VkFence> g_inFlightFences;
     const int MAX_FRAMES_IN_FLIGHT = 2;
 
     bool Init() {
-        g_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        //g_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         g_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         g_uploadSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         g_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -24,7 +24,8 @@ namespace VulkanSynchronizationManager {
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-            if (vkCreateSemaphore(VulkanDeviceManager::GetDevice(), &semaphoreInfo, nullptr, &g_imageAvailableSemaphores[i]) != VK_SUCCESS ||
+            if (
+                //vkCreateSemaphore(VulkanDeviceManager::GetDevice(), &semaphoreInfo, nullptr, &g_imageAvailableSemaphores[i]) != VK_SUCCESS ||
                 vkCreateSemaphore(VulkanDeviceManager::GetDevice(), &semaphoreInfo, nullptr, &g_renderFinishedSemaphores[i]) != VK_SUCCESS || 
                 vkCreateSemaphore(VulkanDeviceManager::GetDevice(), &semaphoreInfo, nullptr, &g_uploadSemaphores[i]) != VK_SUCCESS ||
                 vkCreateFence(VulkanDeviceManager::GetDevice(), &fenceInfo, nullptr, &g_inFlightFences[i]) != VK_SUCCESS) {
@@ -39,16 +40,16 @@ namespace VulkanSynchronizationManager {
     void Destroy() {
         VkDevice device = VulkanDeviceManager::GetDevice();
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-            vkDestroySemaphore(device, g_imageAvailableSemaphores[i], nullptr);
+            //vkDestroySemaphore(device, g_imageAvailableSemaphores[i], nullptr);
             vkDestroySemaphore(device, g_renderFinishedSemaphores[i], nullptr);
             vkDestroySemaphore(device, g_uploadSemaphores[i], nullptr);
             vkDestroyFence(device, g_inFlightFences[i], nullptr);
         }
     }
 
-    VkSemaphore GetImageAvailableSemaphore(size_t frameIndex) {
-        return g_imageAvailableSemaphores[frameIndex];
-    }
+    //VkSemaphore GetImageAvailableSemaphore(size_t frameIndex) {
+    //    return g_imageAvailableSemaphores[frameIndex];
+    //}
 
     VkSemaphore GetRenderFinishedSemaphore(size_t frameIndex) {
         return g_renderFinishedSemaphores[frameIndex];

@@ -4,9 +4,11 @@ namespace OpenGLRenderer {
 
     void LightingPass() {
         OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
+        OpenGLFrameBuffer* finalImageFBO = GetFrameBuffer("FinalImage");
         OpenGLShader* lightingShader = GetShader("Lighting");
 
         if (!gBuffer) return;
+        if (!finalImageFBO) return;
         if (!lightingShader) return;
 
         lightingShader->Use();
@@ -16,7 +18,7 @@ namespace OpenGLRenderer {
         glBindTextureUnit(2, gBuffer->GetColorAttachmentHandleByName("RMA"));
         glBindTextureUnit(3, gBuffer->GetDepthAttachmentHandle());
         glBindTextureUnit(4, gBuffer->GetColorAttachmentHandleByName("WorldSpacePosition"));
-        glBindTextureUnit(5, gBuffer->GetColorAttachmentHandleByName("MousePick"));
+        glBindTextureUnit(5, finalImageFBO->GetColorAttachmentHandleByName("ViewportIndex"));
 
         glBindImageTexture(0, gBuffer->GetColorAttachmentHandleByName("FinalLighting"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
 

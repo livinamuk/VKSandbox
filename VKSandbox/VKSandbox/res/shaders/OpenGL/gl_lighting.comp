@@ -11,7 +11,7 @@ layout(binding = 1) uniform sampler2D NormalTexture;
 layout(binding = 2) uniform sampler2D RMATexture;
 layout(binding = 3) uniform sampler2D DepthTexture;
 layout(binding = 4) uniform sampler2D WorldPositionTexture;
-layout(binding = 5) uniform sampler2D MousePickTexture;
+layout(binding = 5) uniform usampler2D ViewportIndexTexture;
 
 layout(rgba16f, binding = 0) uniform image2D outputImage;
 
@@ -39,14 +39,16 @@ void main() {
     vec4 baseColor = texture(BaseColorTexture, uv_screenspace);
     vec4 normal = texture(NormalTexture, uv_screenspace);
     vec4 rma = texture(RMATexture, uv_screenspace);
-    baseColor.rgb = pow(baseColor.rgb, vec3(2.2));
+    uint viewportIndex = texture(ViewportIndexTexture, uv_screenspace).r;
+
+    // Gamma-correct the base color
+    vec3 gammaBaseColor = pow(baseColor.rgb, vec3(2.2));
 
     float roughness = rma.r;
     float metallic = rma.g;
     
     vec2 renderTargetSize = vec2(rendererData.gBufferWidth, rendererData.gBufferHeight);
     int splitScreenMode = rendererData.splitscreenMode;
-    int viewportIndex = GetViewportIndex(pixelCoords, renderTargetSize, splitScreenMode);
 
     float clipSpaceXMin = viewportData[viewportIndex].clipSpaceXMin;
     float clipSpaceXMax = viewportData[viewportIndex].clipSpaceXMax;
@@ -66,7 +68,7 @@ void main() {
     viewSpacePosition /= viewSpacePosition.w;
     vec4 worldSpacePosition = inverseView * viewSpacePosition;
 
-    worldSpacePosition.rgb = WOLRD_POS_FROM_TEXTURE.rgb;
+    //worldSpacePosition.rgb = WOLRD_POS_FROM_TEXTURE.rgb;
 
     vec3 lightPosition = (vec3(7, 0, 10) * 0.5) + vec3(0, 0.125, 1);
     vec3 lightColor = vec3(1, 0.98, 0.94);
@@ -74,33 +76,58 @@ void main() {
     float lightStrength = 2;
         
     lightPosition = vec3(-3.5, 2, 1);
-    lightStrength = 1;
-    lightRadius = 15;
+    //lightPosition = vec3(15, 2, 15);
+    lightStrength = 1.0;
+    lightRadius = 100;
     		  
-
-    vec3 directLighting = GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal.xyz, worldSpacePosition.xyz, baseColor.rgb, roughness, metallic, viewPos);
-
-    float ambientIntensity = 0.05;
+    // Ambient light
+    float ambientIntensity = 0.005;
     vec3 ambientColor = baseColor.rgb * lightColor;
     vec3 ambientLighting = ambientColor * ambientIntensity;
 
+    // Direct light
+    vec3 directLighting = GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal.xyz, worldSpacePosition.xyz, gammaBaseColor.rgb, roughness, metallic, viewPos);
+
+    // Alpha
     float finalAlpha = baseColor.a;
     
+    // Composite
     vec3 finalColor = directLighting.rgb + ambientLighting;
 
     // Tone mapping
-	finalColor = mix(finalColor, Tonemap_ACES(finalColor), 1.0);
+	finalColor = mix(finalColor, Tonemap_ACES(finalColor), 1.0);    
 	finalColor = pow(finalColor, vec3(1.0/2.2));
-	finalColor = mix(finalColor, Tonemap_ACES(finalColor), 0.235);
     
     finalColor.rgb = finalColor.rgb * finalAlpha;    
     vec4 outputColor = vec4(finalColor, finalAlpha);
     
-    imageStore(outputImage, pixelCoords, outputColor);
-
+    // Don't apply lighting to skybox
+    float skyboxFlag = float(normal.x == 0.0 && normal.y == 0.0 && normal.z == 0.0);
+    outputColor.rgb = mix(outputColor.rgb, baseColor.rgb, skyboxFlag);
     
-  //.  imageStore(outputImage, pixelCoords, vec4(normal.rgb * 0.5 + 0.5, 1.0));
-   // imageStore(outputImage, pixelCoords, vec4(normal.rgb, 1.0));
+    // Post process vibrance
+    outputColor = Vibrance(outputColor, 1.5);
 
-//   imageStore(outputImage, pixelCoords, vec4(rma.rgb, 1.0));
+    if (false) {
+        if (viewportIndex == 0) {
+            outputColor.rgb = vec3(1.0) - outputColor.rgb;
+        }
+        if (viewportIndex == 1) {
+            outputColor.rgb *= vec3(1, 0, 0);
+        }
+        if (viewportIndex == 2) {
+            outputColor.rgb *= vec3(0, 1, 0);
+        }
+        if (viewportIndex == 3) {
+            outputColor.rgb *= vec3(0, 0, 1);
+        }
+    }
+
+    //vec3 N = normal.xyz;
+    //vec3 L = normalize(lightPosition - worldSpacePosition.xyz);
+    //float NoL = clamp(dot(N, L), 0.0, 1.0);
+    //outputColor.rgb = vec3(NoL);
+    //outputColor.rgb = normal.rgb;
+
+    imageStore(outputImage, pixelCoords, outputColor);
 }

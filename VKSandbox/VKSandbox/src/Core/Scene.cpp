@@ -1,13 +1,17 @@
 #include "Scene.h"
 #include "HellDefines.h"
+#include "Core/Game.h"
+#include "Renderer/RenderDataManager.h"
 
 namespace Scene {
+    std::vector<AnimatedGameObject> g_animatedGameObjects;
     std::vector<GameObject> g_gameObjects;
     std::vector<RenderItem> g_renderItems;
     std::vector<RenderItem> g_renderItemsBlended;
     std::vector<RenderItem> g_renderItemsAlphaDiscarded;
     std::vector<RenderItem> g_renderItemsHairTopLayer;
     std::vector<RenderItem> g_renderItemsHairBottomLayer;
+    std::vector<SkinnedRenderItem> g_skinnedRenderItems;
 
     void UpdateObjects();
     void UpdateRenderItems();
@@ -22,14 +26,20 @@ namespace Scene {
     }
 
     void UpdateObjects() {
+        float deltaTime = Game::GetDeltaTime();
+
         for (GameObject& gameObject : g_gameObjects) {
             // TODO: gameObject.Update();
+        }
+        for (AnimatedGameObject& animatedGameObject : g_animatedGameObjects) {
+            animatedGameObject.Update(deltaTime);
         }
     }
 
     void UpdateRenderItems() {
         // Clear global render item vectors
         g_renderItems.clear();
+        g_skinnedRenderItems.clear();
         g_renderItemsBlended.clear();
         g_renderItemsAlphaDiscarded.clear();
         g_renderItemsHairTopLayer.clear();
@@ -47,10 +57,22 @@ namespace Scene {
             g_renderItemsHairTopLayer.insert(g_renderItemsHairTopLayer.end(), gameObject.GetRenderItemsHairTopLayer().begin(), gameObject.GetRenderItemsHairTopLayer().end());
             g_renderItemsHairBottomLayer.insert(g_renderItemsHairBottomLayer.end(), gameObject.GetRenderItemsHairBottomLayer().begin(), gameObject.GetRenderItemsHairBottomLayer().end());
         }
+
+        RenderDataManager::ResetBaseSkinnedVertex();
+        for (AnimatedGameObject& animatedGameObject : g_animatedGameObjects) {
+            animatedGameObject.UpdateRenderItems(); 
+            animatedGameObject.DrawBones(WHITE);
+            //animatedGameObject.DrawBoneTangentVectors();
+            g_skinnedRenderItems.insert(g_skinnedRenderItems.end(), animatedGameObject.GetRenderItems().begin(), animatedGameObject.GetRenderItems().end());
+        }
     }
 
     void CreateGameObject() {
         g_gameObjects.emplace_back();
+    }
+    
+    void Scene::CreateAnimatedGameObject() {
+        g_animatedGameObjects.emplace_back();
     }
 
     GameObject* GetGameObjectByName(const std::string& name) {
@@ -60,6 +82,15 @@ namespace Scene {
             }
         }
         return nullptr;
+    }
+
+    AnimatedGameObject* GetAnimatedGameObjectByIndex(int32_t index) {
+        if (index >= 0 && index < g_animatedGameObjects.size()) {
+            return &g_animatedGameObjects[index];
+        }
+        else {
+            return nullptr;
+        }
     }
 
     void SetMaterials() {
@@ -122,11 +153,51 @@ namespace Scene {
             cube->SetModel("Cube");
             cube->SetMeshMaterials("MermaidTail");
         }
+
+        CreateAnimatedGameObject();
+        AnimatedGameObject& object = g_animatedGameObjects.back();
+        object.SetFlag(AnimatedGameObject::Flag::NONE);
+        object.SetPlayerIndex(1);
+        object.SetSkinnedModel("Shark");
+        object.SetName("222");
+        object.SetAnimationModeToBindPose();
+        object.SetAllMeshMaterials("Doberman");
+        object.SetPosition(glm::vec3(3.8f, -0.5, 11.3f));
+        object.SetScale(0.01);
+        object.PlayAndLoopAnimation("Shark_Attack_Left_Quick");
+
+        CreateAnimatedGameObject();
+        AnimatedGameObject& object2 = g_animatedGameObjects.back();
+        object2.SetFlag(AnimatedGameObject::Flag::NONE);
+        object2.SetPlayerIndex(1);
+        object2.SetSkinnedModel("Shark");
+        object2.SetName("222");
+        object2.SetAnimationModeToBindPose();
+        object2.SetAllMeshMaterials("Doberman");
+        object2.SetPosition(glm::vec3(7.8f, -0.5, 11.3f));
+        object2.SetScale(0.01);
+        object2.SetAnimationModeToBindPose();
+
+        CreateAnimatedGameObject();
+        AnimatedGameObject& object3 = g_animatedGameObjects.back();
+        object3.SetFlag(AnimatedGameObject::Flag::NONE);
+        object3.SetPlayerIndex(1);
+        object3.SetSkinnedModel("Glock");
+        object3.SetName("222");
+        object3.SetAnimationModeToBindPose();
+        object3.SetAllMeshMaterials("Doberman");
+        object3.SetPosition(glm::vec3(0.8f, -0.5, 11.3f));
+        object3.SetScale(0.01);
+        object3.PlayAndLoopAnimation("Glock_ReloadEmpty");
+        //object3.SetAnimationModeToBindPose();
     }
 
-    std::vector<RenderItem>& GetRenderItems() { return g_renderItems; }
-    std::vector<RenderItem>& GetRenderItemsBlended() { return g_renderItemsBlended; }
-    std::vector<RenderItem>& GetRenderItemsAlphaDiscarded() { return g_renderItemsAlphaDiscarded; }
-    std::vector<RenderItem>& GetRenderItemsHairTopLayer() { return g_renderItemsHairTopLayer; }
-    std::vector<RenderItem>& GetRenderItemsHairBottomLayer() { return g_renderItemsHairBottomLayer; }
+    std::vector<AnimatedGameObject>& GetAnimatedGameObjects()   { return g_animatedGameObjects; }
+    std::vector<GameObject>& GetGameObjects()                   { return g_gameObjects; }
+    std::vector<RenderItem>& GetRenderItems()                   { return g_renderItems; }
+    std::vector<RenderItem>& GetRenderItemsBlended()            { return g_renderItemsBlended; }
+    std::vector<RenderItem>& GetRenderItemsAlphaDiscarded()     { return g_renderItemsAlphaDiscarded; }
+    std::vector<RenderItem>& GetRenderItemsHairTopLayer()       { return g_renderItemsHairTopLayer; }
+    std::vector<RenderItem>& GetRenderItemsHairBottomLayer()    { return g_renderItemsHairBottomLayer; }
+    std::vector<SkinnedRenderItem>& GetSkinnedRenderItems()     { return g_skinnedRenderItems; }
 }

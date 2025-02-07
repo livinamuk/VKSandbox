@@ -1,7 +1,9 @@
 #pragma once
 
-#define NEAR_PLANE   0.01f
-#define FAR_PLANE  500.00f
+#define UNDEFINED_STRING "UNDEFINED_STRING"
+
+#define NEAR_PLANE 0.0025f
+#define FAR_PLANE 500.0f
 
 #define ORANGE        glm::vec4(1.00f, 0.65f, 0.00f, 1.0f)
 #define BLACK         glm::vec4(0.00f, 0.00f, 0.00f, 1.0f)
@@ -18,12 +20,13 @@
 #define TRANSPARENT   glm::vec4(0.00f, 0.00f, 0.00f, 0.0f)
 
 #define HELL_PI 3.14159265358979323846
-#define PLAYER_INDEX_SHIFT 20 // Only 2 bits needed for 4 players
+#define VIEWPORT_INDEX_SHIFT 20 // Only 2 bits needed for 4 players
 
 // Render limits
 #define TEXTURE_ARRAY_SIZE 1024
 #define MAX_INSTANCE_DATA_COUNT 8192
 #define MAX_INDIRECT_DRAW_COMMAND_COUNT 4096
+#define MAX_ANIMATED_TRANSFORMS 2048 // is this needed?
 
 // System audio
 #define AUDIO_SELECT "UI_Select.wav"
@@ -35,3 +38,30 @@
 #define HELL_CURSOR_HAND            0x00036004
 #define HELL_CURSOR_HRESIZE         0x00036005
 #define HELL_CURSOR_VRESIZE         0x00036006
+
+
+
+
+
+
+// Fix this shit
+
+#define ZERO_MEM(a) memset(a, 0, sizeof(a))
+#define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
+#define SAFE_DELETE(p) if (p) { delete p; p = NULL; }
+#define ToRadian(x) (float)(((x) * HELL_PI / 180.0f))
+#define ToDegree(x) (float)(((x) * 180.0f / HELL_PI))
+
+#define POSITION_LOCATION    0
+#define NORMAL_LOCATION		 1
+#define TEX_COORD_LOCATION   2
+#define TANGENT_LOCATION     3
+#define BONE_ID_LOCATION     4
+#define BONE_WEIGHT_LOCATION 5
+
+#define GLOCK_CLIP_SIZE 12
+#define GLOCK_MAX_AMMO_SIZE 200
+#define AKS74U_MAG_SIZE 30
+#define AKS74U_MAX_AMMO_SIZE 9999
+#define SHOTGUN_AMMO_SIZE 8
+#define SHOTGUN_MAX_AMMO_SIZE 9999

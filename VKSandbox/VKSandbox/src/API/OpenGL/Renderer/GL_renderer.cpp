@@ -33,20 +33,16 @@ namespace OpenGLRenderer {
     std::unordered_map<std::string, OpenGLShader> g_shaders;
     std::unordered_map<std::string, OpenGLFrameBuffer> g_frameBuffers;
     std::unordered_map<std::string, OpenGLCubemapView> g_cubemapViews;
+    std::unordered_map<std::string, OpenGLSSBO> g_ssbos;
     std::unordered_map<std::string, OpenGLRasterizerState> g_rasterizerStates;
-
-    struct SSBOs {
-        SSBO samplers;
-        SSBO playerData;
-        SSBO rendererData;
-        SSBO instanceData;
-    } g_ssbos;
 
     IndirectBuffer g_indirectBuffer;
 
     struct Cubemaps {
         OpenGLCubemapView g_skyboxView;
     } g_cubemaps;
+
+    void ClearRenderTargets();
 
     void Init() {
         const Resolutions& resolutions = Config::GetResolutions();
@@ -57,7 +53,7 @@ namespace OpenGLRenderer {
         g_frameBuffers["GBuffer"].CreateAttachment("RMA", GL_RGBA8);
         g_frameBuffers["GBuffer"].CreateAttachment("MousePick", GL_RG16UI, GL_NEAREST, GL_NEAREST);
         g_frameBuffers["GBuffer"].CreateAttachment("FinalLighting", GL_RGBA16F);
-        g_frameBuffers["GBuffer"].CreateAttachment("WorldSpacePosition", GL_RGBA16F);
+        g_frameBuffers["GBuffer"].CreateAttachment("WorldSpacePosition", GL_RGBA32F);
         g_frameBuffers["GBuffer"].CreateDepthAttachment(GL_DEPTH32F_STENCIL8);
 
         g_frameBuffers["Hair"] = OpenGLFrameBuffer("Hair", resolutions.hair);
@@ -69,70 +65,92 @@ namespace OpenGLRenderer {
 
         g_frameBuffers["FinalImage"] = OpenGLFrameBuffer("FinalImage", resolutions.finalImage);
         g_frameBuffers["FinalImage"].CreateAttachment("Color", GL_RGBA16F);
+        g_frameBuffers["FinalImage"].CreateAttachment("ViewportIndex", GL_R8UI);
 
         g_frameBuffers["UI"] = OpenGLFrameBuffer("UI", resolutions.ui);
         g_frameBuffers["UI"].CreateAttachment("Color", GL_RGBA8, GL_NEAREST, GL_NEAREST);
+
+        int heightMapSize = 256;
+        g_frameBuffers["HeightMap"] = OpenGLFrameBuffer("HeightMap", heightMapSize, heightMapSize);
+        g_frameBuffers["HeightMap"].CreateAttachment("Color", GL_RGBA8);
 
         int framebufferHandle = g_frameBuffers["GBuffer"].GetHandle();
         int attachmentSlot = g_frameBuffers["GBuffer"].GetColorAttachmentSlotByName("MousePick");
         OpenGLBackEnd::SetMousePickHandles(framebufferHandle, attachmentSlot);
 
         // Create ssbos
-        g_ssbos.samplers.PreAllocate(sizeof(glm::uvec2) * TEXTURE_ARRAY_SIZE);
-        g_ssbos.playerData.PreAllocate(sizeof(ViewportData) * 4);
-        g_ssbos.rendererData.PreAllocate(sizeof(RendererData));
-        g_ssbos.instanceData.PreAllocate(sizeof(RenderItem) * MAX_INSTANCE_DATA_COUNT);
+        g_ssbos["Samplers"] = OpenGLSSBO(sizeof(glm::uvec2) * TEXTURE_ARRAY_SIZE);
+        g_ssbos["PlayerData"] = OpenGLSSBO(sizeof(ViewportData) * 4);
+        g_ssbos["RendererData"] = OpenGLSSBO(sizeof(RendererData));
+        g_ssbos["InstanceData"] = OpenGLSSBO(sizeof(RenderItem) * MAX_INSTANCE_DATA_COUNT);
+        g_ssbos["SkinningTransforms"] = OpenGLSSBO(sizeof(glm::mat4) * MAX_ANIMATED_TRANSFORMS);
 
         // Preallocate the indirect command buffer
         g_indirectBuffer.PreAllocate(sizeof(DrawIndexedIndirectCommand) * MAX_INDIRECT_DRAW_COMMAND_COUNT);
 
         // Load shaders
-        g_shaders["EditorMesh"] = OpenGLShader({ "gl_editor_mesh.vert", "gl_editor_mesh.frag" });
-        g_shaders["Gizmo"] = OpenGLShader({ "gl_gizmo.vert", "gl_gizmo.frag" });
-        g_shaders["HairDepthPeel"] = OpenGLShader({ "gl_hair_depth_peel.vert", "gl_hair_depth_peel.frag" });
-        g_shaders["HairFinalComposite"] = OpenGLShader({ "gl_hair_final_composite.comp" });
-        g_shaders["HairLayerComposite"] = OpenGLShader({ "gl_hair_layer_composite.comp" });
-        g_shaders["HairLighting"] = OpenGLShader({ "gl_hair_lighting.vert", "gl_hair_lighting.frag" });
-        g_shaders["Lighting"] = OpenGLShader({ "gl_lighting.comp" });
-        g_shaders["GBuffer"] = OpenGLShader({ "gl_gBuffer.vert", "gl_gBuffer.frag" });
-        g_shaders["SolidColor"] = OpenGLShader({ "gl_solid_color.vert", "gl_solid_color.frag" });
-        g_shaders["Skybox"] = OpenGLShader({ "gl_skybox.vert", "gl_skybox.frag" });
-        g_shaders["UI"] = OpenGLShader({ "gl_ui.vert", "gl_ui.frag" });
+        g_shaders["ComputeSkinning"] = OpenGLShader({ "GL_compute_skinning.comp" });
+        g_shaders["EditorMesh"] = OpenGLShader({ "GL_editor_mesh.vert", "GL_editor_mesh.frag" });
+        g_shaders["Gizmo"] = OpenGLShader({ "GL_gizmo.vert", "GL_gizmo.frag" });
+        g_shaders["HairDepthPeel"] = OpenGLShader({ "GL_hair_depth_peel.vert", "GL_hair_depth_peel.frag" });
+        g_shaders["HairFinalComposite"] = OpenGLShader({ "GL_hair_final_composite.comp" });
+        g_shaders["HairLayerComposite"] = OpenGLShader({ "GL_hair_layer_composite.comp" });
+        g_shaders["HairLighting"] = OpenGLShader({ "GL_hair_lighting.vert", "GL_hair_lighting.frag" });
+        g_shaders["HeightMapColor"] = OpenGLShader({ "GL_heightmap_color.vert", "GL_heightmap_color.frag" });
+        g_shaders["HeightMapImageGeneration"] = OpenGLShader({ "GL_heightmap_image_generation.comp" });
+        g_shaders["HeightMapVertexGeneration"] = OpenGLShader({ "GL_heightmap_vertex_generation.comp" });
+        g_shaders["Lighting"] = OpenGLShader({ "GL_lighting.comp" });
+        g_shaders["GBuffer"] = OpenGLShader({ "GL_GBuffer.vert", "GL_gBuffer.frag" });
+        g_shaders["SolidColor"] = OpenGLShader({ "GL_solid_color.vert", "GL_solid_color.frag" });
+        g_shaders["Skybox"] = OpenGLShader({ "GL_skybox.vert", "GL_skybox.frag" });
+        g_shaders["UI"] = OpenGLShader({ "GL_ui.vert", "GL_ui.frag" });
     }
 
     void InitMain() {
-        std::vector<GLuint> textures = {
-            AssetManager::GetTextureByName("NightSky_Right")->GetGLTexture().GetHandle(),
-            AssetManager::GetTextureByName("NightSky_Left")->GetGLTexture().GetHandle(),
-            AssetManager::GetTextureByName("NightSky_Top")->GetGLTexture().GetHandle(),
-            AssetManager::GetTextureByName("NightSky_Bottom")->GetGLTexture().GetHandle(),
-            AssetManager::GetTextureByName("NightSky_Front")->GetGLTexture().GetHandle(),
-            AssetManager::GetTextureByName("NightSky_Back")->GetGLTexture().GetHandle()
-        };
-        g_cubemapViews["SkyboxNightSky"] = OpenGLCubemapView(textures);
         InitRasterizerStates();
+
+        // Attempt to load skybox
+        std::vector<Texture*> textures = {
+            AssetManager::GetTextureByName("NightSky_Right"),
+            AssetManager::GetTextureByName("NightSky_Left"),
+            AssetManager::GetTextureByName("NightSky_Top"),
+            AssetManager::GetTextureByName("NightSky_Bottom"),
+            AssetManager::GetTextureByName("NightSky_Front"),
+            AssetManager::GetTextureByName("NightSky_Back")
+        };
+        std::vector<GLuint> texturesHandles;
+        for (Texture* texture : textures) {
+            if (!texture) continue;
+            texturesHandles.push_back(texture->GetGLTexture().GetHandle());
+        }
+        if (texturesHandles.size() == 6) {
+            g_cubemapViews["SkyboxNightSky"] = OpenGLCubemapView(texturesHandles);
+        }
     }
 
     void UpdateSSBOS() {
-        const std::vector<GLuint64>& samplers = OpenGLBackEnd::GetBindlessTextureIDs();
-        g_ssbos.samplers.Update(samplers.size() * sizeof(GLuint64), (void*)&samplers[0]);
-        g_ssbos.samplers.Bind(0);
+        const std::vector<GLuint64>& bindlessTextureIDs = OpenGLBackEnd::GetBindlessTextureIDs();
+        g_ssbos["Samplers"].Update(bindlessTextureIDs.size() * sizeof(GLuint64), (void*)&bindlessTextureIDs[0]);
+        g_ssbos["Samplers"].Bind(0);
 
         const RendererData& rendererData = RenderDataManager::GetRendererData();
-        g_ssbos.rendererData.Update(sizeof(RendererData), (void*)&rendererData);
-        g_ssbos.rendererData.Bind(1);
+        g_ssbos["RendererData"].Update(sizeof(RendererData), (void*)&rendererData);
+        g_ssbos["RendererData"].Bind(1);
 
         const std::vector<ViewportData>& playerData = RenderDataManager::GetViewportData();
-        g_ssbos.playerData.Update(playerData.size() * sizeof(ViewportData), (void*)&playerData[0]);
-        g_ssbos.playerData.Bind(2);
+        g_ssbos["PlayerData"].Update(playerData.size() * sizeof(ViewportData), (void*)&playerData[0]);
+        g_ssbos["PlayerData"].Bind(2);
 
         const std::vector<RenderItem>& instanceData = RenderDataManager::GetInstanceData();
-        g_ssbos.instanceData.Update(instanceData.size() * sizeof(RenderItem), (void*)&instanceData[0]);
-        g_ssbos.instanceData.Bind(3);
-
+        g_ssbos["InstanceData"].Update(instanceData.size() * sizeof(RenderItem), (void*)&instanceData[0]);
+        g_ssbos["InstanceData"].Bind(3);
     }
 
     void RenderGame() {
+
+        ComputeSkinningPass();
+        ClearRenderTargets();
+
         UpdateSSBOS();
 
         const RendererSettings& renderSettings = Config::GetRendererSettings();
@@ -148,21 +166,10 @@ namespace OpenGLRenderer {
             std::cout << "Depth peel layer count: " << peelCount << "\n";
         }
 
-        g_frameBuffers["GBuffer"].Bind();
-        g_frameBuffers["GBuffer"].SetViewport();
 
-        // Write a framebuffer method to everything below in one go
-        // Write a framebuffer method to everything below in one go
-        // Write a framebuffer method to everything below in one go
-        // Write a framebuffer method to everything below in one go
-        g_frameBuffers["GBuffer"].ClearAttachment("BaseColor", 0, 0, 0, 0);
-        g_frameBuffers["GBuffer"].ClearAttachment("Normal", 0, 0, 0, 0);
-        g_frameBuffers["GBuffer"].ClearAttachment("RMA", 0, 0, 0, 0);
-        g_frameBuffers["GBuffer"].ClearAttachment("MousePick", 0, 0);
-        g_frameBuffers["GBuffer"].ClearAttachment("WorldSpacePosition", 0, 0);        
-        g_frameBuffers["GBuffer"].ClearDepthAttachment();
 
         SkyBoxPass();
+        HeightMapPass();
         GeometryPass();
         LightingPass();
         HairPass();
@@ -174,12 +181,43 @@ namespace OpenGLRenderer {
         OpenGLFrameBuffer& finalImageBuffer = g_frameBuffers["FinalImage"];
 
         // Downscale blit
-        OpenGLRendererUtil::BlitFrameBuffer(gBuffer, finalImageBuffer, "FinalLighting", "Color", GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        OpenGLRendererUtil::BlitFrameBuffer(&gBuffer, &finalImageBuffer, "FinalLighting", "Color", GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
         // Blit to swapchain
-        OpenGLRendererUtil::BlitToDefaultFrameBuffer(finalImageBuffer, "Color", GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        OpenGLRendererUtil::BlitToDefaultFrameBuffer(&finalImageBuffer, "Color", GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+        OpenGLFrameBuffer& heightmapFramebuffer = g_frameBuffers["HeightMap"]; 
+        BlitRect srcRect;
+        srcRect.x0 = 0;
+        srcRect.y0 = 0;
+        srcRect.x1 = heightmapFramebuffer.GetWidth();
+        srcRect.y1 = heightmapFramebuffer.GetHeight();
+        BlitRect dstRect = srcRect;
+           
+        OpenGLRendererUtil::BlitToDefaultFrameBuffer(&heightmapFramebuffer, "Color", srcRect, dstRect, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
         UIPass();
+    }
+
+    void ClearRenderTargets() {
+        OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
+        OpenGLFrameBuffer* finalImageFBO = GetFrameBuffer("FinalImage");
+
+        // GBuffer
+        gBuffer->ClearAttachment("BaseColor", 0, 0, 0, 0);
+        gBuffer->ClearAttachment("Normal", 0, 0, 0, 0);
+        gBuffer->ClearAttachment("RMA", 0, 0, 0, 0);
+        gBuffer->ClearAttachmentUI("MousePick", 0, 0);
+        gBuffer->ClearAttachment("WorldSpacePosition", 0, 0);
+        gBuffer->ClearDepthAttachment();
+
+        // Viewport index
+        for (unsigned int i = 0; i < 4; i++) {
+            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+            if (viewport->IsVisible()) {
+                OpenGLRendererUtil::ClearFrameBufferByViewportUInt(finalImageFBO, "ViewportIndex", viewport, i);
+            }
+        }
     }
 
     void MultiDrawIndirect(const std::vector<DrawIndexedIndirectCommand>& commands) {
@@ -192,6 +230,32 @@ namespace OpenGLRenderer {
             glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (GLvoid*)0, (GLsizei)commands.size(), 0);
         }
     }
+
+    void SplitMultiDrawIndirect(OpenGLShader* shader, const std::vector<DrawIndexedIndirectCommand>& commands) {
+        const std::vector<RenderItem>& instanceData = RenderDataManager::GetInstanceData();
+
+        for (const DrawIndexedIndirectCommand& command : commands) {
+            int viewportIndex = command.baseInstance >> VIEWPORT_INDEX_SHIFT;
+            int instanceOffset = command.baseInstance & ((1 << VIEWPORT_INDEX_SHIFT) - 1);
+
+            for (GLuint i = 0; i < command.instanceCount; ++i) {
+                const RenderItem& renderItem = instanceData[instanceOffset + i];
+
+                shader->SetInt("u_viewportIndex", viewportIndex);
+                shader->SetInt("u_globalInstanceIndex", instanceOffset + i);
+
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, AssetManager::GetTextureByIndex(renderItem.baseColorTextureIndex)->GetGLTexture().GetHandle());
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, AssetManager::GetTextureByIndex(renderItem.normalMapTextureIndex)->GetGLTexture().GetHandle());
+                glActiveTexture(GL_TEXTURE2);
+                glBindTexture(GL_TEXTURE_2D, AssetManager::GetTextureByIndex(renderItem.rmaTextureIndex)->GetGLTexture().GetHandle());
+
+                glDrawElementsBaseVertex(GL_TRIANGLES, command.indexCount, GL_UNSIGNED_INT, (GLvoid*)(command.firstIndex * sizeof(GLuint)), command.baseVertex);
+            }
+        }
+    }
+
 
     void HotloadShaders() {
         bool allSucceeded = true;
@@ -213,6 +277,11 @@ namespace OpenGLRenderer {
     OpenGLFrameBuffer* GetFrameBuffer(const std::string& name) {
         auto it = g_frameBuffers.find(name);
         return (it != g_frameBuffers.end()) ? &it->second : nullptr;
+    }
+
+    OpenGLSSBO* GetSSBO(const std::string& name) {
+        auto it = g_ssbos.find(name);
+        return (it != g_ssbos.end()) ? &it->second : nullptr;
     }
 
     OpenGLCubemapView* GetCubemapView(const std::string& name) {

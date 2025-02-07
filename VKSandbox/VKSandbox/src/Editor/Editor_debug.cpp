@@ -14,22 +14,21 @@ namespace Editor {
 
         for (int i = 0; i < 4; i++) {
             const Viewport* viewport = ViewportManager::GetViewportByIndex(i);
-            const Camera* camera = Editor::GetCameraByIndex(i);
+            //const Camera* camera = Editor::GetCameraByIndex(i);
             const Resolutions& resolutions = Config::GetResolutions();
             int width = resolutions.ui.x * viewport->GetSize().x;
             int height = resolutions.ui.y * viewport->GetSize().y;
             int xLeft = resolutions.ui.x * viewport->GetPosition().x;
             int yTop = resolutions.ui.y * (1.0f - viewport->GetPosition().y - viewport->GetSize().y);
 
-            if (!Debug::IsDebugTextVisible()) {
+            if (!Debug::IsDebugTextVisible() && viewport->GetSize().x > 0.3f && viewport->GetSize().y > 0.2f) {
                 std::string text = "";
                 //text += "ProjectionMatrix: \n" + Util::Mat4ToString(viewport->GetProjectionMatrix()) + "\n\n";
                 //text += "ViewMatrix: \n" + Util::Mat4ToString(camera->GetViewMatrix()) + "\n";
                 //text += "ViewportMode: " + Util::ViewportModeToString(viewport->GetViewportMode()) + "\n";
-                text += "Hover: " + Util::BoolToString(viewport->IsHovered()) + "\n";
-                //text += "Gizmo scaling factor: " + std::to_string(Gizmo::GetGizmoScalingFactorByViewportIndex(i)) + "\n";
-                text += "Camera View: " + Util::CameraTypeToString(Editor::GetCameraViewByIndex(i)) + "\n";
-
+                text += Util::CameraViewToString(Editor::GetCameraViewByIndex(i)) + "\n";
+                text += "\n";
+            
                // text += "IsActive: " + Util::BoolToString(i == Editor::GetActiveViewportIndex()) + "\n";
 
 

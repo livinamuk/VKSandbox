@@ -7,11 +7,15 @@
 
 namespace Editor {
     void Init();
-    void Update();
+    void ResetViewports();
+    void Update(float deltaTime);
+    void UpdateCursor();
+    void UpdateDividers();
     void UpdateInput();
     void UpdateUI();
     void UpdateCamera();
     void UpdateMouseRays();
+    void UpdateCameraInterpolation(float deltaTime);
     void UpdateDebug();
     void Open();
     void Close();
@@ -23,8 +27,11 @@ namespace Editor {
     void SetHoveredObjectType(EditorObjectType editorObjectType);
     void SetSplitX(float value);
     void SetSplitY(float value);
-    void SetViewportToFrontView(uint32_t viewportindex, glm::vec3 viewportOrigin);
+    void SetViewportView(uint32_t viewportIndex, glm::vec3 viewportOrigin, CameraView targetView);
     void SetViewportResizeState(ViewportResizeState viewportResizeState);
+    void SetViewportOrthographicState(uint32_t viewportIndex, bool state);
+    //void SetCameraView(uint32_t cameraViewIndex, CameraView cameraView);
+    void SetViewportOrthoSize(uint32_t viewportIndex, float size);
 
     int GetActiveViewportIndex();
     int GetHoveredViewportIndex();
@@ -32,12 +39,13 @@ namespace Editor {
     int GetHoveredObjectIndex();
     bool IsOpen();
     bool IsViewportOrthographic(uint32_t viewportIndex);
-    float GetSplitX();
-    float GetSplitY();
+    float GetVerticalDividerXPos();
+    float GetHorizontalDividerYPos();
     glm::vec3 GetMouseRayOriginByViewportIndex(int32_t viewportIndex);
     glm::vec3 GetMouseRayDirectionByViewportIndex(int32_t viewportIndex);
+    glm::mat4 GetViewportViewMatrix(int32_t viewportIndex);
     std::string EditorObjectTypeToString(const EditorObjectType& type);
-    Camera* GetCameraByIndex(uint32_t index);
+   // Camera* GetCameraByIndex(uint32_t index);
     Viewport* GetActiveViewport();
     ShadingMode GetViewportModeByIndex(uint32_t index);
     CameraView GetCameraViewByIndex(uint32_t index);
@@ -46,4 +54,8 @@ namespace Editor {
     ViewportResizeState GetViewportResizeState();
 
     EditorMesh& GetEditorMesh();
+
+    // Dividers
+    bool IsVerticalDividerHovered();
+    bool IsHorizontalDividerHovered();
 }
