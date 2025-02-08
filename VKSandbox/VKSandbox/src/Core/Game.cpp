@@ -49,6 +49,11 @@ namespace Game {
         AddLocalPlayer(glm::vec3(-2.09f, 1.45f, 0.68f), glm::vec3(-0.30f, -1.32f, 0.0f));
         AddLocalPlayer(glm::vec3(-2.09f, 1.45f, 0.68f), glm::vec3(-0.30f, -1.32f, 0.0f));
 
+        SetPlayerKeyboardAndMouseIndex(0, 0, 0);
+        SetPlayerKeyboardAndMouseIndex(1, 1, 1);
+        SetPlayerKeyboardAndMouseIndex(2, 1, 1);
+        SetPlayerKeyboardAndMouseIndex(3, 1, 1);
+
         AddLocalPlayer(glm::vec3(0.0f, 1.2f, 2.5f), glm::vec3(0.0f, 0.0f, 0.0f));
         AddLocalPlayer(glm::vec3(0.0f, 2.5f, 0.0f), glm::vec3(-HELL_PI / 2, -HELL_PI / 2, 0.0f));
         AddLocalPlayer(glm::vec3(-2.5f, 1.2f, 0.0f), glm::vec3(0.0f, -HELL_PI / 2, 0.0f));
@@ -203,6 +208,13 @@ namespace Game {
         } 
         else{
             return 1;
+        }
+    }
+
+    void SetPlayerKeyboardAndMouseIndex(int playerIndex, int keyboardIndex, int mouseIndex) {
+        if (playerIndex >= 0 && playerIndex < g_localPlayers.size()) {
+            g_localPlayers[playerIndex].SetKeyboardIndex(keyboardIndex);
+            g_localPlayers[playerIndex].SetMouseIndex(mouseIndex);
         }
     }
 }

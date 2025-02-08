@@ -86,4 +86,29 @@ namespace Util {
         std::copy(text, text + strlen(text), b);
         return b;
     }
+
+    std::string WeaponActionToString(const WeaponAction& weaponAction) {
+        switch (weaponAction) {
+        case WeaponAction::IDLE:                          return "IDLE";
+        case WeaponAction::FIRE:                          return "FIRE";
+        case WeaponAction::RELOAD:                        return "RELOAD";
+        case WeaponAction::RELOAD_FROM_EMPTY:             return "RELOAD_FROM_EMPTY";
+        case WeaponAction::DRAW_BEGIN:                    return "DRAW_BEGIN";
+        case WeaponAction::DRAWING:                       return "DRAWING";
+        case WeaponAction::SPAWNING:                      return "SPAWNING";
+        case WeaponAction::RELOAD_SHOTGUN_BEGIN:          return "RELOAD_SHOTGUN_BEGIN";
+        case WeaponAction::RELOAD_SHOTGUN_SINGLE_SHELL:   return "RELOAD_SHOTGUN_SINGLE_SHELL";
+        case WeaponAction::RELOAD_SHOTGUN_DOUBLE_SHELL:   return "RELOAD_SHOTGUN_DOUBLE_SHELL";
+        case WeaponAction::RELOAD_SHOTGUN_END:            return "RELOAD_SHOTGUN_END";
+        case WeaponAction::RELOAD_REVOLVER_BEGIN:         return "RELOAD_REVOLVER_BEGIN";
+        case WeaponAction::RELOAD_REVOLVER_LOOP:          return "RELOAD_REVOLVER_LOOP";
+        case WeaponAction::RELOAD_REVOLVER_END:           return "RELOAD_REVOLVER_END";
+        case WeaponAction::ADS_IN:                        return "ADS_IN";
+        case WeaponAction::ADS_OUT:                       return "ADS_OUT";
+        case WeaponAction::ADS_IDLE:                      return "ADS_IDLE";
+        case WeaponAction::ADS_FIRE:                      return "ADS_FIRE";
+        case WeaponAction::MELEE:                         return "MELEE";
+        default:                                          return "UNDEFINED";
+        }
+    }
 }

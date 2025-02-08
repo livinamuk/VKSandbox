@@ -2,11 +2,13 @@
 #include "HellDefines.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../Core/Game.h"
-#include "../Core/Scene.h"
-#include "../Editor/Editor.h"
-#include "../Input/Input.h"
-#include "../BackEnd/BackEnd.h"
+#include "BackEnd/BackEnd.h"
+#include "Core/Audio.h"
+#include "Core/Game.h"
+#include "Core/Scene.h"
+#include "Editor/Editor.h"
+#include "Input/Input.h"
+#include "Viewport/ViewportManager.h"
 
 void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex) {
     m_position = position;
@@ -19,13 +21,12 @@ void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex)
     Scene::CreateAnimatedGameObject();
     m_viewWeaponAnimatedGameObjectIndex = Scene::GetAnimatedGameObjects().size() - 1;
     AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
-    viewWeapon->SetFlag(AnimatedGameObject::Flag::VIEW_WEAPON);
     viewWeapon->SetPlayerIndex(viewportIndex);
+    viewWeapon->SetExclusiveViewportIndex(viewportIndex);
 
     Scene::CreateAnimatedGameObject();
     m_characterModelAnimatedGameObjectIndex = Scene::GetAnimatedGameObjects().size() - 1;
     AnimatedGameObject* characterModel = GetCharacterModelAnimatedGameObject();
-    characterModel->SetFlag(AnimatedGameObject::Flag::CHARACTER_MODEL);
     characterModel->SetPlayerIndex(viewportIndex);
 }
 
@@ -34,66 +35,54 @@ void Player::Update(float deltaTime) {
     
     UpdateMovement(deltaTime);
     UpdateCamera();
+    UpdateWeaponLogic();
     UpdateViewWeapon();
     UpdateUI();
+
+    if (Input::KeyPressed(HELL_KEY_K)) {
+        m_awaitingSpawn = true;
+    }
 }
 
 void Player::Respawn() {
     AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
-    viewWeapon->SetSkinnedModel("Glock");
-    viewWeapon->PlayAndLoopAnimation("Glock_Reload");
-    viewWeapon->SetSkinnedModel("SPAS");
-    viewWeapon->PlayAndLoopAnimation("SPAS_Reload2Shells");
+    //viewWeapon->SetSkinnedModel("Glock");
+    //viewWeapon->PlayAndLoopAnimation("Glock_Reload");
+    //viewWeapon->SetSkinnedModel("SPAS");
+    //viewWeapon->PlayAndLoopAnimation("SPAS_Reload2Shells");
+    //viewWeapon->SetSkinnedModel("Knife");
+    //viewWeapon->PlayAndLoopAnimation("Knife_Idle");
 
-    // Load weapon states
-    //m_weaponStates.clear();
-    //for (int i = 0; i < WeaponManager::GetWeaponCount(); i++) {
-    //    WeaponState& state = m_weaponStates.emplace_back();
-    //    state.name = WeaponManager::GetWeaponInfoByIndex(i)->name;
-    //    state.has = false;
-    //    state.ammoInMag = 0;
-    //}
-    //// Load ammo states
-    //m_ammoStates.clear();
-    //for (int i = 0; i < WeaponManager::GetAmmoTypeCount(); i++) {
-    //    AmmoState& state = m_ammoStates.emplace_back();
-    //    state.name = WeaponManager::GetAmmoInfoByIndex(i)->name;
-    //    state.ammoOnHand = 0;
-    //}
-    //
-    //GiveDefaultLoadout();
-    //SwitchWeapon("Glock", SPAWNING);
-    ////    SwitchWeapon("GoldenGlock", SPAWNING);
-    //
+    m_weaponStates.clear();
+    for (int i = 0; i < WeaponManager::GetWeaponCount(); i++) {
+        WeaponState& state = m_weaponStates.emplace_back();
+        state.name = WeaponManager::GetWeaponInfoByIndex(i)->name;
+        state.has = false;
+        state.ammoInMag = 0;
+    }
+
+    m_ammoStates.clear();
+    for (int i = 0; i < WeaponManager::GetAmmoTypeCount(); i++) {
+        AmmoState& state = m_ammoStates.emplace_back();
+        state.name = WeaponManager::GetAmmoInfoByIndex(i)->name;
+        state.ammoOnHand = 0;
+    }
+
+    GiveDefaultLoadout();
+    SwitchWeapon("Knife", WeaponAction::DRAW_BEGIN);
+
     //if (_characterController) {
     //    PxExtendedVec3 globalPose = PxExtendedVec3(spawnPoint.position.x, spawnPoint.position.y, spawnPoint.position.z);
     //    _characterController->setFootPosition(globalPose);
     //}
     //_position = spawnPoint.position;
     //_rotation = spawnPoint.rotation;
-    //Audio::PlayAudio("Glock_Equip.wav", 0.5f);
+    Audio::PlayAudio("Glock_Equip.wav", 0.5f);
     
     m_awaitingSpawn = false;
 }
 
-void Player::GiveDefaultLoadout() {
-   GiveWeapon("Knife");
-   GiveWeapon("Glock");
-   GiveWeapon("GoldenGlock");
-   GiveWeapon("Tokarev");
-   GiveWeapon("AKS74U");
-   GiveWeapon("P90");
-   GiveWeapon("Shotgun");
-   GiveWeapon("SPAS");
-   
-   GiveAmmo("Glock", 80);
-   GiveAmmo("Tokarev", 200);
-   GiveAmmo("AKS74U", 999999);
-   GiveAmmo("Shotgun", 6666);
-   
-   GiveRedDotToWeapon("GoldenGlock");
-   // GiveSilencerToWeapon("Glock");
-}
+
 
 void Player::EnableControl() {
     m_controlEnabled = true;
@@ -170,4 +159,28 @@ AnimatedGameObject* Player::GetViewWeaponAnimatedGameObject() {
 
 bool Player::IsDead() {
     return false;
+}
+
+bool Player::ViewportIsVisible() {
+    Viewport* viewport = ViewportManager::GetViewportByIndex(m_viewportIndex);
+    if (!viewport) {
+        return false;
+    }
+    else {
+        return viewport->IsVisible();
+    }
+}
+
+bool Player::ViewModelAnimationsCompleted() {
+    AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
+    if (!viewWeapon) {
+        std::cout << "WARNING!!! Player::ViewModelAnimationsCompleted() failed coz viewWeapon was nullptr\n";
+        return true;
+    }
+    for (AnimationState& animationState : viewWeapon->m_animationLayer.m_animationStates) {
+        if (!animationState.IsComplete()) {
+            return false;
+        }
+    }
+    return true;
 }

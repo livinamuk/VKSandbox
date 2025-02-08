@@ -89,11 +89,9 @@ namespace OpenGLRenderer {
             }
         }
 
-        OpenGLShader* shader2 = GetShader("SolidColor");
-        shader2->Use();
+        shader->Use();
         gBuffer->DrawBuffers({ "BaseColor", "Normal", "RMA", "MousePick", "WorldSpacePosition" });
         SetRasterizerState("GeometryPass_NonBlended");
-
 
         glBindVertexArray(OpenGLBackEnd::GetSkinnedVertexDataVAO());
         glBindBuffer(GL_ARRAY_BUFFER, OpenGLBackEnd::GetSkinnedVertexDataVBO());
@@ -103,51 +101,46 @@ namespace OpenGLRenderer {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
             if (viewport->IsVisible()) {
                 OpenGLRendererUtil::SetViewport(gBuffer, viewport);
-
-                glm::mat4 projectionMatrix = viewportData[i].projection;
-                glm::mat4 viewMatrix = viewportData[i].view;
-
-                shader2->SetMat4("projection", projectionMatrix);
-                shader2->SetMat4("view", viewMatrix);
-
-                for (SkinnedRenderItem& renderItem : Scene::GetSkinnedRenderItems()) {
-                    SkinnedMesh* mesh = AssetManager::GetSkinnedMeshByIndex(renderItem.srcMeshIndex);
-                    shader2->SetMat4("model", renderItem.modelMatrix);
-                    glDrawElementsInstancedBaseVertex(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), 1, renderItem.baseVertex);
+                if (BackEnd::RenderDocFound()) {
+                    SplitMultiDrawIndirect(shader, drawInfoSet.skinnedGeometry.perViewport[i]);
+                }
+                else {
+                    MultiDrawIndirect(drawInfoSet.skinnedGeometry.perViewport[i]);
                 }
             }
         }
+        
         glBindVertexArray(0);
 
 
-        glBindVertexArray(OpenGLBackEnd::GetWeightedVertexDataVAO());
-        glBindBuffer(GL_ARRAY_BUFFER, OpenGLBackEnd::GetWeightedVertexDataVBO());
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, OpenGLBackEnd::GetWeightedVertexDataEBO());
-        for (int i = 0; i < 4; i++) {
-            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
-            if (viewport->IsVisible()) {
-                OpenGLRendererUtil::SetViewport(gBuffer, viewport);
-
-                glm::mat4 projectionMatrix = viewportData[i].projection;
-                glm::mat4 viewMatrix = viewportData[i].view;
-
-                shader2->SetMat4("projection", projectionMatrix);
-                shader2->SetMat4("view", viewMatrix);
-
-                Transform transform;
-                transform.position = glm::vec3(-8.0f, 0.0f, 5.0f);
-                transform.scale = glm::vec3(0.01f);
-
-                SkinnedModel* skinnedModel = AssetManager::GetSkinnedModelByName("Glock");
-                int meshCount = skinnedModel->GetMeshCount();
-                for (int i = 0; i < meshCount; i++) {
-                    SkinnedMesh* mesh = AssetManager::GetSkinnedMeshByIndex(skinnedModel->GetMeshIndices()[i]);             
-                    shader2->SetMat4("model", transform.to_mat4());
-                    glDrawElementsInstancedBaseVertex(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), 1, mesh->baseVertexGlobal);
-                }
-            }
-        }
-        glBindVertexArray(0);
+       // glBindVertexArray(OpenGLBackEnd::GetWeightedVertexDataVAO());
+       // glBindBuffer(GL_ARRAY_BUFFER, OpenGLBackEnd::GetWeightedVertexDataVBO());
+       // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, OpenGLBackEnd::GetWeightedVertexDataEBO());
+       // for (int i = 0; i < 4; i++) {
+       //     Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+       //     if (viewport->IsVisible()) {
+       //         OpenGLRendererUtil::SetViewport(gBuffer, viewport);
+       //
+       //         glm::mat4 projectionMatrix = viewportData[i].projection;
+       //         glm::mat4 viewMatrix = viewportData[i].view;
+       //
+       //         shader2->SetMat4("projection", projectionMatrix);
+       //         shader2->SetMat4("view", viewMatrix);
+       //
+       //         Transform transform;
+       //         transform.position = glm::vec3(-8.0f, 0.0f, 5.0f);
+       //         transform.scale = glm::vec3(0.01f);
+       //
+       //         SkinnedModel* skinnedModel = AssetManager::GetSkinnedModelByName("Glock");
+       //         int meshCount = skinnedModel->GetMeshCount();
+       //         for (int i = 0; i < meshCount; i++) {
+       //             SkinnedMesh* mesh = AssetManager::GetSkinnedMeshByIndex(skinnedModel->GetMeshIndices()[i]);             
+       //             shader2->SetMat4("model", transform.to_mat4());
+       //             glDrawElementsInstancedBaseVertex(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), 1, mesh->baseVertexGlobal);
+       //         }
+       //     }
+       // }
+       // glBindVertexArray(0);
     }
 }
 

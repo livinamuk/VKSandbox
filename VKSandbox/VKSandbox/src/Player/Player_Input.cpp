@@ -2,250 +2,258 @@
 #include "Input/InputMulti.h"
 
 bool Player::PressingWalkForward() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, _controls.WALK_FORWARD);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, m_controls.WALK_FORWARD);
     }
     else {
-        // return InputMulti::ButtonDown(_controllerIndex, _controls.WALK_FORWARD);
+        // return InputMulti::ButtonDown(_controllerIndex, m_controls.WALK_FORWARD);
         return false;
     }
 }
 
 bool Player::PressingWalkBackward() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, _controls.WALK_BACKWARD);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, m_controls.WALK_BACKWARD);
     }
     else {
-        //return InputMulti::ButtonDown(_controllerIndex, _controls.WALK_BACKWARD);
+        //return InputMulti::ButtonDown(_controllerIndex, m_controls.WALK_BACKWARD);
         return false;
     }
 }
 
 bool Player::PressingWalkLeft() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, _controls.WALK_LEFT);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, m_controls.WALK_LEFT);
     }
     else {
-        //return InputMulti::ButtonDown(_controllerIndex, _controls.WALK_LEFT);
+        //return InputMulti::ButtonDown(_controllerIndex, m_controls.WALK_LEFT);
         return false;
     }
 }
 
 bool Player::PressingWalkRight() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, _controls.WALK_RIGHT);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, m_controls.WALK_RIGHT);
     }
     else {
-        //return InputMulti::ButtonDown(_controllerIndex, _controls.WALK_RIGHT);
+        //return InputMulti::ButtonDown(_controllerIndex, m_controls.WALK_RIGHT);
         return false;
     }
 }
 
 bool Player::PressingCrouch() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, _controls.CROUCH);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, m_controls.CROUCH);
     }
     else {
-        //return InputMulti::ButtonDown(_controllerIndex, _controls.CROUCH);
+        //return InputMulti::ButtonDown(_controllerIndex, m_controls.CROUCH);
         return false;
     }
 }
 
 bool Player::PressedWalkForward() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.WALK_FORWARD);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.WALK_FORWARD);
     }
     else {
-        //return InputMulti::ButtonPressed(_controllerIndex, _controls.WALK_FORWARD);
+        //return InputMulti::ButtonPressed(_controllerIndex, m_controls.WALK_FORWARD);
         return false;
     }
 }
 
 bool Player::PressedWalkBackward() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.WALK_BACKWARD);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.WALK_BACKWARD);
     }
     else {
-        //return InputMulti::ButtonPressed(_controllerIndex, _controls.WALK_BACKWARD);
+        //return InputMulti::ButtonPressed(_controllerIndex, m_controls.WALK_BACKWARD);
         return false;
     }
 }
 
 bool Player::PressedWalkLeft() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.WALK_LEFT);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.WALK_LEFT);
     }
     else {
-        // return InputMulti::ButtonPressed(_controllerIndex, _controls.WALK_LEFT);
+        // return InputMulti::ButtonPressed(_controllerIndex, m_controls.WALK_LEFT);
         return false;
     }
 }
 
 bool Player::PressedWalkRight() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.WALK_RIGHT);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.WALK_RIGHT);
     }
     else {
-        //return InputMulti::ButtonPressed(_controllerIndex, _controls.WALK_RIGHT);
+        //return InputMulti::ButtonPressed(_controllerIndex, m_controls.WALK_RIGHT);
         return false;
     }
 }
 
 bool Player::PressedInteract() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.INTERACT);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.INTERACT);
     }
     else {
-        //return InputMulti::ButtonPressed(_controllerIndex, _controls.INTERACT);
+        //return InputMulti::ButtonPressed(_controllerIndex, m_controls.INTERACT);
         return false;
     }
 }
 
 bool Player::PressedReload() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.RELOAD);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.RELOAD);
     }
     else {
-        //return InputMulti::ButtonPressed(_controllerIndex, _controls.RELOAD);
+        //return InputMulti::ButtonPressed(_controllerIndex, m_controls.RELOAD);
         return false;
     }
 }
 
 bool Player::PressedFire() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.FIRE);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.FIRE);
     }
     else {
-        //return InputMulti::ButtonPressed(_controllerIndex, _controls.FIRE);
+        //return InputMulti::ButtonPressed(_controllerIndex, m_controls.FIRE);
         return false;
     }
 }
 
 bool Player::PressingFire() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, _controls.FIRE);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, m_controls.FIRE);
     }
     else {
-        // return InputMulti::ButtonDown(_controllerIndex, _controls.FIRE);
+        // return InputMulti::ButtonDown(_controllerIndex, m_controls.FIRE);
         return false;
     }
 }
 
 bool Player::PresingJump() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, _controls.JUMP);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, m_controls.JUMP);
     }
     else {
-        //return InputMulti::ButtonPressed(_controllerIndex, _controls.JUMP);
+        //return InputMulti::ButtonPressed(_controllerIndex, m_controls.JUMP);
         return false;
     }
 }
 
 bool Player::PressedCrouch() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.CROUCH);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.CROUCH);
     }
     else {
-        // return InputMulti::ButtonPressed(_controllerIndex, _controls.CROUCH);
+        // return InputMulti::ButtonPressed(_controllerIndex, m_controls.CROUCH);
         return false;
     }
 }
 
 bool Player::PressedNextWeapon() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.NEXT_WEAPON);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.NEXT_WEAPON);
     }
     else {
-        //return InputMulti::ButtonPressed(_controllerIndex, _controls.NEXT_WEAPON);
+        //return InputMulti::ButtonPressed(_controllerIndex, m_controls.NEXT_WEAPON);
         return false;
     }
 }
 
 bool Player::PressingADS() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, _controls.ADS);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, m_controls.ADS);
     }
     else {
-        // return InputMulti::ButtonDown(_controllerIndex, _controls.ADS);
+        // return InputMulti::ButtonDown(_controllerIndex, m_controls.ADS);
         return false;
     }
 }
 
 bool Player::PressedADS() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.ADS);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.ADS);
     }
     else {
-        // return InputMulti::ButtonPressed(_controllerIndex, _controls.ADS);
+        // return InputMulti::ButtonPressed(_controllerIndex, m_controls.ADS);
         return false;
     }
 }
 
 bool Player::PressedMelee() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.MELEE);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.MELEE);
     }
     else {
-        // return InputMulti::ButtonPressed(_controllerIndex, _controls.ADS);
+        // return InputMulti::ButtonPressed(_controllerIndex, m_controls.ADS);
         return false;
     }
 }
 
 
 bool Player::PressedEscape() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.ESCAPE);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.ESCAPE);
     }
     else {
-        // return InputMulti::ButtonPressed(_controllerIndex, _controls.ESCAPE);
+        // return InputMulti::ButtonPressed(_controllerIndex, m_controls.ESCAPE);
         return false;
     }
 }
 bool Player::PressedFullscreen() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.DEBUG_FULLSCREEN);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.DEBUG_FULLSCREEN);
     }
     else {
-        // return InputMulti::ButtonPressed(_controllerIndex, _controls.ESCAPE);
+        // return InputMulti::ButtonPressed(_controllerIndex, m_controls.ESCAPE);
         return false;
     }
 }
 
 bool Player::PressedOne() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.DEBUG_ONE);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.DEBUG_ONE);
     }
     else {
-        // return InputMulti::ButtonPressed(_controllerIndex, _controls.ESCAPE);
+        // return InputMulti::ButtonPressed(_controllerIndex, m_controls.ESCAPE);
         return false;
     }
 }
 
 bool Player::PressedTwo() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.DEBUG_TWO);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.DEBUG_TWO);
     }
     else {
-        // return InputMulti::ButtonPressed(_controllerIndex, _controls.ESCAPE);
+        // return InputMulti::ButtonPressed(_controllerIndex, m_controls.ESCAPE);
         return false;
     }
 }
 
 bool Player::PressedThree() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.DEBUG_THREE);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.DEBUG_THREE);
     }
     else {
-        // return InputMulti::ButtonPressed(_controllerIndex, _controls.ESCAPE);
+        // return InputMulti::ButtonPressed(_controllerIndex, m_controls.ESCAPE);
         return false;
     }
 }
 bool Player::PressedFour() {
-    if (_inputType == InputType::KEYBOARD_AND_MOUSE) {
-        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, _controls.DEBUG_FOUR);
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyPressed(m_keyboardIndex, m_mouseIndex, m_controls.DEBUG_FOUR);
     }
     else {
-        // return InputMulti::ButtonPressed(_controllerIndex, _controls.ESCAPE);
+        // return InputMulti::ButtonPressed(_controllerIndex, m_controls.ESCAPE);
         return false;
     }
+}
+
+void Player::SetKeyboardIndex(int32_t index) {
+    m_keyboardIndex = index;
+}
+
+void Player::SetMouseIndex(int32_t index) {
+    m_mouseIndex = index;
 }

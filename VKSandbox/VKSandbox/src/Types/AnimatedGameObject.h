@@ -21,12 +21,10 @@ struct JointWorldMatrix {
 struct AnimatedGameObject {
 
     enum class AnimationMode { BINDPOSE, ANIMATION, RAGDOLL };
-    enum class Flag { VIEW_WEAPON, CHARACTER_MODEL, NONE };
 
 private:
-    std::vector<SkinnedRenderItem> m_skinnedMeshRenderItems;
+    std::vector<RenderItem> m_renderItems;
     int32_t m_playerIndex = -1;
-    Flag m_flag = Flag::NONE;
 
 public:
     std::unordered_map<std::string, unsigned int> m_boneMapping;
@@ -38,10 +36,8 @@ public:
 
     const size_t GetAnimatedTransformCount();
     void UpdateRenderItems();
-    std::vector<SkinnedRenderItem>& GetRenderItems();
-    void SetFlag(Flag flag);
+    std::vector<RenderItem>& GetRenderItems();
     void SetPlayerIndex(int32_t index);
-    const Flag GetFlag();
     const int32_t GetPlayerIndex();
     const uint32_t GetVerteXCount();
     std::vector<uint32_t> m_skinnedBufferIndices;
@@ -66,7 +62,7 @@ public:
 	std::string GetName();
 	const glm::mat4 GetModelMatrix();
 	bool IsAnimationComplete();
-	bool AnimationIsPastPercentage(float percent);
+	//AnimationIsPastPercentage(float percent);
     glm::vec3 GetScale();
 
 	SkinnedModel* m_skinnedModel = nullptr;
@@ -147,15 +143,24 @@ public:
     std::vector<glm::mat4>& GetGlobalBlendedNodeTransforms();
     glm::mat4 GetBindPoseByBoneName(const std::string& name);
 
-    uint32_t GetAnimationFrameNumber(); 
-    bool AnimationIsPastFrameNumber(int frameNumber);
+
+    uint32_t GetAnimationFrameNumber();                     // the logic in here needs rethinking!!!
+    bool AnimationIsPastFrameNumber(int frameNumber);       // the logic in here needs rethinking!!!
 
     AnimationLayer m_animationLayer;
 
     void DrawBones(glm::vec3 color);
     void DrawBoneTangentVectors(float size = 0.1f);
-    void DrawMeshAABBs(glm::vec3 color);
 
     void MakeGold();
     void MakeNotGold();
+
+
+    void SetExclusiveViewportIndex(int index);
+    void SetIgnoredViewportIndex(int index);
+
+    bool AnimationByNameIsComplete(const std::string& name);
+
+    int m_ignoredViewportIndex = -1;
+    int m_exclusiveViewportIndex = -1;
 };

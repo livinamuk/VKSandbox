@@ -100,7 +100,7 @@ void AnimationState::Update(int skinnedModelIndex, float deltaTime) {
             m_currentTime += deltaTime * m_playbackParams.animationSpeed;
         }
         float duration = animation->m_duration / animation->m_ticksPerSecond;
-        if (m_currentTime > duration) {
+        if (m_currentTime >= duration) {
             if (!m_loop) {
                 m_currentTime = duration;
                 m_paused = true;
@@ -206,7 +206,7 @@ std::string AnimationState::GetDebugInfo() {
 }
 
 bool AnimationState::AwaitingRemoval() {
-    if (m_playbackParams.removeWhenComplete&& IsComplete()) {
+    if (m_playbackParams.removeAnimationStateWhenComplete&& IsComplete()) {
         return true;
     }
     if (m_forceStop) {         

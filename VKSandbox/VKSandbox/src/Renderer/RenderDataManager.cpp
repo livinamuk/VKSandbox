@@ -16,20 +16,22 @@ namespace RenderDataManager {
     std::vector<RenderItem> g_instanceData;
     uint32_t g_baseSkinnedVertex;
 
+    void UpdateViewportFrustums();
     void UpdateViewportData();
     void UpdateRendererData();
     void UpdateDrawCommandsSet();
     void CreateDrawCommands(DrawCommands& drawCommands, std::vector<RenderItem>& renderItems);
+    void CreateDrawCommandsSkinned(DrawCommands& drawCommands, std::vector<RenderItem>& renderItems);
     void CreateMultiDrawIndirectCommands(std::vector<DrawIndexedIndirectCommand>& commands, std::span<RenderItem> renderItems, int playerIndex, int instanceOffset);
+    void CreateMultiDrawIndirectCommandsSkinned(std::vector<DrawIndexedIndirectCommand>& commands, std::span<RenderItem> renderItems, int playerIndex, int instanceOffset);
     int EncodeBaseInstance(int playerIndex, int instanceOffset);
     void DecodeBaseInstance(int baseInstance, int& playerIndex, int& instanceOffset);
 
     void Update() {
         UpdateViewportData();
+        UpdateViewportFrustums();
         UpdateRendererData();
         UpdateDrawCommandsSet();
-
-
     }
 
     void UpdateViewportData() {
@@ -101,10 +103,15 @@ namespace RenderDataManager {
                     g_viewportData[i].clipSpaceYMax = 0.5f;
                 }
             }
+        }
+    }
 
-
-
-
+    void UpdateViewportFrustums() {
+        for (int i = 0; i < 4; i++) {
+            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+            if (viewport->IsVisible()) {
+                viewport->GetFrustum().Update(g_viewportData[i].projectionView);
+            }
         }
     }
 
@@ -119,6 +126,12 @@ namespace RenderDataManager {
         g_rendererData.splitscreenMode = (int)Game::GetSplitscreenMode();
     }
 
+    void SortRenderItems(std::vector<RenderItem>& renderItems) {
+        std::sort(renderItems.begin(), renderItems.end(), [](const RenderItem& a, const RenderItem& b) {
+            return a.meshIndex < b.meshIndex;
+        });
+    }
+
     void UpdateDrawCommandsSet() {
         g_instanceData.clear();
         auto& set = g_drawCommandsSet;
@@ -127,6 +140,85 @@ namespace RenderDataManager {
         CreateDrawCommands(set.geometryAlphaDiscarded, Scene::GetRenderItemsAlphaDiscarded());
         CreateDrawCommands(set.hairTopLayer, Scene::GetRenderItemsHairTopLayer());
         CreateDrawCommands(set.hairBottomLayer, Scene::GetRenderItemsHairBottomLayer());
+        CreateDrawCommandsSkinned(set.skinnedGeometry, Scene::GetSkinnedRenderItems());
+    }
+
+    void CreateDrawCommands(DrawCommands& drawCommands, std::vector<RenderItem>& renderItems) {
+        SortRenderItems(renderItems);
+
+        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
+        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
+        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
+        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
+        for (RenderItem& renderItem : renderItems) {
+            Util::UpdateRenderItemAABB(renderItem);
+        }
+
+        // Clear any commands from last frame
+        for (int i = 0; i < 4; i++) {
+            drawCommands.perViewport[i].clear();
+        }
+
+        // Iterate the viewports and build the draw commands
+        for (int i = 0; i < 4; i++) {
+            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+            if (!viewport->IsVisible()) continue;
+
+            // Store the instance offset for this player
+            int instanceStart = g_instanceData.size();
+
+            // Preallocate an estimate
+            g_instanceData.reserve(g_instanceData.size() + renderItems.size());
+
+            // Append new render items to the global instance data
+            for (const RenderItem& renderItem : renderItems) {
+                if (renderItem.ignoredViewportIndex != -1 && renderItem.ignoredViewportIndex == i) continue;
+                if (renderItem.exclusiveViewportIndex != -1 && renderItem.exclusiveViewportIndex != i) continue;
+
+                // Frustum cull it
+                AABB aabb(renderItem.aabbMin, renderItem.aabbMax);
+                if (viewport->GetFrustum().IntersectsAABB(aabb) || true) {
+                    g_instanceData.push_back(renderItem);
+                }
+            }
+
+            // Create indirect draw commands using the stored offset
+            std::span<RenderItem> instanceView(g_instanceData.begin() + instanceStart, g_instanceData.end());
+            CreateMultiDrawIndirectCommands(drawCommands.perViewport[i], instanceView, i, instanceStart);
+        }
+    }
+
+    void CreateDrawCommandsSkinned(DrawCommands& drawCommands, std::vector<RenderItem>& renderItems) {
+        SortRenderItems(renderItems);
+
+        // Clear any commands from last frame
+        for (int i = 0; i < 4; i++) {
+            drawCommands.perViewport[i].clear();
+        }
+
+        // Iterate the viewports and build the draw commands
+        for (int i = 0; i < 4; i++) {
+            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+            if (!viewport->IsVisible()) continue;
+
+            // Store the instance offset for this player
+            int instanceStart = g_instanceData.size();
+
+            // Preallocate an estimate
+            g_instanceData.reserve(g_instanceData.size() + renderItems.size());
+
+            // Append new render items to the global instance data
+            for (const RenderItem& renderItem : renderItems) {
+                if (renderItem.ignoredViewportIndex != -1 && renderItem.ignoredViewportIndex == i) continue;
+                if (renderItem.exclusiveViewportIndex != -1 && renderItem.exclusiveViewportIndex != i) continue;
+
+                g_instanceData.push_back(renderItem);
+            }
+
+            // Create indirect draw commands using the stored offset
+            std::span<RenderItem> instanceView(g_instanceData.begin() + instanceStart, g_instanceData.end());
+            CreateMultiDrawIndirectCommandsSkinned(drawCommands.perViewport[i], instanceView, i, instanceStart);
+        }
     }
 
     void CreateMultiDrawIndirectCommands(std::vector<DrawIndexedIndirectCommand>& commands, std::span<RenderItem> renderItems, int playerIndex, int instanceOffset) {
@@ -158,54 +250,32 @@ namespace RenderDataManager {
         }
     }
 
-    void CreateDrawCommands(DrawCommands& drawCommands, std::vector<RenderItem>& renderItems) {
-        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
-        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
-        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
-        // Update all RenderItem aabbs (REPLACE THIS ONCE YOU HAVE PHYSX AGAIN)
-        for (RenderItem& renderItem : renderItems) {
-            Util::UpdateRenderItemAABB(renderItem);
-        }
+    void CreateMultiDrawIndirectCommandsSkinned(std::vector<DrawIndexedIndirectCommand>& commands, std::span<RenderItem> renderItems, int playerIndex, int instanceOffset) {
+        std::unordered_map<int, std::size_t> commandMap;
+        commands.reserve(renderItems.size());
 
-        // Put this somewhere better
-        // Put this somewhere better
-        // Put this somewhere better
-        // Put this somewhere better
-        // Put this somewhere better
-        // Put this somewhere better
-        Frustum frustum;
+        for (const RenderItem& renderItem : renderItems) {
+            int meshIndex = renderItem.meshIndex;
+            SkinnedMesh* mesh = AssetManager::GetSkinnedMeshByIndex(meshIndex);
 
-        // Clear any commands from last frame
-        for (int i = 0; i < 4; i++) {
-            drawCommands.perViewport[i].clear();
-        }
-
-        // Iterate the viewports and build the draw commands
-        for (int i = 0; i < 4; i++) {
-            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
-            if (!viewport->IsVisible()) continue;
-
-            glm::mat4 projectionView = g_viewportData[i].projectionView;
-            frustum.Update(projectionView);
-
-            // Store the instance offset for this player
-            int instanceStart = g_instanceData.size();
-
-            // Preallocate an estimate
-            g_instanceData.reserve(g_instanceData.size() + renderItems.size());
-
-            // Append new render items to the global instance data
-            for (const RenderItem& renderItem : renderItems) {
-                // Frustum cull it
-                AABB aabb(renderItem.aabbMin, renderItem.aabbMax);
-                if (frustum.IntersectsAABB(aabb)) {
-                    g_instanceData.push_back(renderItem);
-                }
+            // If the command exists, increment its instance count
+            auto it = commandMap.find(meshIndex);
+            if (it != commandMap.end()) {
+                commands[it->second].instanceCount++;
             }
+            // Otherwise create a new command
+            else {
+                std::size_t index = commands.size();
+                auto& cmd = commands.emplace_back();
+                cmd.indexCount = mesh->indexCount;
+                cmd.firstIndex = mesh->baseIndex;
+                cmd.baseVertex = renderItem.baseSkinnedVertex;
+                cmd.baseInstance = EncodeBaseInstance(playerIndex, instanceOffset);
+                cmd.instanceCount = 1;
 
-            // Create indirect draw commands using the stored offset
-            std::span<RenderItem> instanceView(g_instanceData.begin() + instanceStart, g_instanceData.end());
-            CreateMultiDrawIndirectCommands(drawCommands.perViewport[i], instanceView, i, instanceStart);
+                commandMap[meshIndex] = index;
+            }
+            instanceOffset++;
         }
     }
 

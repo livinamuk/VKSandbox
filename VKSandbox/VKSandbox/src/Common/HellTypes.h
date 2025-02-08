@@ -29,30 +29,37 @@ struct RenderItem {
     glm::mat4 inverseModelMatrix = glm::mat4(1);
     glm::vec4 aabbMin = glm::vec4(0);
     glm::vec4 aabbMax = glm::vec4(0);
-    int meshIndex;
-    int baseColorTextureIndex;
-    int normalMapTextureIndex;
-    int rmaTextureIndex;
-    int mousePickType;
-    int mousePickIndex;
-    int padding0;
-    int padding1;
-};
 
-struct SkinnedRenderItem {
-    glm::mat4 modelMatrix = glm::mat4(1);
-    glm::mat4 inverseModelMatrix = glm::mat4(1);
-    glm::vec4 aabbMin = glm::vec4(0);
-    glm::vec4 aabbMax = glm::vec4(0);
-    int srcMeshIndex;
-    int baseColorTextureIndex;
-    int normalTextureIndex;
-    int rmaTextureIndex;
-    int baseVertex;
-    int padding0;
+    int meshIndex = 0;
+    int baseColorTextureIndex = 0;
+    int normalMapTextureIndex = 0;
+    int rmaTextureIndex = 0;
+
+    int mousePickType = 0;
+    int mousePickIndex = 0;
+    int baseSkinnedVertex = 0;
+    int ignoredViewportIndex = -1;
+
+    int exclusiveViewportIndex = -1;
+    int skinned = 0; // True or false
     int padding1;
     int padding2;
 };
+
+//struct SkinnedRenderItem {
+//    glm::mat4 modelMatrix = glm::mat4(1);
+//    glm::mat4 inverseModelMatrix = glm::mat4(1);
+//    glm::vec4 aabbMin = glm::vec4(0);
+//    glm::vec4 aabbMax = glm::vec4(0);
+//    int srcMeshIndex;
+//    int baseColorTextureIndex;
+//    int normalTextureIndex;
+//    int rmaTextureIndex;
+//    int baseVertex;
+//    int padding0;
+//    int padding1;
+//    int padding2;
+//};
 
 struct RenderItem2D {
     glm::mat4 modelMatrix = glm::mat4(1);
@@ -254,6 +261,8 @@ struct DrawCommandsSet {
     DrawCommands geometryAlphaDiscarded;
     DrawCommands hairTopLayer;
     DrawCommands hairBottomLayer;
+
+    DrawCommands skinnedGeometry;
 };
 
 struct RendererSettings {

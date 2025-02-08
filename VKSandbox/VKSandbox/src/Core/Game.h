@@ -11,6 +11,7 @@ namespace Game {
     float GetDeltaTime();
 
     Player* GetLocalPlayerByIndex(uint32_t index);
+    void SetPlayerKeyboardAndMouseIndex(int playerIndex, int keyboardIndex, int mouseIndex);
     void NextSplitScreenMode();
     void SetSplitscreenMode(SplitscreenMode mode);
     const SplitscreenMode& GetSplitscreenMode();

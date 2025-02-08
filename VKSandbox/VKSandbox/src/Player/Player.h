@@ -1,8 +1,8 @@
 #pragma once
 #include "HellTypes.h"
 #include "Camera/Camera.h"
-#include "Core/WeaponManager.h"
 #include "Types/AnimatedGameObject.h"
+#include "Weapon/WeaponManager.h"
 
 struct Player {
     void Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex);
@@ -40,7 +40,7 @@ struct Player {
     bool CanEnterADS();
     bool InADS(); 
     bool CanMelee();
-    void UpdateViewWeaponLogic(float deltaTime);
+    void UpdateWeaponLogic();
     void GiveDefaultLoadout();
     void GiveWeapon(std::string name);
     void GiveAmmo(std::string name, int amount);
@@ -142,10 +142,10 @@ private:
     int32_t m_viewWeaponAnimatedGameObjectIndex = 0;
     int32_t m_viewportIndex = 0;
     Camera m_camera;
-    InputType _inputType = KEYBOARD_AND_MOUSE;
-    PlayerControls _controls;
+    InputType m_inputType = KEYBOARD_AND_MOUSE;
+    PlayerControls m_controls;
     ShellEjectionState m_shellEjectionState;
-    WeaponAction _weaponAction = DRAW_BEGIN;
+    WeaponAction m_weaponAction = DRAW_BEGIN;
     std::vector<WeaponState> m_weaponStates;
     std::vector<AmmoState> m_ammoStates;
 
@@ -171,4 +171,25 @@ private:
         glm::mat4 m_weaponSwayMatrix = glm::mat4(1);
         int m_mouseIndex = -1;
         int m_keyboardIndex = -1;
+
+
+        void NextWeapon();
+        void UpdateMeleeLogic();
+        void UpdateGunLogic();
+        void UpdateShotgunGunLogic();
+
+        WeaponType GetCurrentWeaponType();
+        WeaponAction GetCurrentWeaponAction();
+
+        void FireMelee();
+        bool CanFireMelee();
+        
+        void FireGun();
+        bool CanFireGun();
+
+        void FireShotgun();
+        bool CanFireShotgun();
+
+        bool ViewModelAnimationsCompleted();
+        bool ViewportIsVisible();
 };

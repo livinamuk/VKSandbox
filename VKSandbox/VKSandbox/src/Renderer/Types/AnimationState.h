@@ -13,9 +13,24 @@ struct AnimationPlaybackParams {
     float animationSpeed = 1.0f;
     float blendWeight = 1.0f;
     float easeOutDuration = 1.0f;
-    bool removeWhenComplete = false;
-    bool removeAnyExistingAnimation = true;
+    bool removeAnimationStateWhenComplete = false;
+    bool removeOtherExistingAnimations = true;
     std::string animationName = "";
+
+    static AnimationPlaybackParams GetDefaultPararms() {
+        AnimationPlaybackParams params;    
+        params.removeOtherExistingAnimations = true;
+        params.removeAnimationStateWhenComplete = false;
+        params.animationSpeed = 1.0f;
+        return params;
+    }
+    static AnimationPlaybackParams GetDefaultLoopingPararms() {
+        AnimationPlaybackParams params;
+        params.removeOtherExistingAnimations = true;
+        params.removeAnimationStateWhenComplete = false;
+        params.animationSpeed = 1.0f;
+        return params;
+    }
 };
 
 struct AnimationState {
@@ -35,6 +50,7 @@ public:
     int GetAnimationFrameNumber();
     bool AnimationIsPastFrameNumber(int frameNumber);
     std::string GetDebugInfo();
+
 private:
     float GetTimeInTicks(float currentTime);
     // Members

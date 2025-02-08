@@ -51,7 +51,7 @@ void AnimationLayer::PlayAnimation(const std::string& animationName, const Anima
     int animationIndex = AssetManager::GetAnimationIndexByName(animationName);
     if (animationIndex != -1) {
         // Remove any existing animations if specified to do so
-        if (playbackParams.removeAnyExistingAnimation) {
+        if (playbackParams.removeOtherExistingAnimations) {
             m_animationStates.clear();
         }
         // If it is already playing, then restart the existing animation
@@ -69,15 +69,21 @@ void AnimationLayer::PlayAnimation(const std::string& animationName, const Anima
 
 void AnimationLayer::PlayAndLoopAnimation(const std::string& animationName, const AnimationPlaybackParams& playbackParams) {
     int animationIndex = AssetManager::GetAnimationIndexByName(animationName);
+
     if (animationIndex != -1) {
-        // Remove any existing animations if specified to do so
-        if (playbackParams.removeAnyExistingAnimation) {
-            m_animationStates.clear();
+        // Remove any other existing animations if specified to do so
+        if (playbackParams.removeOtherExistingAnimations) {
+            for (int i = 0; i < m_animationStates.size(); i++) {
+                if (m_animationStates[i].m_index != animationIndex) {
+                    m_animationStates.erase(m_animationStates.begin() + i);
+                    i--;
+                }
+            }
         }
-        // If it is already playing, then restart the existing animation
+        // rETHINK THIS
         for (AnimationState& animationState : m_animationStates) {
             if (animationState.GetAnimationIndex() == animationIndex) {
-                animationState.PlayAndLoopAnimation(animationName, playbackParams);
+                //animationState.PlayAndLoopAnimation(animationName, playbackParams);
                 return;
             }
         }
@@ -110,6 +116,7 @@ void AnimationLayer::ClearAllAnimationStates() {
 }
 
 bool AnimationLayer::AllAnimationIsComplete() {
+    std::cout << " THIS FUNCITON IS BROKEN COZ ANIMATION STATES CAN STAY AFTER COMPLETION!!!\n";
     return m_animationStates.empty();
 }
 

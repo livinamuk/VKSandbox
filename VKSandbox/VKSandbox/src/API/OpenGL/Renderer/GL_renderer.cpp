@@ -70,8 +70,7 @@ namespace OpenGLRenderer {
         g_frameBuffers["UI"] = OpenGLFrameBuffer("UI", resolutions.ui);
         g_frameBuffers["UI"].CreateAttachment("Color", GL_RGBA8, GL_NEAREST, GL_NEAREST);
 
-        int heightMapSize = 256;
-        g_frameBuffers["HeightMap"] = OpenGLFrameBuffer("HeightMap", heightMapSize, heightMapSize);
+        g_frameBuffers["HeightMap"] = OpenGLFrameBuffer("HeightMap", HEIGHTMAP_SIZE, HEIGHTMAP_SIZE);
         g_frameBuffers["HeightMap"].CreateAttachment("Color", GL_RGBA8);
 
         int framebufferHandle = g_frameBuffers["GBuffer"].GetHandle();
@@ -155,12 +154,12 @@ namespace OpenGLRenderer {
 
         const RendererSettings& renderSettings = Config::GetRendererSettings();
         int peelCount = renderSettings.depthPeelCount;
-        if (Input::KeyPressed(HELL_KEY_E) && peelCount < 7) {
+        if (Input::KeyPressed(HELL_KEY_8) && peelCount < 7) {
             Audio::PlayAudio("UI_Select.wav", 1.0f);
             Config::SetDepthPeelCount(peelCount + 1);
             std::cout << "Depth peel layer count: " << peelCount << "\n";
         }
-        if (Input::KeyPressed(HELL_KEY_Q) && peelCount > 0) {
+        if (Input::KeyPressed(HELL_KEY_9) && peelCount > 0) {
             Audio::PlayAudio("UI_Select.wav", 1.0f);
             Config::SetDepthPeelCount(peelCount - 1);
             std::cout << "Depth peel layer count: " << peelCount << "\n";

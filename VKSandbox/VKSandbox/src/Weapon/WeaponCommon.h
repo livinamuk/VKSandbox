@@ -1,10 +1,17 @@
 #pragma once
-#include "HellTypes.h"
 #include "HellDefines.h"
+#include <glm/glm.hpp>
 #include <string>
+#include <vector>
 #include <unordered_map>
 
-enum class WeaponType { MELEE, PISTOL, SHOTGUN, AUTOMATIC };
+enum class WeaponType { 
+    MELEE, 
+    PISTOL, 
+    SHOTGUN, 
+    AUTOMATIC,
+    UNDEFINED
+};
 
 struct AnimationNames {
     std::string idle;
@@ -109,17 +116,3 @@ struct WeaponAttachmentInfo {
     const char* modelName = UNDEFINED_STRING;
     bool isGold = false;
 };
-
-namespace WeaponManager {
-
-    void Init();
-    void SortList();
-    void PreLoadWeaponPickUpConvexHulls();
-    WeaponInfo* GetWeaponInfoByName(std::string name);
-    WeaponInfo* GetWeaponInfoByIndex(int index);
-    AmmoInfo* GetAmmoInfoByName(std::string name);
-    AmmoInfo* GetAmmoInfoByIndex(int index);
-    int GetWeaponCount();
-    int GetAmmoTypeCount();
-
-}

@@ -11,7 +11,7 @@ namespace Scene {
     std::vector<RenderItem> g_renderItemsAlphaDiscarded;
     std::vector<RenderItem> g_renderItemsHairTopLayer;
     std::vector<RenderItem> g_renderItemsHairBottomLayer;
-    std::vector<SkinnedRenderItem> g_skinnedRenderItems;
+    std::vector<RenderItem> g_skinnedRenderItems;
 
     void UpdateObjects();
     void UpdateRenderItems();
@@ -62,7 +62,7 @@ namespace Scene {
         for (AnimatedGameObject& animatedGameObject : g_animatedGameObjects) {
             animatedGameObject.UpdateRenderItems(); 
             animatedGameObject.DrawBones(WHITE);
-            //animatedGameObject.DrawBoneTangentVectors();
+            animatedGameObject.DrawBoneTangentVectors();
             g_skinnedRenderItems.insert(g_skinnedRenderItems.end(), animatedGameObject.GetRenderItems().begin(), animatedGameObject.GetRenderItems().end());
         }
     }
@@ -115,6 +115,7 @@ namespace Scene {
     }
 
     void CreateGameObjects() {
+
         CreateGameObject();
         GameObject* mermaid = &g_gameObjects.back();
         mermaid->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -156,7 +157,6 @@ namespace Scene {
 
         CreateAnimatedGameObject();
         AnimatedGameObject& object = g_animatedGameObjects.back();
-        object.SetFlag(AnimatedGameObject::Flag::NONE);
         object.SetPlayerIndex(1);
         object.SetSkinnedModel("Shark");
         object.SetName("222");
@@ -166,9 +166,10 @@ namespace Scene {
         object.SetScale(0.01);
         object.PlayAndLoopAnimation("Shark_Attack_Left_Quick");
 
+        return;
+
         CreateAnimatedGameObject();
         AnimatedGameObject& object2 = g_animatedGameObjects.back();
-        object2.SetFlag(AnimatedGameObject::Flag::NONE);
         object2.SetPlayerIndex(1);
         object2.SetSkinnedModel("Shark");
         object2.SetName("222");
@@ -180,7 +181,6 @@ namespace Scene {
 
         CreateAnimatedGameObject();
         AnimatedGameObject& object3 = g_animatedGameObjects.back();
-        object3.SetFlag(AnimatedGameObject::Flag::NONE);
         object3.SetPlayerIndex(1);
         object3.SetSkinnedModel("Glock");
         object3.SetName("222");
@@ -199,5 +199,5 @@ namespace Scene {
     std::vector<RenderItem>& GetRenderItemsAlphaDiscarded()     { return g_renderItemsAlphaDiscarded; }
     std::vector<RenderItem>& GetRenderItemsHairTopLayer()       { return g_renderItemsHairTopLayer; }
     std::vector<RenderItem>& GetRenderItemsHairBottomLayer()    { return g_renderItemsHairBottomLayer; }
-    std::vector<SkinnedRenderItem>& GetSkinnedRenderItems()     { return g_skinnedRenderItems; }
+    std::vector<RenderItem>& GetSkinnedRenderItems()            { return g_skinnedRenderItems; }
 }

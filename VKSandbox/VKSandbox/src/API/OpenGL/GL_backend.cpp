@@ -10,6 +10,9 @@
 #include "../BackEnd/GLFWIntegration.h"
 #include "Types/GL_pbo.hpp"
 
+// remove me
+#include "Renderer/Renderer.h"
+
 namespace OpenGLBackEnd {
 
     // PBO texture loading
@@ -19,6 +22,8 @@ namespace OpenGLBackEnd {
     const size_t MAX_DATA_SIZE = MAX_TEXTURE_WIDTH * MAX_TEXTURE_HEIGHT * MAX_CHANNEL_COUNT;
     std::vector<PBO> g_textureBakingPBOs;
     PBO g_mousePickPBO;
+    PBO g_heightMapVerticesReadBackPBO;
+    PBO g_heightMapIndicesReadBackPBO;
     GLuint g_frameBufferHandle = 0;
     GLuint g_mousePickAttachmentSlot = 0;
     uint16_t g_mousePickR = 0;
@@ -35,6 +40,8 @@ namespace OpenGLBackEnd {
     GLuint g_skinnedVertexDataVBO = 0;
     GLuint g_allocatedSkinnedVertexBufferSize = 0;
     std::vector<GLuint64> g_bindlessTextureIDs;
+
+    OpenGLHeightMapMesh g_heightMapMesh;
 
     void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei /*length*/, const char* message, const void* /*userParam*/);
     void UpdateBindlessTextures();
@@ -83,6 +90,11 @@ namespace OpenGLBackEnd {
 
         g_mousePickPBO.Init(2 * sizeof(uint16_t));
 
+        // Height map init shit (ABSTRACT ME BETTER!!!!!)
+        int vertexBufferSize = HEIGHTMAP_SIZE * HEIGHTMAP_SIZE * sizeof(Vertex);
+        int indexBufferSize = (HEIGHTMAP_SIZE - 1) * (HEIGHTMAP_SIZE - 1) * 6 * sizeof(uint32_t);
+        g_heightMapVerticesReadBackPBO.Init(vertexBufferSize);
+        g_heightMapIndicesReadBackPBO.Init(indexBufferSize);
     }
 
     void BeginFrame() {
@@ -213,6 +225,46 @@ namespace OpenGLBackEnd {
             glBindTexture(GL_TEXTURE_2D, 0);
             g_mousePickPBO.SyncStart();
         }
+    }
+
+    // UNTESTED!!!!!!!!!!!!
+    // UNTESTED!!!!!!!!!!!!
+    // UNTESTED!!!!!!!!!!!!
+    // UNTESTED!!!!!!!!!!!!
+    void ReadBackEntireTexture(int textureWidth, int textureHeight) {
+        g_mousePickPBO.UpdateState();
+
+        if (!g_mousePickPBO.IsSyncComplete()) {
+            return; // Wait for sync
+        }
+
+        // Prepare a 2D vector to store the pixels
+        std::vector<std::vector<uint16_t>> pixels(textureWidth, std::vector<uint16_t>(textureHeight));
+
+        // Bind PBO for readback
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, g_mousePickPBO.GetHandle());
+        glBindFramebuffer(GL_FRAMEBUFFER, g_frameBufferHandle);
+        glReadBuffer(g_mousePickAttachmentSlot);
+
+        // Read the entire texture into the PBO
+        glReadPixels(0, 0, textureWidth, textureHeight, GL_RG_INTEGER, GL_UNSIGNED_SHORT, nullptr);
+
+        g_mousePickPBO.SyncStart();
+
+        // Map the buffer and copy data into pixels
+        const uint16_t* mappedBuffer = reinterpret_cast<const uint16_t*>(g_mousePickPBO.GetPersistentBuffer());
+        if (mappedBuffer) {
+            for (int y = 0; y < textureHeight; ++y) {
+                for (int x = 0; x < textureWidth; ++x) {
+                    int index = (y * textureWidth + x) * 2; // GL_RG_INTEGER means 2 channels per pixel
+                    pixels[x][y] = mappedBuffer[index];     // Assumes you need only one channel
+                }
+            }
+        }
+
+        // Unbind
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     uint16_t GetMousePickR() {
@@ -446,6 +498,43 @@ namespace OpenGLBackEnd {
         }    std::cout << "\n\n\n";
     }
 
+    void ReadBackHeightmapMeshData() {
+        int indexCount = (HEIGHTMAP_SIZE - 1) * (HEIGHTMAP_SIZE - 1) * 6;
+        int vertexCount = HEIGHTMAP_SIZE * HEIGHTMAP_SIZE;
+        int vertexBufferSize = HEIGHTMAP_SIZE * HEIGHTMAP_SIZE * sizeof(Vertex);
+        int indexBufferSize = (HEIGHTMAP_SIZE - 1) * (HEIGHTMAP_SIZE - 1) * 6 * sizeof(uint32_t);
+
+        g_heightMapVerticesReadBackPBO.UpdateState();
+
+        if (!g_heightMapVerticesReadBackPBO.IsSyncComplete()) {
+            return; // Wait for sync
+        }
+
+        // Bind PBO to store vertex buffer data
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, g_heightMapVerticesReadBackPBO.GetHandle());
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_heightMapMesh.GetVBO());
+
+        // Copy the vertex buffer data into the PBO
+        glCopyBufferSubData(GL_SHADER_STORAGE_BUFFER, GL_PIXEL_PACK_BUFFER, 0, 0, vertexBufferSize);
+
+        // Sync and map buffer to access data
+        g_heightMapVerticesReadBackPBO.SyncStart();
+        const Vertex* mappedBuffer = reinterpret_cast<const Vertex*>(g_heightMapVerticesReadBackPBO.GetPersistentBuffer());
+
+        if (mappedBuffer) {
+            for (int i = 0; i < vertexCount; i++) {
+                const Vertex& v = mappedBuffer[i];
+                glm::vec3 pos = v.position;
+                pos.y *= 10;
+                //Renderer::DrawPoint(pos, GREEN);
+            }
+        }
+
+        // Unbind
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    }
+
     GLuint GetVertexDataVAO() { return g_vertexDataVAO; }
     GLuint GetVertexDataVBO() { return g_vertexDataVBO; }
     GLuint GetVertexDataEBO() { return g_vertexDataEBO; }
@@ -454,6 +543,7 @@ namespace OpenGLBackEnd {
     GLuint GetWeightedVertexDataEBO() { return g_weightedVertexDataEBO; }
     GLuint GetSkinnedVertexDataVAO() { return g_skinnedVertexDataVAO; }
     GLuint GetSkinnedVertexDataVBO() { return g_skinnedVertexDataVBO; }
+    OpenGLHeightMapMesh& GetHeightMapMesh() { return g_heightMapMesh; };
     const std::vector<GLuint64>& GetBindlessTextureIDs() { return g_bindlessTextureIDs; }
 
 }

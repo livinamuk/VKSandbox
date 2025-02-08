@@ -28,12 +28,19 @@ struct RenderItem {
     mat4 inverseModelMatrix;
     vec4 aabbMin;
     vec4 aabbMax;
+
     int meshIndex;
     int baseColorTextureIndex;
     int normalMapTextureIndex;
     int rmaTextureIndex;
+
     int mousePickType;
     int mousePickIndex;
+    int baseSkinnedVertex;
+    int ignoredViewportIndex;
+
+    int exclusiveViewportIndex;
+    int skinned; // true or false
     int padding1;
     int padding2;
 };

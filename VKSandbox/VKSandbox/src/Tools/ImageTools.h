@@ -19,6 +19,7 @@ namespace ImageTools {
 
     // Util
     void SaveBitmap(const char* filename, unsigned char* data, int width, int height, int numChannels);
+    void SaveTextureAsBitmap(const std::vector<std::vector<uint16_t>>& pixels, int width, int height, const std::string& filename);
 
     // Debug
     std::string CMPErrorToString(int error);

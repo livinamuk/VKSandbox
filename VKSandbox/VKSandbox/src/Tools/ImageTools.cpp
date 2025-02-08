@@ -262,6 +262,29 @@ namespace ImageTools {
         free(flippedData);
     }
 
+    // Possibly broken!!!
+    // Possibly broken!!!
+    // Possibly broken!!!
+    // Possibly broken!!!
+    // Possibly broken!!!
+    void SaveTextureAsBitmap(const std::vector<std::vector<uint16_t>>& pixels, int width, int height, const std::string& filename) {
+        std::vector<uint8_t> imageData(width * height);
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                imageData[y * width + x] = static_cast<uint8_t>(pixels[x][y] & 0xFF); // Clamp to 8-bit gray scale
+            }
+        }
+
+        // Save as BMP (1-channel grayscale)
+        if (stbi_write_bmp(filename.c_str(), width, height, 1, imageData.data())) {
+            std::cout << "Saved " << filename << " successfully!\n";
+        }
+        else {
+            std::cout << "Failed to save " << filename << "\n";
+        }
+    }
+
     void CreateFolder(const char* path) {
         std::filesystem::path dir(path);
         if (!std::filesystem::exists(dir)) {

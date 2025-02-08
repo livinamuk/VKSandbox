@@ -35,7 +35,7 @@ namespace Util {
     std::vector<uint32_t> GenerateCubeIndices();
     std::vector<uint32_t> GenerateSequentialIndices(int vertexCount);
 
-    // String
+    // Text
     std::string BoolToString(bool b);
     std::string Vec3ToString(glm::vec3 v);
     std::string Mat4ToString(glm::mat4 m);
@@ -44,6 +44,7 @@ namespace Util {
     std::string ViewportModeToString(const ShadingMode& viewportMode);
     std::string CameraViewToString(const CameraView& cameraView);
     std::string ViewportResizeStateToString(const ViewportResizeState& viewportResizeState);
+    std::string WeaponActionToString(const WeaponAction& weaponAction);
 
     // File
     const char* CopyConstChar(const char* text);

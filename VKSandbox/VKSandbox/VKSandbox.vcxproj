@@ -174,7 +174,10 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\AssetManagement\BakeQueue.cpp" />
     <ClCompile Include="src\Core\Scene.cpp" />
-    <ClCompile Include="src\Core\WeaponManager.cpp" />
+    <ClCompile Include="src\Player\Player_WeaponLogic_Gun.cpp" />
+    <ClCompile Include="src\Player\Player_WeaponLogic_Melee.cpp" />
+    <ClCompile Include="src\Player\Player_WeaponLogic_Shotgun.cpp" />
+    <ClCompile Include="src\Weapon\WeaponManager.cpp" />
     <ClCompile Include="src\Editor\Editor_debug.cpp" />
     <ClCompile Include="src\Editor\Editor_camera.cpp" />
     <ClCompile Include="src\Editor\Editor_dividers.cpp" />
@@ -191,11 +194,11 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\File\AssimpImporter.cpp" />
     <ClCompile Include="src\File\File.cpp" />
     <ClCompile Include="src\Core\Game.cpp" />
-    <ClCompile Include="src\Player\Player_camera.cpp" />
+    <ClCompile Include="src\Player\Player_Camera.cpp" />
     <ClCompile Include="src\Player\Player_Input.cpp" />
-    <ClCompile Include="src\Player\Player_movement.cpp" />
-    <ClCompile Include="src\Player\Player_ui.cpp" />
-    <ClCompile Include="src\Player\Player_viewWeapon.cpp" />
+    <ClCompile Include="src\Player\Player_Movement.cpp" />
+    <ClCompile Include="src\Player\Player_UI.cpp" />
+    <ClCompile Include="src\Player\Player_WiewWeapon.cpp" />
     <ClCompile Include="src\Player\Player_WeaponLogic.cpp" />
     <ClCompile Include="src\Renderer\RenderDataManager.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
@@ -297,7 +300,8 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClInclude Include="src\Config\Config.h" />
     <ClInclude Include="src\Core\Audio.h" />
     <ClInclude Include="src\AssetManagement\BakeQueue.h" />
-    <ClInclude Include="src\Core\WeaponManager.h" />
+    <ClInclude Include="src\Weapon\WeaponCommon.h" />
+    <ClInclude Include="src\Weapon\WeaponManager.h" />
     <ClInclude Include="src\Editor\Types\EditorMesh.h" />
     <ClInclude Include="src\Input\InputMulti.h" />
     <ClInclude Include="src\Player\Player.h" />

@@ -43,7 +43,8 @@ float fbm(vec2 uv) {
     float amplitude = 0.5;
     float frequency = 1.0;
 
-    for (int i = 0; i < 5; i++) { // 5 octaves for better detail
+    // Move octaves, mean more detail
+    for (int i = 0; i < 100; i++) { 
         value += amplitude * perlinNoise(uv * frequency);
         frequency *= 2.0;
         amplitude *= 0.5;
@@ -58,15 +59,13 @@ void main() {
 
     vec4 outputColor = vec4(1,0,0,1);
 
-    vec2 uv = uv_screenspace * 2.0;  // Scale up noise
-    uv += vec2(2, 0);
+    vec2 uv = uv_screenspace * 2.0; // Scale up noise
+
+    // Offset the output in uv space
+    uv += vec2(2.0, 0);
     float height = fbm(uv);
 
     outputColor = vec4(vec3(height * 5), 1.0); // Grayscale output
 
-
-
     imageStore(outputImage, pixelCoords, outputColor);
-
-
 }

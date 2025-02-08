@@ -26,5 +26,5 @@ namespace Scene {
     std::vector<RenderItem>& GetRenderItemsAlphaDiscarded();
     std::vector<RenderItem>& GetRenderItemsHairTopLayer();
     std::vector<RenderItem>& GetRenderItemsHairBottomLayer();
-    std::vector<SkinnedRenderItem>& GetSkinnedRenderItems();
+    std::vector<RenderItem>& GetSkinnedRenderItems();
 }

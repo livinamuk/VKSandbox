@@ -42,34 +42,31 @@ void main() {
     vertices[index].uv[0] = float(x) / float(width - 1);
     vertices[index].uv[1] = float(z) / float(depth - 1);
 
-    // --- Normal Calculation ---
-// Read neighboring heights
-float left  = imageLoad(heightmap, ivec2(max(x - 1, 0), z)).r;
-float right = imageLoad(heightmap, ivec2(min(x + 1, width - 1), z)).r;
-float down  = imageLoad(heightmap, ivec2(x, max(z - 1, 0))).r;
-float up    = imageLoad(heightmap, ivec2(x, min(z + 1, depth - 1))).r;
+    // Read neighboring heights
+    float left  = imageLoad(heightmap, ivec2(max(x - 1, 0), z)).r;
+    float right = imageLoad(heightmap, ivec2(min(x + 1, width - 1), z)).r;
+    float down  = imageLoad(heightmap, ivec2(x, max(z - 1, 0))).r;
+    float up    = imageLoad(heightmap, ivec2(x, min(z + 1, depth - 1))).r;
 
-// Use a finite-difference approximation with a 0.5 factor
-vec3 dx = vec3(1.0, 0.5 * (right - left), 0.0);
-vec3 dz = vec3(0.0, 0.5 * (up - down), 1.0);
+    // Use a finite-difference approximation with a 0.5 factor
+    vec3 dx = vec3(1.0, 0.5 * (right - left), 0.0);
+    vec3 dz = vec3(0.0, 0.5 * (up - down), 1.0);
 
-// Compute the normal using the cross product.
-// The order here (cross(dz, dx)) is chosen so that for a flat surface (where up==down and right==left)
-// the normal comes out as (0,1,0).
-vec3 normal = normalize(cross(dz, dx));
+    // Compute the norma
+    vec3 normal = normalize(cross(dz, dx));
 
     vertices[index].normal[0] = normal.x;
     vertices[index].normal[1] = normal.y;
     vertices[index].normal[2] = normal.z;
 
-    // --- Tangent Calculation ---
+    // Tangents
     vec3 tangent = normalize(vec3(1.0, right - left, 0.0));
 
     vertices[index].tangent[0] = tangent.x;
     vertices[index].tangent[1] = tangent.y;
     vertices[index].tangent[2] = tangent.z;
 
-    // Generate indices (strip-like pattern)
+    // Generate indices
     if (x < width - 1 && z < depth - 1) {
         uint i = (z * (width - 1) + x) * 6;
         indices[i] = index;

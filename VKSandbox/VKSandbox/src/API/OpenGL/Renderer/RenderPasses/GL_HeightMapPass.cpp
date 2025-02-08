@@ -9,7 +9,6 @@
 
 namespace OpenGLRenderer {
 
-    OpenGLHeightMapMesh g_heightMapMesh;
 
     void HeightMapPass() {
         OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
@@ -24,9 +23,9 @@ namespace OpenGLRenderer {
         if (!vertexBufferShader) return;
 
         // Create vertex buffer if it doesn't exist
-        int heightMapSize = 256;
-        if (g_heightMapMesh.GetVAO() == 0) {
-            g_heightMapMesh.Create(heightMapSize);
+        OpenGLHeightMapMesh& heightMapMesh = OpenGLBackEnd::GetHeightMapMesh();
+        if (heightMapMesh.GetVAO() == 0) {
+            heightMapMesh.Create(HEIGHTMAP_SIZE);
         }
 
         // Create height map data
@@ -39,11 +38,11 @@ namespace OpenGLRenderer {
         vertexBufferShader->Use();
         glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
 
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, g_heightMapMesh.GetVBO());
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, g_heightMapMesh.GetEBO());
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, heightMapMesh.GetVBO());
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, heightMapMesh.GetEBO());
 
         // Dispatch compute shader
-        glDispatchCompute((heightMapSize + 15) / 16, (heightMapSize + 15) / 16, 1);
+        glDispatchCompute((HEIGHTMAP_SIZE + 15) / 16, (HEIGHTMAP_SIZE + 15) / 16, 1);
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
 
         gBuffer->Bind();
@@ -70,8 +69,9 @@ namespace OpenGLRenderer {
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, AssetManager::GetTextureByIndex(material->m_rma)->GetGLTexture().GetHandle());
 
-        int indexCount = (heightMapSize - 1) * (heightMapSize - 1) * 6;
-        glBindVertexArray(g_heightMapMesh.GetVAO());
+        int indexCount = (HEIGHTMAP_SIZE - 1) * (HEIGHTMAP_SIZE - 1) * 6;
+        int vertexCount = HEIGHTMAP_SIZE * HEIGHTMAP_SIZE;
+        glBindVertexArray(heightMapMesh.GetVAO());
 
         for (int i = 0; i < 4; i++) {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
@@ -81,5 +81,7 @@ namespace OpenGLRenderer {
             }
         }
         glBindVertexArray(0);
+
+        OpenGLBackEnd::ReadBackHeightmapMeshData();
     }
 }

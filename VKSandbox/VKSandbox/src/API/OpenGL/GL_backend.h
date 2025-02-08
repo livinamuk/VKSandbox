@@ -6,6 +6,7 @@
 #include <iostream>
 #include "Types/GL_texture.h"
 #include "../Renderer/Types/Texture.h"
+#include "Types/GL_heightmapMesh.h"
 
 namespace OpenGLBackEnd {
     // Core
@@ -32,6 +33,9 @@ namespace OpenGLBackEnd {
     void UploadVertexData(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
     void UploadWeightedVertexData(std::vector<WeightedVertex>& vertices, std::vector<uint32_t>& indices);
     void AllocateSkinnedVertexBufferSpace(int vertexCount);
+
+    OpenGLHeightMapMesh& GetHeightMapMesh();
+    void ReadBackHeightmapMeshData();
 
     GLuint GetVertexDataVAO();
     GLuint GetVertexDataVBO();

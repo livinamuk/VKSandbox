@@ -14,38 +14,32 @@ void AnimatedGameObject::UpdateRenderItems() {
     if (!m_skinnedModel) return;
 
     int meshCount = m_meshRenderingEntries.size();
-    m_skinnedMeshRenderItems.clear();
+    m_renderItems.clear();
     for (int i = 0; i < meshCount; i++) {
         if (m_meshRenderingEntries[i].drawingEnabled) {
-            SkinnedRenderItem& renderItem = m_skinnedMeshRenderItems.emplace_back();
+            RenderItem& renderItem = m_renderItems.emplace_back();
             SkinnedMesh* mesh = AssetManager::GetSkinnedMeshByIndex(m_meshRenderingEntries[i].meshIndex);
             Material* material = AssetManager::GetMaterialByIndex(m_meshRenderingEntries[i].materialIndex);
             renderItem.baseColorTextureIndex = material->m_basecolor;
-            renderItem.normalTextureIndex = material->m_normal;
+            renderItem.normalMapTextureIndex = material->m_normal;
             renderItem.rmaTextureIndex = material->m_rma;
             renderItem.modelMatrix = GetModelMatrix();
             renderItem.inverseModelMatrix = glm::inverse(GetModelMatrix());
-            renderItem.srcMeshIndex = m_skinnedModel->GetMeshIndices()[i];
-            renderItem.baseVertex = RenderDataManager::GetBaseSkinnedVertex() + mesh->baseVertexLocal;
+            renderItem.meshIndex = m_skinnedModel->GetMeshIndices()[i];
+            renderItem.ignoredViewportIndex = m_ignoredViewportIndex;
+            renderItem.exclusiveViewportIndex = m_exclusiveViewportIndex;
+            renderItem.baseSkinnedVertex = RenderDataManager::GetBaseSkinnedVertex() + mesh->baseVertexLocal;
         }
     }
     RenderDataManager::IncrementBaseSkinnedVertex(m_skinnedModel->m_vertexCount);
 }
 
-std::vector<SkinnedRenderItem>& AnimatedGameObject::GetRenderItems() {
-    return m_skinnedMeshRenderItems;
-}
-
-void AnimatedGameObject::SetFlag(Flag flag) {
-    m_flag = flag;
+std::vector<RenderItem>& AnimatedGameObject::GetRenderItems() {
+    return m_renderItems;
 }
 
 void AnimatedGameObject::SetPlayerIndex(int32_t index) {
     m_playerIndex = index;
-}
-
-const AnimatedGameObject::Flag AnimatedGameObject::GetFlag() {
-    return m_flag;
 }
 
 const int32_t AnimatedGameObject::GetPlayerIndex() {
@@ -316,17 +310,6 @@ void AnimatedGameObject::SetRotationZ(float rotation) {
     _transform.rotation.z = rotation;
 }
 
-
-bool AnimatedGameObject::AnimationIsPastPercentage(float percent) {
-    /*if (!_currentAnimation) {
-        return false; // REMOVE ONCE YOU HAVE VULKAN LOADING SHIT CORRECTLY!
-    }
-    if (_currentAnimationTime * _currentAnimation->GetTicksPerSecond() > _currentAnimation->m_duration * (percent / 100.0))
-        return true;
-    else*/
-        return false;
-}
-
 glm::vec3 AnimatedGameObject::GetAK74USCasingSpawnPostion() {
     if (m_name == "AKS74U") {
         int boneIndex = m_skinnedModel->m_BoneMapping["Weapon"];
@@ -486,18 +469,15 @@ void AnimatedGameObject::PrintMeshNames() {
 }
 
 uint32_t AnimatedGameObject::GetAnimationFrameNumber() {
-    /*if (_currentAnimation) {
-        return  _currentAnimationTime * _currentAnimation->m_ticksPerSecond;
+    if (m_animationLayer.m_animationStates.size()) {
+        return m_animationLayer.m_animationStates[0].GetAnimationFrameNumber();
     }
-    else {*/
-        return 0;
-   // }
+    return 0;
 }
 
 bool AnimatedGameObject::AnimationIsPastFrameNumber(int frameNumber) {
     return frameNumber < GetAnimationFrameNumber();
 }
-
 
 void AnimatedGameObject::DrawBones(glm::vec3 color) {
     for (const glm::mat4& boneWorldMatrix : m_animationLayer.m_globalBlendedNodeTransforms) {
@@ -507,6 +487,14 @@ void AnimatedGameObject::DrawBones(glm::vec3 color) {
 }
 
 void AnimatedGameObject::DrawBoneTangentVectors(float size) {    
+    // Hack to not render them for view weapon
+    for (int i = 0; i < Game::GetLocalPlayerCount(); i++) {
+        Player* player = Game::GetLocalPlayerByIndex(i);
+        if (player->GetViewWeaponAnimatedGameObject() == this) {
+            return;
+        }
+    }
+    // Otherwise sent the bone tangent vectors to the render as lines
     for (const glm::mat4& boneWorldMatrix : m_animationLayer.m_globalBlendedNodeTransforms) {
         glm::vec3 origin = GetModelMatrix() * boneWorldMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         glm::vec3 right = glm::normalize(glm::vec3(boneWorldMatrix[0]));
@@ -525,10 +513,21 @@ void AnimatedGameObject::MakeNotGold() {
     m_isGold = false;
 }
 
-//void AnimatedGameObject::DrawMeshAABBs(glm::vec3 color) {
-//    for (uint32_t& meshIndex : m_skinnedModel->GetMeshIndices()) {
-//        SkinnedMesh* skinnedMesh = AssetManager::GetSkinnedMeshByIndex(meshIndex);
-//        AABB aabb = Util::ComputeWorldAABB(skinnedMesh->aabbMin, skinnedMesh->aabbMax, modelMatrix);
-//        // hmm damn, these mesh are skinned...  
-//   }
-//}
+void AnimatedGameObject::SetExclusiveViewportIndex(int index) {
+    m_exclusiveViewportIndex = index;
+}
+
+void AnimatedGameObject::SetIgnoredViewportIndex(int index) {
+    m_ignoredViewportIndex = index;
+}
+
+
+bool AnimatedGameObject::AnimationByNameIsComplete(const std::string& name) {
+    for (AnimationState& AnimationState : m_animationLayer.m_animationStates) {
+        int animationIndex = AssetManager::GetAnimationIndexByName(name);
+        if (AnimationState.m_index == animationIndex) {
+            return AnimationState.IsComplete();
+        }
+    }
+    return true;
+}

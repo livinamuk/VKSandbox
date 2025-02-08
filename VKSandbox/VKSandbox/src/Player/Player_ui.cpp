@@ -21,8 +21,18 @@ void Player::UpdateUI() {
     if (!Debug::IsDebugTextVisible()) {
         std::string text = "";
         text += "Cam Pos: " + Util::Vec3ToString(GetCameraPosition()) + "\n";
-        text += "Cam Forward: " + Util::Vec3ToString(GetCameraForward()) + "\n";
-        text += "Cam Euler: " + Util::Vec3ToString(GetCameraRotation()) + "\n";
+        //text += "Cam Forward: " + Util::Vec3ToString(GetCameraForward()) + "\n";
+        //text += "Cam Euler: " + Util::Vec3ToString(GetCameraRotation()) + "\n";
+
+        if (GetCurrentWeaponInfo()) {
+            text += "Weapon: " + GetCurrentWeaponInfo()->name + "\n";
+        }
+
+
+        text += "Weapon Action: " + Util::WeaponActionToString(GetCurrentWeaponAction()) + "\n";
+        //text += "IsMoving: " + Util::BoolToString(IsMoving()) + "\n";
+        //text += "Animation States: " + std::to_string(GetViewWeaponAnimatedGameObject()->m_animationLayer.m_animationStates.size()) + "\n";
+
         UIBackEnd::BlitText(text, "StandardFont", xLeft, yTop, 2.0f);
     }
 }

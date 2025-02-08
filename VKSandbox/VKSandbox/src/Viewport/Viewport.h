@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "HellEnums.h"
+#include "Camera/Frustum.h"
 
 struct SpaceCoords {
     float width;
@@ -21,7 +22,6 @@ public:
     void Show();
     void Hide();
     void SetViewportMode(ShadingMode viewportMode);
-    //void NextViewportMode();
     void SetOrthoSize(float value);
     const bool IsVisible() const;
     const bool IsOrthographic() const;
@@ -36,6 +36,7 @@ public:
     ShadingMode GetViewportMode() const;
     SpaceCoords GetWindowSpaceCoords() const;
     SpaceCoords GetGBufferSpaceCoords() const;
+    Frustum& GetFrustum() { return m_frustum; }
 
 private:
     glm::vec2 m_position;           // Top-left corner in normalized screen space (0-1)
@@ -56,6 +57,7 @@ private:
     glm::mat4 m_orthographicMatrix;
     glm::vec3 m_mouseRayDirPerspective;
     glm::vec3 m_mouseRayDirOrthographic;
+    Frustum m_frustum;
     ShadingMode m_viewportMode;
     SpaceCoords m_windowSpaceCoords;
     SpaceCoords m_gBufferSpaceCoords;

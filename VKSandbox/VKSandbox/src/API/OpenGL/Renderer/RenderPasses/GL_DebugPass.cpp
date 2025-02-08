@@ -216,21 +216,17 @@ namespace OpenGLRenderer {
             glm::vec3 currentForward = glm::normalize(g_camPos - g_orbitTarget);
             glm::vec3 targetForward = glm::normalize(g_camPosTarget - g_orbitTarget);
 
-            // Step 2: Compute rotation quaternion from current to target
             glm::quat rotationQuat = glm::rotation(currentForward, targetForward);
 
-            // Step 3: Ensure shortest path in SLERP
+            // Always pick the shortest direction!
             if (glm::dot(glm::quat(1, 0, 0, 0), rotationQuat) < 0.0f) {
                 rotationQuat = -rotationQuat;
             }
 
-            // Step 4: SLERP between identity (no rotation) and the full rotation
             glm::quat interpolatedQuat = glm::slerp(glm::quat(1, 0, 0, 0), rotationQuat, t);
 
-            // Step 5: Apply the interpolated rotation to the initial forward vector
             glm::vec3 newForward = interpolatedQuat * currentForward;
 
-            // Step 6: Compute new camera position
             float orbitRadius = ORTHO_CAMERA_DISTANCE_FROM_ORIGIN;
             glm::vec3 g_camInterpolated = g_orbitTarget + newForward * orbitRadius;
             g_camPos = g_camInterpolated;
@@ -348,11 +344,6 @@ namespace OpenGLRenderer {
 //        
 //     }
 // }
-
-
-
-
-
 
 
 
