@@ -1,10 +1,12 @@
 #include "Editor.h"
 #include "Gizmo.h"
 #include "BackEnd/BackEnd.h"
+#include "Config/Config.h"
 #include "Core/Audio.h"
 #include "Core/Scene.h"
 #include "Input/Input.h"
 #include "Viewport/ViewportManager.h"
+#include "UI/UIBackEnd.h"
 
 namespace Editor {
 
@@ -87,5 +89,52 @@ namespace Editor {
                 }
             }
         }
+
+
+
+
+        const Resolutions& resolutions = Config::GetResolutions();
+
+        int mouseX = Input::GetMouseX();
+        int mouseY = Input::GetMouseY();
+        int gBufferWidth = resolutions.gBuffer.x;
+        int gBufferHeight = resolutions.gBuffer.y;
+
+        int mappedMouseX = Util::MapRange(mouseX, 0, BackEnd::GetWindowedWidth(), 0, gBufferWidth);
+        int mappedMouseY = Util::MapRange(mouseY, 0, BackEnd::GetWindowedHeight(), 0, gBufferHeight);
+
+        // Object selection rectangle
+        ViewportSelectionRectangleState& rectangleState = GetViewportSelectionRectangleState();
+
+        // Begin drag
+        if (Input::LeftMousePressed() && !rectangleState.dragging) {
+            rectangleState.dragging = true;
+            rectangleState.beginX = mappedMouseX;
+            rectangleState.beginY = mappedMouseY;
+        }
+
+        // Calculate other part of rectangle
+        if (rectangleState.dragging) {
+            rectangleState.currentX = mappedMouseX;
+            rectangleState.currentY = mappedMouseY;
+        }
+
+        // End drag
+        if (!Input::LeftMouseDown()) {
+            rectangleState.dragging = false;
+        }
+        // Still dragging? Then draw it
+        else {
+            glm::ivec2 location = glm::ivec2(0, 0);
+            location.x = rectangleState.beginX;
+            location.y = rectangleState.beginY;
+
+            glm::ivec2 size = glm::ivec2(0, 0);
+            size.x = rectangleState.currentX - rectangleState.beginX;
+            size.y = rectangleState.currentY - rectangleState.beginY;
+
+            UIBackEnd::BlitTexture("DefaultRMA", location, Alignment::TOP_LEFT, glm::vec4(1, 1, 1, 0.5f), size);
+        }
+
     }
 }

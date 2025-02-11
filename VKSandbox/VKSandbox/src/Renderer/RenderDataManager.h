@@ -5,8 +5,9 @@
 namespace RenderDataManager {
     void Update();
     const RendererData& GetRendererData();
-    const std::vector<ViewportData>& GetViewportData();
+    const std::vector<GPULight>& GetGPULightData();
     const std::vector<RenderItem>& GetInstanceData();
+    const std::vector<ViewportData>& GetViewportData();
     const DrawCommandsSet& GetDrawInfoSet();
 
     void ResetBaseSkinnedVertex();

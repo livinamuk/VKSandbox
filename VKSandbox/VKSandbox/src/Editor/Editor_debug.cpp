@@ -40,6 +40,10 @@ namespace Editor {
                 //text += "Orbit target: " + Util::Vec3ToString(camera->m_orbitTarget) + "\n";
                 //text += "Cam euler: " + Util::Vec3ToString(camera->GetEulerRotation()) + "\n";
                 
+
+
+                text += "Gizmo Position: " + Util::Vec3ToString(Gizmo::GetPosition()) + "\n";
+
                // SpaceCoords windowSpaceCoords = viewport->GetWindowSpaceCoords();
                // SpaceCoords gBufferSpaceCoords = viewport->GetGBufferSpaceCoords();
                // 

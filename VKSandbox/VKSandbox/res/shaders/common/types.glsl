@@ -40,7 +40,24 @@ struct RenderItem {
     int ignoredViewportIndex;
 
     int exclusiveViewportIndex;
-    int skinned; // true or false
-    int padding1;
-    int padding2;
+    int skinned;     // true or false
+    float emissiveR;    
+    float emissiveG;
+
+    float emissiveB;
+    float padding0;
+    float padding1;
+    float padding2;
+};
+
+struct Light {
+    float posX;
+    float posY;
+    float posZ;
+    float colorR;
+
+    float colorG;
+    float colorB;
+    float strength;
+    float radius;
 };

@@ -19,6 +19,7 @@ struct AnimationNames {
     std::string reload;
     std::string draw;
     std::string spawn;
+    std::vector<std::string> adsFire;
     std::vector<std::string> fire;
     std::vector<std::string> reloadempty;
     std::string adsIn;
@@ -26,14 +27,16 @@ struct AnimationNames {
     std::string adsIdle;
     std::string adsWalk;
     std::string melee;
-    std::vector<std::string> adsFire;
     std::string revolverReloadBegin;
     std::string revolverReloadLoop;
     std::string revolverReloadEnd;
     std::string shotgunReloadStart;
     std::string shotgunReloadEnd;
+    std::string shotgunReloadEndPump;
     std::string shotgunReloadOneShell;
     std::string shotgunReloadTwoShells;
+    std::string shotgunFireEmpty;
+    std::string shotgunDrawPump;
 };
 
 struct AnimationCancelPercentages {
@@ -55,8 +58,10 @@ struct AnimationSpeeds {
     float adsFire = 1.0f;
     float shotgunReloadStart = 1.0f;
     float shotgunReloadEnd = 1.0f;
+    float shotgunReloadEndPump = 1.0f;
     float shotgunReloadOneShell = 1.0f;
     float shotgunReloadTwoShells = 1.0f;
+    float shotgunFireEmpty = 1.0f;
 };
 
 struct AudioFiles {
@@ -64,6 +69,7 @@ struct AudioFiles {
     std::vector<std::string> revolverCocks;
     std::string reload;
     std::string reloadEmpty;
+    std::string shotgunPump;
 };
 
 struct WeaponInfo {

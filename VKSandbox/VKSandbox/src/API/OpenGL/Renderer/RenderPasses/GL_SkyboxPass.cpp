@@ -8,24 +8,16 @@ namespace OpenGLRenderer {
 
     void SkyBoxPass() {
         OpenGLShader* shader = GetShader("Skybox");
-        if (!shader) return;
-
         OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
-        if (!gBuffer) return;
-
-        Mesh* mesh = AssetManager::GetCubeMesh();
-        if (!mesh) return;
-
         OpenGLCubemapView* skyboxCubemapView = GetCubemapView("SkyboxNightSky");
-        if (!skyboxCubemapView) return;
+        Mesh* mesh = AssetManager::GetCubeMesh();
 
         gBuffer->Bind();
         gBuffer->DrawBuffer("BaseColor");       
         shader->Use();
+
+        SetRasterizerState("SkyBox");
         
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
-        glDisable(GL_CULL_FACE);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemapView->GetHandle());
         glBindVertexArray(OpenGLBackEnd::GetVertexDataVAO());

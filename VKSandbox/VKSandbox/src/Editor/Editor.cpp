@@ -27,6 +27,7 @@ namespace Editor {
     
     float g_orthoCameraDistances[4];
     ViewportResizeState g_viewportResizeState;
+    ViewportSelectionRectangleState g_viewportSelectionRectangleState;
 
     void Init() {
         if (BackEnd::GetAPI() == API::OPENGL) {
@@ -242,12 +243,14 @@ namespace Editor {
         else {
             std::cout << "Editor::SetViewportOrthoSize(uint32_t viewportIndex, float size) failed. " << viewportIndex << " out of range of editor viewport count 4\n";
         }
-    }
-
- 
+    }    
 
     ViewportResizeState GetViewportResizeState() {
         return g_viewportResizeState;
+    }
+
+    ViewportSelectionRectangleState& GetViewportSelectionRectangleState() {
+        return g_viewportSelectionRectangleState;
     }
 
     float GetVerticalDividerXPos() {

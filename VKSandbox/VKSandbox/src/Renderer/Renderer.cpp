@@ -10,7 +10,7 @@ namespace Renderer {
             OpenGLRenderer::InitMain();
         }
         else if (BackEnd::GetAPI() == API::VULKAN) {
-            //VulkanRenderer::InitMain();
+            // TODO: VulkanRenderer::InitMain();
         }
     }
 
@@ -28,7 +28,7 @@ namespace Renderer {
             OpenGLRenderer::RenderGame();
         }
         else if (BackEnd::GetAPI() == API::VULKAN) {
-            //VulkanRenderer::RenderLoadingScreen();
+            // TODO: VulkanRenderer::RenderLoadingScreen();
         }
     }
 
@@ -38,6 +38,15 @@ namespace Renderer {
         }
         else if (BackEnd::GetAPI() == API::VULKAN) {
             //VulkanRenderer::HotloadShaders();
+        }
+    }
+
+    void RecreateBlurBuffers() {
+        if (BackEnd::GetAPI() == API::OPENGL) {
+            OpenGLRenderer::RecreateBlurBuffers();
+        }
+        else if (BackEnd::GetAPI() == API::VULKAN) {
+            //VulkanRenderer::RecreateBlurBuffers();
         }
     }
 

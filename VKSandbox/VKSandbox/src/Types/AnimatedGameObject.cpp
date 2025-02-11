@@ -122,7 +122,7 @@ void AnimatedGameObject::SetMeshMaterialByMeshName(std::string meshName, std::st
     }
     for (MeshRenderingEntry& meshRenderingEntry : m_meshRenderingEntries) {
         if (meshRenderingEntry.meshName == meshName) {
-            meshRenderingEntry.materialIndex = AssetManager::GetMaterialIndex(materialName);
+            meshRenderingEntry.materialIndex = AssetManager::GetMaterialIndexByName(materialName);
         }
     }
 }
@@ -132,7 +132,7 @@ void AnimatedGameObject::SetMeshMaterialByMeshIndex(int meshIndex, std::string m
         return;
     }
     if (meshIndex >= 0 && meshIndex < m_meshRenderingEntries.size()) {
-        m_meshRenderingEntries[meshIndex].materialIndex = AssetManager::GetMaterialIndex(materialName);
+        m_meshRenderingEntries[meshIndex].materialIndex = AssetManager::GetMaterialIndexByName(materialName);
     }
 }
 
@@ -184,7 +184,7 @@ void AnimatedGameObject::SetAllMeshMaterials(std::string materialName) {
         return;
     }
     for (MeshRenderingEntry& meshRenderingEntry : m_meshRenderingEntries) {
-        meshRenderingEntry.materialIndex =AssetManager::GetMaterialIndex(materialName);
+        meshRenderingEntry.materialIndex =AssetManager::GetMaterialIndexByName(materialName);
     }
 }
 

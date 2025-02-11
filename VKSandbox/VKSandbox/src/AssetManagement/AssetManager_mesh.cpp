@@ -34,6 +34,20 @@ namespace AssetManager {
         return meshes.size() - 1;
     }
 
+    int CreateMesh(const std::string& name, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) {
+        // Initialize AABB min and max with first vertex
+        glm::vec3 aabbMin = vertices[0].position;
+        glm::vec3 aabbMax = vertices[0].position;
+
+        // Calculate AABB by iterating over all vertices
+        for (const Vertex& v : vertices) {
+            aabbMin = glm::min(aabbMin, v.position);
+            aabbMax = glm::max(aabbMax, v.position);
+        }
+
+        return CreateMesh(name, vertices, indices, aabbMin, aabbMax);
+    }
+
     int GetMeshIndexByName(const std::string& name) {
         std::vector<Mesh>& meshes = GetMeshes();
         for (int i = 0; i < meshes.size(); i++) {

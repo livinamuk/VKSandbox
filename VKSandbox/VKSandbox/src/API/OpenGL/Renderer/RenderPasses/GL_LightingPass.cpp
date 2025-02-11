@@ -19,6 +19,7 @@ namespace OpenGLRenderer {
         glBindTextureUnit(3, gBuffer->GetDepthAttachmentHandle());
         glBindTextureUnit(4, gBuffer->GetColorAttachmentHandleByName("WorldSpacePosition"));
         glBindTextureUnit(5, finalImageFBO->GetColorAttachmentHandleByName("ViewportIndex"));
+        glBindTextureUnit(6, gBuffer->GetColorAttachmentHandleByName("Emissive"));
 
         glBindImageTexture(0, gBuffer->GetColorAttachmentHandleByName("FinalLighting"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
 

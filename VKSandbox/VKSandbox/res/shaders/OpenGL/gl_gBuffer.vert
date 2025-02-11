@@ -27,6 +27,7 @@ out vec3 Normal;
 out vec3 Tangent;
 out vec3 BiTangent;
 out vec3 ViewPos;
+out vec3 EmissiveColor;
 
 out flat int MousePickType;
 out flat int MousePickIndex;
@@ -72,6 +73,10 @@ void main() {
 
 	MousePickType =  renderItems[globalInstanceIndex].mousePickType;
 	MousePickIndex =  renderItems[globalInstanceIndex].mousePickIndex;
+        
+    EmissiveColor.r = renderItems[globalInstanceIndex].emissiveR;
+    EmissiveColor.g = renderItems[globalInstanceIndex].emissiveG;
+    EmissiveColor.b = renderItems[globalInstanceIndex].emissiveB;
 
 	gl_Position = projectionView * WorldPos;
 }

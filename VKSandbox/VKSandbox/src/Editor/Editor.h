@@ -52,6 +52,7 @@ namespace Editor {
     EditorObjectType GetSelectedObjectType();
     EditorObjectType GetHoveredObjectType();
     ViewportResizeState GetViewportResizeState();
+    ViewportSelectionRectangleState& GetViewportSelectionRectangleState();
 
     EditorMesh& GetEditorMesh();
 

@@ -14,11 +14,13 @@ namespace RenderDataManager {
     RendererData g_rendererData;
     std::vector<ViewportData> g_viewportData;
     std::vector<RenderItem> g_instanceData;
+    std::vector<GPULight> g_gpuLightData;
     uint32_t g_baseSkinnedVertex;
 
     void UpdateViewportFrustums();
     void UpdateViewportData();
     void UpdateRendererData();
+    void UpdateGPULightData();
     void UpdateDrawCommandsSet();
     void CreateDrawCommands(DrawCommands& drawCommands, std::vector<RenderItem>& renderItems);
     void CreateDrawCommandsSkinned(DrawCommands& drawCommands, std::vector<RenderItem>& renderItems);
@@ -30,6 +32,7 @@ namespace RenderDataManager {
     void Update() {
         UpdateViewportData();
         UpdateViewportFrustums();
+        UpdateGPULightData();
         UpdateRendererData();
         UpdateDrawCommandsSet();
     }
@@ -112,6 +115,21 @@ namespace RenderDataManager {
             if (viewport->IsVisible()) {
                 viewport->GetFrustum().Update(g_viewportData[i].projectionView);
             }
+        }
+    }
+
+    void UpdateGPULightData() {
+        g_gpuLightData.clear();
+        for (Light& light : Scene::GetLights()) {
+            GPULight& gpuLight = g_gpuLightData.emplace_back();
+            gpuLight.posX = light.GetPosition().x;
+            gpuLight.posY = light.GetPosition().y;
+            gpuLight.posZ = light.GetPosition().z;
+            gpuLight.colorR = light.GetColor().r;
+            gpuLight.colorG = light.GetColor().g;
+            gpuLight.colorB = light.GetColor().b;
+            gpuLight.radius = light.GetRadius();
+            gpuLight.strength = light.GetStrength();
         }
     }
 
@@ -313,5 +331,9 @@ namespace RenderDataManager {
 
     const DrawCommandsSet& GetDrawInfoSet() {
         return g_drawCommandsSet;
+    }
+
+    const std::vector<GPULight>& GetGPULightData() {
+        return g_gpuLightData;
     }
 }

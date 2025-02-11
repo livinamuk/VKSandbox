@@ -27,6 +27,7 @@ layout (location = 1) out vec4 NormalOut;
 layout (location = 2) out vec4 RMAOut;
 layout (location = 3) out uvec2 MousePickOut;
 layout (location = 4) out vec4 WorldPositionOut;
+layout (location = 5) out vec4 EmissiveOut;
 
 in vec2 TexCoord;
 in vec3 Normal;
@@ -34,6 +35,7 @@ in vec3 Tangent;
 in vec3 BiTangent;
 in vec4 WorldPos;
 in vec3 ViewPos;
+in vec3 EmissiveColor;
 
 in flat int MousePickType;
 in flat int MousePickIndex;
@@ -59,4 +61,6 @@ void main() {
     RMAOut = vec4(rma, 1.0);
     MousePickOut.rg = uvec2(MousePickType, MousePickIndex);
     WorldPositionOut = vec4(WorldPos.rgb, 1.0);
+
+    EmissiveOut = vec4(EmissiveColor,1);
 }

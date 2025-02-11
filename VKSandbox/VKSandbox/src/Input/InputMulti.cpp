@@ -59,7 +59,7 @@ namespace InputMulti {
                             //	cout << "MOUSE " << mouseID << ": WHEEL CHANGE " << raw.data.mouse.usButtonData << endl;
                         }
 
-                        g_mouseStates[mouseID].xoffset += raw.data.mouse.lLastX;
+                        g_mouseStates[mouseID].xoffset -= raw.data.mouse.lLastX;
                         g_mouseStates[mouseID].yoffset += raw.data.mouse.lLastY;
                     }
                     // Keyboard

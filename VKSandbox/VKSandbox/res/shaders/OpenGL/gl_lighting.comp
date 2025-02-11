@@ -12,6 +12,7 @@ layout(binding = 2) uniform sampler2D RMATexture;
 layout(binding = 3) uniform sampler2D DepthTexture;
 layout(binding = 4) uniform sampler2D WorldPositionTexture;
 layout(binding = 5) uniform usampler2D ViewportIndexTexture;
+layout(binding = 6) uniform sampler2D EmissiveTexture;
 
 layout(rgba16f, binding = 0) uniform image2D outputImage;
 
@@ -21,6 +22,10 @@ readonly restrict layout(std430, binding = 1) buffer rendererDataBuffer {
 
 readonly restrict layout(std430, binding = 2) buffer viewportDataBuffer {
 	ViewportData viewportData[];
+};
+
+readonly restrict layout(std430, binding = 4) buffer lightsBuffer {
+	Light lights[];
 };
 
 void main() {
@@ -70,33 +75,38 @@ void main() {
 
     //worldSpacePosition.rgb = WOLRD_POS_FROM_TEXTURE.rgb;
 
-    vec3 lightPosition = (vec3(7, 0, 10) * 0.5) + vec3(0, 0.125, 1);
-    vec3 lightColor = vec3(1, 0.98, 0.94);
-    float lightRadius = 5;
-    float lightStrength = 2;
-        
-    lightPosition = vec3(-3.5, 2, 1);
-    //lightPosition = vec3(15, 2, 15);
-    lightStrength = 1.0;
-    lightRadius = 100;
-    		  
-    // Ambient light
-    float ambientIntensity = 0.005;
-    vec3 ambientColor = baseColor.rgb * lightColor;
-    vec3 ambientLighting = ambientColor * ambientIntensity;
+
+
 
     // Direct light
-    vec3 directLighting = GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal.xyz, worldSpacePosition.xyz, gammaBaseColor.rgb, roughness, metallic, viewPos);
+    vec3 directLighting = vec3(0); 
+    for (int i = 0; i < 2; i++) {    
+        Light light = lights[i];
+        vec3 lightPosition = vec3(light.posX, light.posY, light.posZ);
+        vec3 lightColor =  vec3(light.colorR, light.colorG, light.colorB);
+        float lightStrength = light.strength;
+        float lightRadius = light.radius;
+        directLighting += GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal.xyz, worldSpacePosition.xyz, gammaBaseColor.rgb, roughness, metallic, viewPos);
+    }
+        
+    		  
+    // Ambient light
+    vec3 amibentLightColor = vec3(1, 0.98, 0.94);
+   float ambientIntensity = 0.005;
+   vec3 ambientColor = baseColor.rgb * amibentLightColor;
+   vec3 ambientLighting = ambientColor * ambientIntensity;
+
 
     // Alpha
     float finalAlpha = baseColor.a;
     
     // Composite
-    vec3 finalColor = directLighting.rgb + ambientLighting;
+    vec3 finalColor = directLighting.rgb;// + ambientLighting;
 
     // Tone mapping
 	finalColor = mix(finalColor, Tonemap_ACES(finalColor), 1.0);    
 	finalColor = pow(finalColor, vec3(1.0/2.2));
+	finalColor = mix(finalColor, Tonemap_ACES(finalColor), 0.1235);  
     
     finalColor.rgb = finalColor.rgb * finalAlpha;    
     vec4 outputColor = vec4(finalColor, finalAlpha);
@@ -128,6 +138,11 @@ void main() {
     //float NoL = clamp(dot(N, L), 0.0, 1.0);
     //outputColor.rgb = vec3(NoL);
     //outputColor.rgb = normal.rgb;
+
+
+    vec4 emssiveColor = texture(EmissiveTexture, uv_screenspace);
+    outputColor += emssiveColor;
+
 
     imageStore(outputImage, pixelCoords, outputColor);
 }

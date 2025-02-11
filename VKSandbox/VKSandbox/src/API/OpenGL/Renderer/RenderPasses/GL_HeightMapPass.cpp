@@ -58,10 +58,11 @@ namespace OpenGLRenderer {
         colorShader->SetMat4("modelMatrix", modelMatrix);
         colorShader->SetMat4("inverseModelMatrix", inverseModelMatrix);
 
-        glEnable(GL_DEPTH_TEST);
-        glPointSize(8);
+        SetRasterizerState("GeometryPass_NonBlended");
 
         Material* material = AssetManager::GetDefaultMaterial();
+        int materialIndex = AssetManager::GetMaterialIndexByName("Ground_MudVeg");
+        material = AssetManager::GetMaterialByIndex(materialIndex);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, AssetManager::GetTextureByIndex(material->m_basecolor)->GetGLTexture().GetHandle());
         glActiveTexture(GL_TEXTURE1);

@@ -62,7 +62,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;vendor\physx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -71,7 +71,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>vendor\assimp\lib;vendor\GLFW\lib\Release;vendor\compressonator\lib;vendor\fmod\lib;vendor\Vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>vendor\assimp\lib;vendor\GLFW\lib\Release;vendor\compressonator\lib;vendor\fmod\lib;vendor\Vulkan;vendor\physx\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;fmod_vc.lib;assimp-vc143-mt.lib;Compressonator_MD_DLL.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXExtensions_static_64.lib;PhysXFoundation_64.lib;PhysXTask_static_64.lib;PhysXPvdSDK_static_64.lib;PVDRuntime_64.lib;PhysXCharacterKinematic_static_64.lib;vulkan-1.lib;shaderc_combinedd.lib;liblz4_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
     </Link>
@@ -98,7 +98,7 @@ copy /Y "$(ProjectDir)vendor\dll_debug\PVDRuntime_64.dll" "$(TargetDir)PVDRuntim
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;TRACY_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>src;vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;vendor\physx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -113,15 +113,22 @@ copy /Y "$(ProjectDir)vendor\dll_debug\PVDRuntime_64.dll" "$(TargetDir)PVDRuntim
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <OptimizeReferences>false</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>vendor\assimp\lib;vendor\GLFW\lib\Release;vendor\compressonator\lib;vendor\fmod\lib;vendor\Vulkan;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;Compressonator_MD.lib;CMP_Framework_MD.lib;assimp-vc143-mt.lib;fmod_vc.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>vendor\assimp\lib;vendor\GLFW\lib\Release;vendor\compressonator\lib;vendor\fmod\lib;vendor\Vulkan;vendor\physx\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;Compressonator_MD.lib;CMP_Framework_MD.lib;assimp-vc143-mt.lib;fmod_vc.lib;vulkan-1.lib;PhysX_64.lib;PhysXCommon_64.lib;PhysXCooking_64.lib;PhysXFoundation_64.lib;PhysXTask_static_64.lib;PhysXPvdSDK_static_64.lib;PVDRuntime_64.lib;PhysXExtensions_static_64.lib;PhysXCharacterKinematic_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(ProjectDir)vendor\DLLs\fmod.dll" "$(TargetDir)fmod.dll"
 copy /Y "$(ProjectDir)vendor\DLLs\assimp-vc143-mt.dll" "$(TargetDir)assimp-vc143-mt.dll"
-xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
+xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r
+
+copy /Y "$(ProjectDir)vendor\DLLs\PhysX_64.dll" "$(TargetDir)PhysX_64.dll"
+copy /Y "$(ProjectDir)vendor\DLLs\PhysXCommon_64.dll" "$(TargetDir)PhysXCommon_64.dll"
+copy /Y "$(ProjectDir)vendor\DLLs\PhysXCooking_64.dll" "$(TargetDir)PhysXCooking_64.dll"
+copy /Y "$(ProjectDir)vendor\DLLs\PhysXFoundation_64.dll" "$(TargetDir)PhysXFoundation_64.dll"
+copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.dll"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -139,6 +146,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_LoadingScreen.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_rasterizerStates.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_SkyboxPass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_SpriteSheetPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_UIPass.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_cubemapView.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_framebuffer.cpp" />
@@ -166,6 +174,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\AssetManagement\AssetManager_model.cpp" />
     <ClCompile Include="src\AssetManagement\AssetManager_skinnedMesh.cpp" />
     <ClCompile Include="src\AssetManagement\AssetManager_skinnedModel.cpp" />
+    <ClCompile Include="src\AssetManagement\AssetManager_spriteSheetTexture.cpp" />
     <ClCompile Include="src\AssetManagement\AssetManager_texture.cpp" />
     <ClCompile Include="src\BackEnd\BackEnd.cpp" />
     <ClCompile Include="src\BackEnd\GLFWIntegration.cpp" />
@@ -174,9 +183,15 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\AssetManagement\BakeQueue.cpp" />
     <ClCompile Include="src\Core\Scene.cpp" />
+    <ClCompile Include="src\Physics\Physics.cpp" />
+    <ClCompile Include="src\Player\Player_CharacterController.cpp" />
     <ClCompile Include="src\Player\Player_WeaponLogic_Gun.cpp" />
     <ClCompile Include="src\Player\Player_WeaponLogic_Melee.cpp" />
     <ClCompile Include="src\Player\Player_WeaponLogic_Shotgun.cpp" />
+    <ClCompile Include="src\Physics\Physics_util.cpp" />
+    <ClCompile Include="src\Renderer\Types\SpriteSheetTexture.cpp" />
+    <ClCompile Include="src\Types\Light.cpp" />
+    <ClCompile Include="src\Types\SpriteSheetObject.cpp" />
     <ClCompile Include="src\Weapon\WeaponManager.cpp" />
     <ClCompile Include="src\Editor\Editor_debug.cpp" />
     <ClCompile Include="src\Editor\Editor_camera.cpp" />
@@ -198,7 +213,7 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClCompile Include="src\Player\Player_Input.cpp" />
     <ClCompile Include="src\Player\Player_Movement.cpp" />
     <ClCompile Include="src\Player\Player_UI.cpp" />
-    <ClCompile Include="src\Player\Player_WiewWeapon.cpp" />
+    <ClCompile Include="src\Player\Player_ViewWeapon.cpp" />
     <ClCompile Include="src\Player\Player_WeaponLogic.cpp" />
     <ClCompile Include="src\Renderer\RenderDataManager.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
@@ -237,6 +252,9 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <None Include="res\shaders\common\constants.glsl" />
     <None Include="res\shaders\common\types.glsl" />
     <None Include="res\shaders\common\util.glsl" />
+    <None Include="res\shaders\OpenGL\10.shadow_mapping_depth.frag" />
+    <None Include="res\shaders\OpenGL\10.shadow_mapping_depth.geom" />
+    <None Include="res\shaders\OpenGL\10.shadow_mapping_depth.vert" />
     <None Include="res\shaders\OpenGL\gl_editor_mesh.frag" />
     <None Include="res\shaders\OpenGL\gl_editor_mesh.vert" />
     <None Include="res\shaders\OpenGL\gl_gizmo.frag" />
@@ -253,6 +271,10 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <None Include="res\shaders\OpenGL\gl_skybox.vert" />
     <None Include="res\shaders\OpenGL\gl_solid_color.frag" />
     <None Include="res\shaders\OpenGL\gl_solid_color.vert" />
+    <None Include="res\shaders\OpenGL\GL_spirtesheet.frag" />
+    <None Include="res\shaders\OpenGL\GL_spirtesheet.vert" />
+    <None Include="res\shaders\OpenGL\GL_sprite_sheet.frag" />
+    <None Include="res\shaders\OpenGL\GL_sprite_sheet.vert" />
     <None Include="res\shaders\OpenGL\gl_ui.frag" />
     <None Include="res\shaders\OpenGL\gl_ui.vert" />
     <None Include="res\shaders\common\pbr_functions.glsl" />
@@ -296,10 +318,16 @@ xcopy "$(ProjectDir)res\shaders" "$(TargetDir)res\shaders" /e /y /i /r</Command>
     <ClInclude Include="src\BackEnd\BackEnd.h" />
     <ClInclude Include="src\BackEnd\GLFWIntegration.h" />
     <ClInclude Include="src\Camera\Frustum.h" />
+    <ClInclude Include="src\Common\CreateInfo.h" />
     <ClInclude Include="src\Common\HellDefines.h" />
     <ClInclude Include="src\Config\Config.h" />
     <ClInclude Include="src\Core\Audio.h" />
     <ClInclude Include="src\AssetManagement\BakeQueue.h" />
+    <ClInclude Include="src\Physics\Physics.h" />
+    <ClInclude Include="src\Physics\Physics_util.h" />
+    <ClInclude Include="src\Renderer\Types\SpriteSheetTexture.h" />
+    <ClInclude Include="src\Types\Light.h" />
+    <ClInclude Include="src\Types\SpriteSheetObject.h" />
     <ClInclude Include="src\Weapon\WeaponCommon.h" />
     <ClInclude Include="src\Weapon\WeaponManager.h" />
     <ClInclude Include="src\Editor\Types\EditorMesh.h" />

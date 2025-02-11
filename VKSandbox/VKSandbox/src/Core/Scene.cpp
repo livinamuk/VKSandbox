@@ -6,6 +6,9 @@
 namespace Scene {
     std::vector<AnimatedGameObject> g_animatedGameObjects;
     std::vector<GameObject> g_gameObjects;
+    std::vector<Light> g_lights;
+
+
     std::vector<RenderItem> g_renderItems;
     std::vector<RenderItem> g_renderItemsBlended;
     std::vector<RenderItem> g_renderItemsAlphaDiscarded;
@@ -17,7 +20,23 @@ namespace Scene {
     void UpdateRenderItems();
 
     void Init() {
-        // Nothing as of yet
+
+        float magic = 2.7192f;
+
+        // Hardcode some test lights
+        LightCreateInfo createInfo;
+        createInfo.position = glm::vec3(16.0f, -5.0f + magic, 16.0f);
+        createInfo.type = LightType::LAMP_POST;
+        createInfo.strength = 4.0f;
+        createInfo.radius = 4;
+        AddLight(createInfo);
+
+        createInfo.position = glm::vec3(22.87f, -5.0f + magic, 21.13f);
+        createInfo.type = LightType::LAMP_POST;
+        createInfo.strength = 4.0f;
+        createInfo.radius = 4;
+        AddLight(createInfo);
+
     }
 
     void Update(float deltaTime) {
@@ -58,11 +77,19 @@ namespace Scene {
             g_renderItemsHairBottomLayer.insert(g_renderItemsHairBottomLayer.end(), gameObject.GetRenderItemsHairBottomLayer().begin(), gameObject.GetRenderItemsHairBottomLayer().end());
         }
 
+        // Lights
+        mousePickIndex = 0;
+        for (Light& light : g_lights) {
+            light.UpdateRenderItems();
+            light.SetMousePickIndex(mousePickIndex++);
+            g_renderItems.insert(g_renderItems.end(), light.GetRenderItems().begin(), light.GetRenderItems().end());
+        }
+
         RenderDataManager::ResetBaseSkinnedVertex();
         for (AnimatedGameObject& animatedGameObject : g_animatedGameObjects) {
             animatedGameObject.UpdateRenderItems(); 
-            animatedGameObject.DrawBones(WHITE);
-            animatedGameObject.DrawBoneTangentVectors();
+            //animatedGameObject.DrawBones(WHITE);
+            //animatedGameObject.DrawBoneTangentVectors();
             g_skinnedRenderItems.insert(g_skinnedRenderItems.end(), animatedGameObject.GetRenderItems().begin(), animatedGameObject.GetRenderItems().end());
         }
     }
@@ -155,13 +182,31 @@ namespace Scene {
             cube->SetMeshMaterials("MermaidTail");
         }
 
+
+
+        CreateGameObject();
+        GameObject* bench = &g_gameObjects.back();
+        bench->SetPosition(glm::vec3(17.24f, -5.0f, 16.53f));
+        bench->SetRotationY(-0.4f);
+        bench->SetModel("Bench");
+        bench->SetMeshMaterials("LampPost");
+
+
+     //  CreateGameObject();
+     //  GameObject* bench2 = &g_gameObjects.back();
+     //  bench2->SetPosition(glm::vec3(17.24f, -5.0f, 16.53f));
+     //  bench2->SetRotationY(-0.4f);
+     //  bench2->SetModel("LampPost");
+     //  bench2->SetMeshMaterials("LampPost");
+
+    
         CreateAnimatedGameObject();
         AnimatedGameObject& object = g_animatedGameObjects.back();
         object.SetPlayerIndex(1);
         object.SetSkinnedModel("Shark");
         object.SetName("222");
         object.SetAnimationModeToBindPose();
-        object.SetAllMeshMaterials("Doberman");
+        object.SetAllMeshMaterials("Shark");
         object.SetPosition(glm::vec3(3.8f, -0.5, 11.3f));
         object.SetScale(0.01);
         object.PlayAndLoopAnimation("Shark_Attack_Left_Quick");
@@ -174,7 +219,7 @@ namespace Scene {
         object2.SetSkinnedModel("Shark");
         object2.SetName("222");
         object2.SetAnimationModeToBindPose();
-        object2.SetAllMeshMaterials("Doberman");
+        object2.SetAllMeshMaterials("Shark");
         object2.SetPosition(glm::vec3(7.8f, -0.5, 11.3f));
         object2.SetScale(0.01);
         object2.SetAnimationModeToBindPose();
@@ -192,6 +237,10 @@ namespace Scene {
         //object3.SetAnimationModeToBindPose();
     }
 
+    void AddLight(LightCreateInfo createInfo) {
+        g_lights.push_back(Light(createInfo));
+    }
+
     std::vector<AnimatedGameObject>& GetAnimatedGameObjects()   { return g_animatedGameObjects; }
     std::vector<GameObject>& GetGameObjects()                   { return g_gameObjects; }
     std::vector<RenderItem>& GetRenderItems()                   { return g_renderItems; }
@@ -200,4 +249,5 @@ namespace Scene {
     std::vector<RenderItem>& GetRenderItemsHairTopLayer()       { return g_renderItemsHairTopLayer; }
     std::vector<RenderItem>& GetRenderItemsHairBottomLayer()    { return g_renderItemsHairBottomLayer; }
     std::vector<RenderItem>& GetSkinnedRenderItems()            { return g_skinnedRenderItems; }
+    std::vector<Light>& GetLights() { return g_lights; };
 }

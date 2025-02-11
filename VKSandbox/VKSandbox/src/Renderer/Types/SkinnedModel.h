@@ -76,7 +76,7 @@ private:
 public:
 
     SkinnedModel() {
-        ZERO_MEM(m_Buffers);
+        //ZERO_MEM(m_Buffers);
         m_NumBones = 0;
     }
 
@@ -90,7 +90,7 @@ public:
     const AnimatedNode* FindAnimatedNode(Animation* animation, const char* NodeName);
 
     std::vector<Joint> m_joints;
-    unsigned int m_Buffers[NUM_VBs];
+    //unsigned int m_Buffers[NUM_VBs];
     std::map<std::string, unsigned int> m_BoneMapping;
     unsigned int m_NumBones;
     std::vector<BoneInfo> m_BoneInfo;

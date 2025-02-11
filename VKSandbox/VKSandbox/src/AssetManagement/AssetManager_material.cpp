@@ -36,7 +36,7 @@ namespace AssetManager {
     }
 
     Material* GetDefaultMaterial() {
-        int index = GetMaterialIndex("CheckerBoard");
+        int index = GetMaterialIndexByName("CheckerBoard");
         return GetMaterialByIndex(index);
     }
 
@@ -71,14 +71,14 @@ namespace AssetManager {
         return "UNDEFINED_MATERIAL_NAME";
     }
 
-    int GetMaterialIndex(const std::string& name) {
+    int GetMaterialIndexByName(const std::string& name) {
         std::unordered_map<std::string, int>& indexMap = GetMaterialIndexMap();
         auto it = indexMap.find(name);
         if (it != indexMap.end()) {
             return it->second;
         }
         else {
-            //std::cout << "AssetManager::GetMaterialIndex(const std::string& name) failed because '" << name << "' does not exist\n";
+            //std::cout << "AssetManager::GetMaterialIndexByName(const std::string& name) failed because '" << name << "' does not exist\n";
             return -1;
         }
     }

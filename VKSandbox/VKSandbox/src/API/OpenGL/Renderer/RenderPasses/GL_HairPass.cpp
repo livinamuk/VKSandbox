@@ -22,11 +22,6 @@ namespace OpenGLRenderer {
         hairFrameBuffer->ClearAttachment("Composite", 0, 0, 0, 0);
         hairFrameBuffer->SetViewport();
 
-
-        
-        
-        
-        
         glBindVertexArray(OpenGLBackEnd::GetVertexDataVAO());
 
         const DrawCommandsSet& drawInfoSet = RenderDataManager::GetDrawInfoSet();
@@ -45,8 +40,8 @@ namespace OpenGLRenderer {
         glDispatchCompute((gBuffer->GetWidth() + 7) / 8, (gBuffer->GetHeight() + 7) / 8, 1);
 
         // Cleanup
-        gBuffer->SetViewport(); // NOTE!~!! suspect, not necessary if you do shit properly in the next pass
-        glDepthFunc(GL_LESS);
+        //gBuffer->SetViewport(); // NOTE!~!! suspect, not necessary if you do shit properly in the next pass
+        //glDepthFunc(GL_LESS);
     }
 
     void RenderHairLayer(const DrawCommands& drawCommands, int peelCount) {
@@ -125,6 +120,5 @@ namespace OpenGLRenderer {
             int workGroupsY = (hairFrameBuffer->GetHeight() + 7) / 8;
             glDispatchCompute(workGroupsX, workGroupsY, 1);
         }
-        glDisable(GL_SCISSOR_TEST);
     }
 }

@@ -5,30 +5,23 @@ namespace OpenGLRenderer {
     void InitRasterizerStates() {
         OpenGLRasterizerState* geometryPassNonBlended = CreateRasterizerState("GeometryPass_NonBlended");
         geometryPassNonBlended->depthTestEnabled = true;
-        geometryPassNonBlended->stencilEnable = false;
         geometryPassNonBlended->blendEnable = false;
         geometryPassNonBlended->cullfaceEnable = true;
         geometryPassNonBlended->depthMask = true;
         geometryPassNonBlended->depthFunc = GL_LESS;
-        geometryPassNonBlended->blendFuncSrcfactor = GL_SRC_ALPHA;
-        geometryPassNonBlended->blendFuncDstfactor = GL_ONE_MINUS_SRC_ALPHA;
-        geometryPassNonBlended->pointSize = 8;
 
         OpenGLRasterizerState* geometryPassBlended = CreateRasterizerState("GeometryPass_Blended");
         geometryPassBlended->depthTestEnabled = true;
         geometryPassBlended->blendEnable = true;
-        geometryPassBlended->stencilEnable = false;
         geometryPassBlended->cullfaceEnable = false;
         geometryPassBlended->depthMask = false;
         geometryPassBlended->depthFunc = GL_LESS;
         geometryPassBlended->blendFuncSrcfactor = GL_SRC_ALPHA;
         geometryPassBlended->blendFuncDstfactor = GL_ONE_MINUS_SRC_ALPHA;
-        geometryPassBlended->pointSize = 8;
 
         OpenGLRasterizerState* hairPassViewspaceDepth = CreateRasterizerState("HairViewspaceDepth");
         hairPassViewspaceDepth->depthTestEnabled = true;
         hairPassViewspaceDepth->blendEnable = false;
-        hairPassViewspaceDepth->stencilEnable = false;
         hairPassViewspaceDepth->cullfaceEnable = true;
         hairPassViewspaceDepth->depthMask = true;
         hairPassViewspaceDepth->depthFunc = GL_LESS;
@@ -38,7 +31,6 @@ namespace OpenGLRenderer {
 
         OpenGLRasterizerState* hairPassLighting = CreateRasterizerState("HairLighting");
         hairPassLighting->depthTestEnabled = true;
-        hairPassLighting->stencilEnable = false;
         hairPassLighting->blendEnable = false;
         hairPassLighting->cullfaceEnable = true;
         hairPassLighting->depthMask = true;
@@ -46,6 +38,22 @@ namespace OpenGLRenderer {
         hairPassLighting->blendFuncSrcfactor = GL_SRC_ALPHA;
         hairPassLighting->blendFuncDstfactor = GL_ONE_MINUS_SRC_ALPHA;
         hairPassLighting->pointSize = 8;
+
+        OpenGLRasterizerState* spriteSheet = CreateRasterizerState("SpriteSheetPass");
+        spriteSheet->depthTestEnabled = true;
+        spriteSheet->blendEnable = true;
+        spriteSheet->cullfaceEnable = false;
+        spriteSheet->depthMask = false;
+        spriteSheet->depthFunc = GL_LESS;
+        spriteSheet->blendFuncSrcfactor = GL_SRC_ALPHA;
+        spriteSheet->blendFuncDstfactor = GL_ONE_MINUS_SRC_ALPHA;
+
+        OpenGLRasterizerState* skybox = CreateRasterizerState("SkyBox");
+        skybox->depthTestEnabled = false;
+        skybox->blendEnable = false;
+        skybox->cullfaceEnable = false;
+        skybox->depthMask = false;
+        skybox->depthFunc = GL_LESS;
     }
 
 }

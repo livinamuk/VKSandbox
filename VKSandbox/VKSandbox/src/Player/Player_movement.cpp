@@ -16,34 +16,63 @@ void Player::UpdateMovement(float deltaTime) {
 
         // View height
         float heightSpeed = 3.0f;
-        if (Input::KeyDown(HELL_KEY_SPACE)) {
+        if (Input::KeyDown(HELL_KEY_EQUAL)) {
             m_position.y += deltaTime * heightSpeed * speedFactor;
         }
-        if (Input::KeyDown(GLFW_KEY_LEFT_CONTROL)) {
+        if (Input::KeyDown(GLFW_KEY_MINUS)) {
             m_position.y -= deltaTime * heightSpeed * speedFactor;
         }
 
         // WSAD
         glm::vec3 displacement = glm::vec3(0);
-        if (Input::KeyDown(HELL_KEY_A)) {
+        if (PressingWalkLeft()) {
             displacement -= m_camera.GetRight();
             m_Moving = true;
         }
-        if (Input::KeyDown(HELL_KEY_D)) {
+        if (PressingWalkRight()) {
             displacement += m_camera.GetRight();
             m_Moving = true;
         }
-        if (Input::KeyDown(HELL_KEY_W)) {
+        if (PressingWalkForward()) {
             displacement += m_camera.GetForwardXZ();
             m_Moving = true;
         }
-        if (Input::KeyDown(HELL_KEY_S)) {
+        if (PressingWalkBackward()) {
             displacement -= m_camera.GetForwardXZ();
             m_Moving = true;
         }
 
         displacement *= m_walkSpeed * deltaTime * speedFactor;
-        m_position += displacement;
+
+        // Check grounded state
+        m_grounded = false;
+        for (CharacterCollisionReport& report : Physics::GetCharacterCollisionReports()) {
+            if (report.characterController == m_characterController && report.hitNormal.y > 0.5f) {
+                m_grounded = true;
+            }
+        }
+
+        // Jump
+        if (PresingJump() && HasControl() && m_grounded) {
+            m_yVelocity = 4.9f;  // better magic value for jump strength
+            m_grounded = false;
+        }
+        //if (IsOverlappingLadder()) {
+        //    m_grounded = true;
+        //}
+
+        // Gravity
+        if (m_grounded) {
+            m_yVelocity = -3.5f;
+        }
+        else {
+            float gravity = 9.8f;// 15.75f; // 9.8 feels like the moon
+            m_yVelocity -= gravity * deltaTime;
+        }
+
+        displacement.y += m_yVelocity * deltaTime;
+
+        MoveCharacterController(glm::vec3(displacement.x, displacement.y, displacement.z));
     }
 }
 

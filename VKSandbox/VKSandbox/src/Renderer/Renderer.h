@@ -6,6 +6,7 @@ namespace Renderer {
     void RenderLoadingScreen();
     void RenderGame();
     void HotloadShaders();
+    void RecreateBlurBuffers();
 
     void DrawPoint(glm::vec3 position, glm::vec3 color);
     void DrawLine(glm::vec3 begin, glm::vec3 end, glm::vec3 color);

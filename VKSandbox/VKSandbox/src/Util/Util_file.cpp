@@ -54,4 +54,18 @@ namespace Util {
         std::string result = filepath.substr(filepath.rfind("/") + 1);
         return result.substr(0, result.length() - 4);
     }
+
+    FileInfo GetFileInfoFromPath(const std::string& filepath) {
+        FileInfo fileInfo;
+        std::filesystem::path path(filepath);
+        if (!std::filesystem::exists(path) || !std::filesystem::is_regular_file(path)) {
+            throw std::runtime_error("Invalid file path or not a regular file: " + filepath);
+        }
+        fileInfo.path = path.string();
+        fileInfo.name = path.stem().string();
+        fileInfo.ext = path.has_extension() ? path.extension().string().substr(1) : "";
+        fileInfo.dir = path.parent_path().string();
+
+        return fileInfo;
+    }
 }

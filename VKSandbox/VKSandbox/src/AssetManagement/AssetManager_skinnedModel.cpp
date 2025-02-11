@@ -1,5 +1,6 @@
 #include "AssetManager.h"
 #include "Util/Util.h"
+#include "File/AssimpImporter.h"
 #include <assimp/Importer.hpp> 
 #include <assimp/scene.h> 
 #include <assimp/postprocess.h> 
@@ -180,6 +181,29 @@ namespace AssetManager {
 
         std::lock_guard<std::mutex> lock(mutex);
         std::cout << "Loaded " << skinnedModel->GetFileInfo().name << "\n";
+    }
+
+    void ExportMissingSkinnedModels() {
+        // Scan for new obj and fbx and export custom model format
+        for (FileInfo& fileInfo : Util::IterateDirectory("res/skinned_models_raw", { "obj", "fbx" })) {
+            std::string assetPath = "res/skinned_models_export_test/" + fileInfo.name + ".skinnedmodel";
+
+            // If the file exists but timestamps don't match, re-export
+            if (Util::FileExists(assetPath)) {
+                uint64_t lastModified = File::GetLastModifiedTime(fileInfo.path);
+                SkinnedModelHeader modelHeader = File::ReadSkinnedModelHeader(assetPath);
+                if (modelHeader.timestamp != lastModified) {
+                    File::DeleteFile(assetPath);
+                    SkinnedModelData modelData = AssimpImporter::ImportSkinnedFbx(fileInfo.path);
+                    File::ExportSkinnedModel(modelData);
+                }
+            }
+            // File doesn't even exist yet, so export it
+            else {
+                SkinnedModelData modelData = AssimpImporter::ImportSkinnedFbx(fileInfo.path);
+                File::ExportSkinnedModel(modelData);
+            }
+        }
     }
 
     SkinnedModel* AssetManager::GetSkinnedModelByName(const std::string& name) {

@@ -16,6 +16,7 @@
 #include "Editor/Gizmo.h"
 #include "Input/Input.h"
 #include "Input/InputMulti.h"
+#include "Physics/Physics.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/RenderDataManager.h"
 #include "UI/UIBackEnd.h"
@@ -70,6 +71,7 @@ namespace BackEnd {
         ViewportManager::Init();
         Editor::Init();
         WeaponManager::Init();
+        Physics::Init();
 
         glfwShowWindow(static_cast<GLFWwindow*>(BackEnd::GetWindowPointer()));
         return true;
@@ -113,6 +115,7 @@ namespace BackEnd {
         GLFWIntegration::EndFrame(g_api);
         UIBackEnd::EndFrame();
         Debug::EndFrame();
+        InputMulti::ResetMouseOffsets();
     }
 
     void UpdateSubSystems() {

@@ -32,6 +32,10 @@ readonly restrict layout(std430, binding = 1) buffer rendererDataBuffer {
 	RendererData rendererData;
 };
 
+readonly restrict layout(std430, binding = 4) buffer lightsBuffer {
+	Light lights[];
+};
+
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 Tangent;
@@ -62,22 +66,26 @@ void main() {
     float roughness = rma.r;
     float metallic = rma.g;
     
-    vec3 lightPosition = (vec3(7, 0, 10) * 0.5) + vec3(0, 0.125, 1);
-    vec3 lightColor = vec3(1, 0.98, 0.94);
-    float lightRadius = 5;
-    float lightStrength = 2;
-        
-    lightPosition = vec3(-3.5, 2, 1);
-    lightStrength = 1;
-    lightRadius = 15;
 
-    vec3 directLighting = GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal, WorldPos.xyz, baseColor.rgb, roughness, metallic, ViewPos);
+
+    // Direct light
+    vec3 directLighting = vec3(0); 
+    for (int i = 0; i < 2; i++) {    
+        Light light = lights[i];
+        vec3 lightPosition = vec3(light.posX, light.posY, light.posZ);
+        vec3 lightColor =  vec3(light.colorR, light.colorG, light.colorB);
+        float lightStrength = light.strength;
+        float lightRadius = light.radius;
+        directLighting += GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal.xyz, WorldPos.xyz, baseColor.rgb, roughness, metallic, ViewPos);
+    }
+       
     
-    float ambientIntensity = 0.05;
-    vec3 ambientColor = baseColor.rgb * lightColor;
-    vec3 ambientLighting = ambientColor * ambientIntensity;
+   vec3 amibentLightColor = vec3(1, 0.98, 0.94);
+   float ambientIntensity = 0.05;
+   vec3 ambientColor = baseColor.rgb * amibentLightColor;
+   vec3 ambientLighting = ambientColor * ambientIntensity;
     
-    vec3 finalColor = directLighting.rgb + ambientLighting;
+    vec3 finalColor = directLighting.rgb;// + ambientLighting;
     
     // Tone mapping
     finalColor = mix(finalColor, Tonemap_ACES(finalColor), 1.0);

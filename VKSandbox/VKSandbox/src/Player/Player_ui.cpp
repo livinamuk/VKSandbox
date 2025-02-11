@@ -30,9 +30,31 @@ void Player::UpdateUI() {
 
 
         text += "Weapon Action: " + Util::WeaponActionToString(GetCurrentWeaponAction()) + "\n";
-        //text += "IsMoving: " + Util::BoolToString(IsMoving()) + "\n";
-        //text += "Animation States: " + std::to_string(GetViewWeaponAnimatedGameObject()->m_animationLayer.m_animationStates.size()) + "\n";
 
+
+     //  text += "\n";
+     //  text += "Weapon matrix\n";
+     //  text += Util::Mat4ToString(m_viewWeaponCameraMatrix);
+     //
+     //  text += "\n";
+     //  text += "\n";
+
+        text += "\n";
+        text += "Ammo: " + std::to_string(GetCurrentWeaponMagAmmo());
+        text += "/";
+        text += std::to_string(GetCurrentWeaponTotalAmmo()) + "\n";
+        text += "ShellInChamber: " + Util::BoolToString(IsShellInShotgunChamber()) + "\n";
+        text += "CanFireShotgun: " + Util::BoolToString(CanFireShotgun()) + "\n";
+
+        WeaponState* weaponState = GetCurrentWeaponState();
+        AmmoState* ammoState = GetCurrentAmmoState();
+        text += "AwaitingPumpAudio: " + Util::BoolToString(weaponState->shotgunAwaitingPumpAudio) + "\n";
+
+
+        text += "\n";
+        text += "Grounded: " + Util::BoolToString(m_grounded) + "\n";
+
+         
         UIBackEnd::BlitText(text, "StandardFont", xLeft, yTop, 2.0f);
     }
 }

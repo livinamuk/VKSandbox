@@ -13,6 +13,7 @@ struct GameObject {
     void SetPosition(glm::vec3 position);
     void SetRotation(glm::vec3 rotation);
     void SetRotationY(float rotation);
+    void SetScale(glm::vec3 scale);
     void SetModel(const std::string& name);
     void SetMeshMaterials(const char* materialName);
     void SetMeshMaterialByMeshName(std::string meshName, const char* materialName);

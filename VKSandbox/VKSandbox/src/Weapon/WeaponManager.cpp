@@ -308,14 +308,14 @@ namespace WeaponManager {
         tokarev.modelName = "Tokarev";
         tokarev.animationNames.idle = "Tokarev_Idle";
         tokarev.animationNames.walk = "Tokarev_Walk";
+        tokarev.animationNames.draw = "Tokarev_Draw";
+        tokarev.animationNames.spawn = "Tokarev_Spawn";
         tokarev.animationNames.reload = "Tokarev_Reload";
         tokarev.animationNames.reloadempty.push_back("Tokarev_ReloadEmpty");
         tokarev.animationNames.fire.push_back("Tokarev_Fire0");
         tokarev.animationNames.fire.push_back("Tokarev_Fire1");
         tokarev.animationNames.fire.push_back("Tokarev_Fire2");
         tokarev.animationSpeeds.fire = 1.0f;
-        tokarev.animationNames.draw = "Tokarev_Draw";
-        tokarev.animationNames.spawn = "Tokarev_Spawn";
         tokarev.meshMaterials["ArmsMale"] = "Hands";
         tokarev.meshMaterials["ArmsFemale"] = "FemaleArms";
         tokarev.meshMaterials["TokarevBody"] = "Tokarev";
@@ -350,6 +350,10 @@ namespace WeaponManager {
         tokarev.pickUpMeshMaterials["TokarevBody"] = "Tokarev";
         tokarev.pickUpMeshMaterials["TokarevGripPolymer"] = "TokarevGrip";
 
+        tokarev.animationNames.idle = "Tokarev_ReloadEmpty";
+        tokarev.animationNames.walk = "Tokarev_ReloadEmpty";
+        tokarev.animationNames.draw = "Tokarev_ReloadEmpty";
+        tokarev.animationNames.spawn = "Tokarev_ReloadEmpty";
 
 
         WeaponInfo& glock = g_weapons.emplace_back();
@@ -460,6 +464,7 @@ namespace WeaponManager {
         spas.meshMaterials["ArmsMale"] = "Hands";
         spas.meshMaterials["ArmsFemale"] = "FemaleArms";
         spas.meshMaterials["Shells"] = "Shell";
+        spas.meshMaterials["Shells.001"] = "Shell";
         spas.meshMaterials["SPAS12_Main"] = "SPAS_Main";
         spas.meshMaterials["SPAS12_Moving"] = "SPAS_Moving";
         spas.meshMaterials["SPAS12_Stamped"] = "SPAS_Stamped";
@@ -469,22 +474,19 @@ namespace WeaponManager {
         spas.animationNames.reload = "SPAS_Fire";
         spas.animationNames.reloadempty.push_back("SPAS_Fire");
         spas.animationNames.fire.push_back("SPAS_Fire");
-        spas.animationNames.draw = "SPAS_Equip";
+        spas.animationNames.draw = "SPAS_Draw";
         spas.animationNames.shotgunReloadStart = "SPAS_ReloadStart";
         spas.animationNames.shotgunReloadEnd = "SPAS_ReloadEnd";
-        spas.animationSpeeds.fire = 1.5f;
-        spas.animationSpeeds.shotgunReloadStart = 1.5f;
-        spas.animationSpeeds.shotgunReloadEnd = 1.5f;
+        spas.animationNames.shotgunDrawPump = "SPAS_DrawPump";
+        spas.animationSpeeds.fire = 1.0f;
+        spas.animationSpeeds.shotgunReloadStart = 1.0f;
+        spas.animationSpeeds.shotgunReloadEnd = 1.0f;
         spas.animationSpeeds.shotgunReloadOneShell = 1.25f;
         spas.animationSpeeds.shotgunReloadTwoShells = 1.25f;
         spas.animationNames.shotgunReloadOneShell = "SPAS_Reload1Shell";
         spas.animationNames.shotgunReloadTwoShells = "SPAS_Reload2Shells";
-        spas.audioFiles.fire.push_back("Glock_Fire0.wav");
-        spas.audioFiles.fire.push_back("Glock_Fire1.wav");
-        spas.audioFiles.fire.push_back("Glock_Fire2.wav");
-        spas.audioFiles.fire.push_back("Glock_Fire3.wav");
-        spas.audioFiles.reload = "Glock_Reload.wav";
-        spas.audioFiles.reloadEmpty = "Glock_ReloadEmpty.wav";
+        spas.audioFiles.fire.push_back("SPAS_Fire.wav");
+        spas.audioFiles.shotgunPump = "SPAS_Pump.wav";
         spas.type = WeaponType::SHOTGUN;
         spas.muzzleFlashOffset = glm::vec3(0, 0.002, 0.005f);
         spas.casingEjectionOffset = glm::vec3(-0.098, -0.033, 0.238);
@@ -501,6 +503,8 @@ namespace WeaponManager {
         spas.pickUpMeshMaterials["SPAS12_Main"] = "SPAS_Main";
         spas.pickUpMeshMaterials["SPAS12_Moving"] = "SPAS_Moving";
         spas.pickUpMeshMaterials["SPAS12_Stamped"] = "SPAS_Stamped";
+        spas.animationNames.shotgunFireEmpty = "SPAS_FireEmpty";
+        spas.animationNames.shotgunReloadEndPump = "SPAS_ReloadEndPump";
 
 
 

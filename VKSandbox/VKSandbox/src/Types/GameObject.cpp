@@ -13,6 +13,10 @@ void GameObject::SetRotationY(float rotation) {
     m_transform.rotation.y = rotation;
 }
 
+void GameObject::SetScale(glm::vec3 scale) {
+    m_transform.scale = scale;
+}
+
 void GameObject::SetModel(const std::string& name) {
     m_model = AssetManager::GetModelByIndex(AssetManager::GetModelIndexByName(name.c_str()));
     if (m_model) {
@@ -29,17 +33,16 @@ void GameObject::SetModel(const std::string& name) {
 }
 
 void GameObject::SetMeshMaterials(const char* materialName) {
-    int materialIndex = AssetManager::GetMaterialIndex(materialName);
+    int materialIndex = AssetManager::GetMaterialIndexByName(materialName);
     if (m_model && materialIndex != -1) {
         for (int i = 0; i < m_model->GetMeshCount(); i++) {
             m_meshMaterialIndices[i] = materialIndex;
-            return;
         }
     }
 }
 
 void GameObject::SetMeshMaterialByMeshName(std::string meshName, const char* materialName) {
-    int materialIndex = AssetManager::GetMaterialIndex(materialName);
+    int materialIndex = AssetManager::GetMaterialIndexByName(materialName);
     if (m_model && materialIndex != -1) {
         for (int i = 0; i < m_model->GetMeshCount(); i++) {
             if (AssetManager::GetMeshByIndex(m_model->GetMeshIndices()[i])->GetName() == meshName) {

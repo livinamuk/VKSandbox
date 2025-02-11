@@ -4,6 +4,7 @@
 #include "Core/Debug.h"
 #include "Types/AnimatedGameObject.h"
 #include "Types/GameObject.h"
+#include "Types/Light.h"
 #include "Util/Util.h"
 #include "glm/gtx/intersect.hpp"
 #include <vector>
@@ -19,6 +20,7 @@ namespace Scene {
     GameObject* GetGameObjectByName(const std::string& name);
     AnimatedGameObject* GetAnimatedGameObjectByIndex(int32_t index);
 
+
     std::vector<AnimatedGameObject>& GetAnimatedGameObjects();
     std::vector<GameObject>& GetGameObjects();
     std::vector<RenderItem>& GetRenderItems();
@@ -27,4 +29,7 @@ namespace Scene {
     std::vector<RenderItem>& GetRenderItemsHairTopLayer();
     std::vector<RenderItem>& GetRenderItemsHairBottomLayer();
     std::vector<RenderItem>& GetSkinnedRenderItems();
+
+    std::vector<Light>& GetLights();
+    void AddLight(LightCreateInfo createInfo);
 }

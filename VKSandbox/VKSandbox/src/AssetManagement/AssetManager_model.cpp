@@ -70,12 +70,15 @@ namespace AssetManager {
         return model;
     }
 
+    Model* GetModelByName(const std::string& name) {
+        int index = GetModelIndexByName(name);
+        return GetModelByIndex(index);
+    }
+
     Model* GetModelByIndex(int index) {
-        std::vector<Model>& models = GetModels();
-        if (index >= 0 && index < models.size()) {
-            return &models[index];
+        if (index >= 0 && index < GetModels().size()) {
+            return &GetModels()[index];
         }
-        std::cout << "AssetManager::GetModelByIndex() failed because index " << index << " was out of range of size << " << models.size() << "\n";
         return nullptr;
     }
 
@@ -88,4 +91,26 @@ namespace AssetManager {
         std::cout << "AssetManager::GetModelIndexByName() failed because name '" << name << "' was not found in g_models!\n";
         return -1;
     }
+
+    void BuildHardcodedModels() {
+        /* Quad */ {
+            std::vector<Vertex> vertices = {
+                {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}}, // Bottom-left
+                {{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}}, // Bottom-right
+                {{ 0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}}, // Top-right
+                {{-0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}}  // Top-left
+            };
+
+            std::vector<uint32_t> indices = {
+                0, 1, 2,  // First triangle
+                2, 3, 0   // Second triangle
+            };
+
+            Model* model = CreateModel("Quad");
+            int meshIndex = CreateMesh("Quad", vertices, indices);
+            model->AddMeshIndex(meshIndex);
+            model->SetLoadingState(LoadingState::LOADING_COMPLETE);
+        }
+    }
+
 }

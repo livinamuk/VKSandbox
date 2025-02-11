@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 enum class API {
     OPENGL,
@@ -70,6 +71,7 @@ enum class EditorObjectType {
     GAME_OBJECT,
     DOOR,
     WINDOW,
+    LIGHT,
     CSG
 }; 
 
@@ -120,11 +122,13 @@ enum WeaponAction {
     RELOAD_FROM_EMPTY,
     DRAW_BEGIN,
     DRAWING,
+    DRAWING_WITH_SHOTGUN_PUMP,
     SPAWNING,
     RELOAD_SHOTGUN_BEGIN,
     RELOAD_SHOTGUN_SINGLE_SHELL,
     RELOAD_SHOTGUN_DOUBLE_SHELL,
     RELOAD_SHOTGUN_END,
+    RELOAD_SHOTGUN_END_WITH_PUMP,
     RELOAD_REVOLVER_BEGIN,
     RELOAD_REVOLVER_LOOP,
     RELOAD_REVOLVER_END,
@@ -144,18 +148,52 @@ enum InputType {
     CONTROLLER
 };
 
-// Fix me
-
-enum VB_TYPES {
-    INDEX_BUFFER,
-    POS_VB,
-    NORMAL_VB,
-    TEXCOORD_VB,
-    TANGENT_VB,
-    BITANGENT_VB,
-    BONE_VB,
-    SMOOTH_NORMAL_VB,
-    NUM_VBs
+enum CollisionGroup : uint64_t {
+    NO_COLLISION = 0,
+    BULLET_CASING = 1,
+    PLAYER = 2,
+    ENVIROMENT_OBSTACLE = 4,
+    GENERIC_BOUNCEABLE = 8,
+    ITEM_PICK_UP = 16,
+    RAGDOLL = 32,
+    DOG_CHARACTER_CONTROLLER = 64,
+    GENERTIC_INTERACTBLE = 128,
+    ENVIROMENT_OBSTACLE_NO_DOG = 256,
+    SHARK = 512,
+    LADDER = 1024,
 };
 
-enum Weapon { KNIFE = 0, GLOCK, SHOTGUN, AKS74U, MP7, WEAPON_COUNT };
+
+
+// Re-evaluate how this works, coz it alway fucks you up, 
+// and PhysX this group bitmask is used for more than just raycasts, pretty sure
+enum RaycastGroup {
+    RAYCAST_DISABLED = 0,
+    RAYCAST_ENABLED = 1,
+    PLAYER_1_RAGDOLL = 2,
+    PLAYER_2_RAGDOLL = 4,
+    PLAYER_3_RAGDOLL = 8,
+    PLAYER_4_RAGDOLL = 16,
+    DOBERMAN = 32
+};
+
+enum DebugLineRenderMode {
+    SHOW_NO_LINES,
+    PATHFINDING_RECAST,
+    PHYSX_ALL,
+    PHYSX_RAYCAST,
+    PHYSX_COLLISION,
+    RAYTRACE_LAND,
+    PHYSX_EDITOR,
+    BOUNDING_BOXES,
+    RTX_LAND_AABBS,
+    RTX_LAND_TRIS,
+    RTX_LAND_TOP_LEVEL_ACCELERATION_STRUCTURE,
+    RTX_LAND_BOTTOM_LEVEL_ACCELERATION_STRUCTURES,
+    RTX_LAND_TOP_AND_BOTTOM_LEVEL_ACCELERATION_STRUCTURES,
+    DEBUG_LINE_MODE_COUNT,
+};
+
+enum struct LightType {
+    LAMP_POST = 0
+};

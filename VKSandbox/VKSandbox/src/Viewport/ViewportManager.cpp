@@ -2,11 +2,12 @@
 #include "ViewportManager.h"
 #include "HellDefines.h"
 #include "Util.h"
-#include "../BackEnd/BackEnd.h"
-#include "../Config/Config.h"
-#include "../Core/Game.h"
-#include "../Input/Input.h"
-#include "../Editor/Editor.h"
+#include "BackEnd/BackEnd.h"
+#include "Config/Config.h"
+#include "Core/Game.h"
+#include "Input/Input.h"
+#include "Editor/Editor.h"
+#include "Renderer/Renderer.h"
 
 namespace ViewportManager {
     std::vector<Viewport> g_viewports;
@@ -21,11 +22,12 @@ namespace ViewportManager {
 
     void UpdateMouseHoverStates() {
         for (Viewport& viewport : g_viewports) {
-            viewport.UpdateHover();
+            viewport.Update();
         }
     }
 
     void UpdateViewports() {
+
         if (Editor::IsOpen()) {
             float splitX = Editor::GetVerticalDividerXPos();
             float splitY = Editor::GetHorizontalDividerYPos();
@@ -93,6 +95,7 @@ namespace ViewportManager {
                 g_viewports[3].Show();
             }
         }
+        //Renderer::RecreateBlurBuffers();
     }
 
     Viewport* GetViewportByIndex(int32_t viewportIndex) {

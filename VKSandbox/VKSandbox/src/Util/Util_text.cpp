@@ -95,11 +95,13 @@ namespace Util {
         case WeaponAction::RELOAD_FROM_EMPTY:             return "RELOAD_FROM_EMPTY";
         case WeaponAction::DRAW_BEGIN:                    return "DRAW_BEGIN";
         case WeaponAction::DRAWING:                       return "DRAWING";
+        case WeaponAction::DRAWING_WITH_SHOTGUN_PUMP:     return "DRAWING_WITH_SHOTGUN_PUMP";
         case WeaponAction::SPAWNING:                      return "SPAWNING";
         case WeaponAction::RELOAD_SHOTGUN_BEGIN:          return "RELOAD_SHOTGUN_BEGIN";
         case WeaponAction::RELOAD_SHOTGUN_SINGLE_SHELL:   return "RELOAD_SHOTGUN_SINGLE_SHELL";
         case WeaponAction::RELOAD_SHOTGUN_DOUBLE_SHELL:   return "RELOAD_SHOTGUN_DOUBLE_SHELL";
         case WeaponAction::RELOAD_SHOTGUN_END:            return "RELOAD_SHOTGUN_END";
+        case WeaponAction::RELOAD_SHOTGUN_END_WITH_PUMP:  return "RELOAD_SHOTGUN_END_WITH_PUMP";
         case WeaponAction::RELOAD_REVOLVER_BEGIN:         return "RELOAD_REVOLVER_BEGIN";
         case WeaponAction::RELOAD_REVOLVER_LOOP:          return "RELOAD_REVOLVER_LOOP";
         case WeaponAction::RELOAD_REVOLVER_END:           return "RELOAD_REVOLVER_END";

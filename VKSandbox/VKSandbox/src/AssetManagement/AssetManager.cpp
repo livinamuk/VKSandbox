@@ -21,6 +21,7 @@ namespace AssetManager {
     std::vector<Material> g_materials;
     std::vector<Mesh> g_meshes;
     std::vector<Model> g_models;
+    std::vector<SpriteSheetTexture> g_spriteSheetTextures;
     std::vector<Texture> g_textures;
     std::vector<SkinnedMesh> g_skinnedMeshes;
     std::vector<SkinnedModel> g_skinnedModels;
@@ -42,8 +43,7 @@ namespace AssetManager {
     void LoadMinimumTextures();
     void LoadTexture(Texture* texture);
 
-    void BuildIndexMaps();
-    void BuildMaterials();
+
 
     bool FileInfoIsAlbedoTexture(const FileInfo& fileInfo);
     std::string GetMaterialNameFromFileInfo(const FileInfo& fileInfo);
@@ -51,6 +51,7 @@ namespace AssetManager {
     void Init() {
         CompressMissingDDSTexutres();
         ExportMissingModels();
+        ExportMissingSkinnedModels();
         LoadMinimumTextures();
         FindAssetPaths();
 
@@ -106,9 +107,11 @@ namespace AssetManager {
 
         if (LoadingComplete()) {
             BakePendingModels();
+            BuildHardcodedModels();
             BuildIndexMaps(); // required before BuildMaterials()
             BuildMaterials();
             BuildIndexMaps(); // but also required after BuildMaterials()... FIX! maybe just add to the index map when you create these objects.
+            BuildSpriteSheetTextures();
             if (BackEnd::GetAPI() == API::OPENGL) {
                 OpenGLBackEnd::CleanUpBakingPBOs();
                 OpenGLBackEnd::UploadVertexData(g_vertices, g_indices);
@@ -141,6 +144,11 @@ namespace AssetManager {
             SkinnedModel& skinnedModel = g_skinnedModels.emplace_back();
             skinnedModel.SetFileInfo(fileInfo);
         }
+        // Find sprite sheet textures
+        for (FileInfo& fileInfo : Util::IterateDirectory("res/textures/spritesheets")) {
+            SpriteSheetTexture& spriteSheetTexture = g_spriteSheetTextures.emplace_back();
+            spriteSheetTexture.SetFileInfo(fileInfo);
+        }
         // Find all textures
         for (FileInfo& fileInfo : Util::IterateDirectory("res/textures/uncompressed", { "png", "jpg", "tga" })) {
             Texture& texture = g_textures.emplace_back();
@@ -165,6 +173,14 @@ namespace AssetManager {
             texture.SetFileInfo(fileInfo);
             texture.SetImageDataType(ImageDataType::UNCOMPRESSED);
             texture.SetTextureWrapMode(TextureWrapMode::CLAMP_TO_EDGE);
+            texture.SetMinFilter(TextureFilter::LINEAR);
+            texture.SetMagFilter(TextureFilter::LINEAR);
+        }
+        for (FileInfo& fileInfo : Util::IterateDirectory("res/textures/spritesheets", { "png", "jpg", "tga" })) {
+            Texture& texture = g_textures.emplace_back();
+            texture.SetFileInfo(fileInfo);
+            texture.SetImageDataType(ImageDataType::UNCOMPRESSED);
+            texture.SetTextureWrapMode(TextureWrapMode::REPEAT);
             texture.SetMinFilter(TextureFilter::LINEAR);
             texture.SetMagFilter(TextureFilter::LINEAR);
         }
@@ -242,6 +258,10 @@ namespace AssetManager {
         return g_skinnedMeshes;
     }
 
+    std::vector<SpriteSheetTexture>& GetSpriteSheetTextures() {
+        return g_spriteSheetTextures;
+    }
+
     std::vector<Texture>& GetTextures() {
         return g_textures;
     }
@@ -274,6 +294,16 @@ namespace AssetManager {
         // Clean me up
         static Mesh* mesh = GetMeshByIndex(GetModelByIndex(GetModelIndexByName("Cube"))->GetMeshIndices()[0]);
         return mesh;
+    }
+
+    Mesh* GetMeshByModelNameMeshIndex(const std::string modelName, uint32_t meshIndex) {
+        Model* model = GetModelByName(modelName);
+        if (!model || meshIndex < 0 && meshIndex >= model->GetMeshCount()) {
+            return nullptr;
+        }
+        else {
+            return AssetManager::GetMeshByIndex(model->GetMeshIndices()[meshIndex]);
+        }
     }
 }
 

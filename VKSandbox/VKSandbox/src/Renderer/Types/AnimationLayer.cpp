@@ -58,6 +58,7 @@ void AnimationLayer::PlayAnimation(const std::string& animationName, const Anima
         for (AnimationState& animationState : m_animationStates) {
             if (animationState.GetAnimationIndex() == animationIndex) {
                 animationState.PlayAnimation(animationName, playbackParams);
+                std::cout << "bailing because not sure\n";
                 return;
             }
         }

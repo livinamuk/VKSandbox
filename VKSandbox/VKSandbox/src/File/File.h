@@ -7,6 +7,11 @@ namespace File {
     void ExportModel(const ModelData& modelData);
     ModelData ImportModel(const std::string& filepath);
     ModelHeader ReadModelHeader(const std::string& filepath);
+
+    // Skinned Models
+    void ExportSkinnedModel(const SkinnedModelData& modelData);
+    SkinnedModelData ImportSkinnedModel(const std::string& filepath);
+    SkinnedModelHeader ReadSkinnedModelHeader(const std::string& filepath);
     
     // I/O
     void DeleteFile(const std::string& filePath);
@@ -18,6 +23,7 @@ namespace File {
 
     // Debug
     void ExportMeshDataToOBJ(const std::string& filepath, const MeshData& mesh);
+    void ExportSkinnedMeshDataToOBJ(const std::string& filepath, const SkinnedMeshData& mesh);
     void PrintModelHeader(ModelHeader header, const std::string& identifier);
     void PrintMeshHeader(MeshHeader header, const std::string& identifier);
 }

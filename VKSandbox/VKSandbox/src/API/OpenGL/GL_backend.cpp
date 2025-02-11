@@ -1,13 +1,13 @@
 #pragma once
+#include "HellTypes.h"
 #include "GL_backend.h"
-#include "../AssetManagement/BakeQueue.h"
-#include "../AssetManagement/AssetManager.h"
+#include "AssetManagement/BakeQueue.h"
+#include "AssetManagement/AssetManager.h"
+#include "BackEnd/GLFWIntegration.h"
 #include <string>
 #include <iostream>
 #include <vector>
-#include "HellTypes.h"
 #include "GL_Util.h"
-#include "../BackEnd/GLFWIntegration.h"
 #include "Types/GL_pbo.hpp"
 
 // remove me
@@ -75,7 +75,7 @@ namespace OpenGLBackEnd {
         else {
             std::cout << "Debug GL context not available\n";
         }
-
+         
         // Clear screen to black
         glClear(GL_COLOR_BUFFER_BIT);
 

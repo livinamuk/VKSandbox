@@ -1,6 +1,7 @@
 #pragma once
 #include "HellTypes.h"
 #include "Camera/Camera.h"
+#include "Physics/Physics.h"
 #include "Types/AnimatedGameObject.h"
 #include "Weapon/WeaponManager.h"
 
@@ -10,6 +11,8 @@ struct Player {
     void Respawn();
     void EnableControl();
     void DisableControl();
+    void CreateCharacterController(glm::vec3 position);
+    void MoveCharacterController(glm::vec3 displacement);
     const bool IsAwaitingSpawn();
     const bool HasControl();
     const bool IsLocal() const;
@@ -28,7 +31,7 @@ struct Player {
     AnimatedGameObject* GetViewWeaponAnimatedGameObject();
 
     void UpdateCamera();
-    void UpdateViewWeapon();
+    void UpdateViewWeapon(float deltaTime);
     void UpdateMovement(float deltaTime);
     void UpdateUI();
 
@@ -40,21 +43,23 @@ struct Player {
     bool CanEnterADS();
     bool InADS(); 
     bool CanMelee();
+    bool IsShellInShotgunChamber();
     void UpdateWeaponLogic();
     void GiveDefaultLoadout();
-    void GiveWeapon(std::string name);
-    void GiveAmmo(std::string name, int amount);
-    void SwitchWeapon(std::string name, WeaponAction weaponAction);
-    void GiveRedDotToWeapon(std::string name);
-    void GiveSilencerToWeapon(std::string name);
+    void GiveWeapon(const std::string& name);
+    void GiveAmmo(const std::string& name, int amount);
+    void SwitchWeapon(const std::string& name, WeaponAction weaponAction);
+    void GiveRedDotToWeapon(const std::string& name);
+    void GiveSilencerToWeapon(const std::string& name);
     void DropWeapons();
     void UpdateWeaponSway(float deltaTime);
     void SpawnMuzzleFlash();
     WeaponAction& GetWeaponAction();
     WeaponInfo* GetCurrentWeaponInfo();
-    WeaponState* GetWeaponStateByName(std::string name);
+    WeaponState* GetWeaponStateByName(const std::string &name);
     WeaponState* GetCurrentWeaponState();
-    AmmoState* GetAmmoStateByName(std::string name);
+    AmmoState* GetAmmoStateByName(const std::string& name);
+    AmmoState* GetCurrentAmmoState();
 
     //RenderItem CreateAttachmentRenderItem(WeaponAttachmentInfo* weaponAttachmentInfo, const char* boneName);
    
@@ -111,7 +116,7 @@ struct Player {
     bool PressedFlashlight();
 
 
-    void SpawnBullet(float variance, Weapon type);
+    //void SpawnBullet(float variance, Weapon type);
     void SpawnCasing(AmmoInfo* ammoInfo);
 
     // Dev keys
@@ -152,6 +157,17 @@ private:
     float m_waterImpactVelocity = 0;
 
 
+
+    float m_realViewHeightStanding = 1.65f;
+    float m_realViewHeightCrouching = 1.15f;
+    float m_viewHeightStanding = m_realViewHeightStanding;
+    float m_viewHeightCrouching = m_realViewHeightCrouching;
+    float m_crouchDownSpeed = 17.5f;
+    float m_currentViewHeight = m_viewHeightStanding;
+    float m_walkingSpeed = 4.85f;
+    float m_crouchingSpeed = 2.325f;
+    float m_swimmingSpeed = 3.25f;
+
     float _muzzleFlashRotation = 0;
     glm::vec2 _weaponSwayFactor = glm::vec2(0);
     glm::vec3 _weaponSwayTargetPos = glm::vec3(0);
@@ -173,6 +189,10 @@ private:
         int m_keyboardIndex = -1;
 
 
+        float m_weaponAudioFrequency = 1.0f;
+
+        float GetWeaponAudioFrequency();
+
         void NextWeapon();
         void UpdateMeleeLogic();
         void UpdateGunLogic();
@@ -187,9 +207,35 @@ private:
         void FireGun();
         bool CanFireGun();
 
+        // Shotgun
         void FireShotgun();
+        void ReloadShotgun();
+        void UpdatePumpAudio();        
+        void UpdateShotgunReloadLogic();       
         bool CanFireShotgun();
+        bool CanReloadShotgun();
+        bool ShotgunRequiresPump();
+
 
         bool ViewModelAnimationsCompleted();
         bool ViewportIsVisible();
+
+        // Physics 
+        void UpdateCharacterController();
+        PxShape* GetCharacterControllerShape();
+        PxRigidDynamic* GetCharacterControllerActor();
+
+        glm::mat4 GetViewWeaponCameraMatrix();
+
+        glm::mat4 m_viewWeaponCameraMatrix;
+
+
+        bool m_grounded = true;
+        float m_yVelocity = 0;
+
+        float m_weaponSwayX = 0;
+        float m_weaponSwayY = 0;
+
+    private:
+        PxController* m_characterController = NULL;
 };

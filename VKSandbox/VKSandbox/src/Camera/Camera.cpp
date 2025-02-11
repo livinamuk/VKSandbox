@@ -3,9 +3,43 @@
 #include <algorithm>
 #include "Input/Input.h"
 
+#include "Core/Game.h"
+#include "Util.h"
+
 void Camera::Update() {
     m_inverseViewMatrix = glm::translate(glm::mat4(1), m_position) * glm::mat4_cast(glm::quat(m_rotation));
     m_viewMatrix = glm::inverse(m_inverseViewMatrix);
+    m_right = glm::vec3(m_inverseViewMatrix[0]);
+    m_up = glm::vec3(m_inverseViewMatrix[1]);
+    m_forward = glm::vec3(-m_inverseViewMatrix[2]);
+
+
+
+    // FIXXXXXXXXXXXXX
+    // FIXXXXXXXXXXXXX
+    // FIXXXXXXXXXXXXX
+    // FIXXXXXXXXXXXXX
+    Player* player = nullptr;
+    for (int i = 0; i < Game::GetLocalPlayerCount(); i++) {
+        Player* queryPlayer = Game::GetLocalPlayerByIndex(i);
+        if (&queryPlayer->GetCamera() == this) {
+            player = queryPlayer;
+        }
+    }
+    if (!player) {
+        return;
+    }
+    // FIXXXXXXXXXXXXX
+    // FIXXXXXXXXXXXXX
+    // FIXXXXXXXXXXXXX
+    // FIXXXXXXXXXXXXX
+    // FIXXXXXXXXXXXXX
+
+
+    glm::mat4 viewWeaponCameraMatrix = player->GetViewWeaponCameraMatrix();
+
+    m_viewMatrix = viewWeaponCameraMatrix * m_viewMatrix;
+    m_inverseViewMatrix = glm::inverse(m_viewMatrix);
     m_right = glm::vec3(m_inverseViewMatrix[0]);
     m_up = glm::vec3(m_inverseViewMatrix[1]);
     m_forward = glm::vec3(-m_inverseViewMatrix[2]);

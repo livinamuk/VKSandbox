@@ -74,6 +74,6 @@ void main() {
         indices[i + 2] = index + 1;
         indices[i + 3] = index + 1;
         indices[i + 4] = index + width;
-        indices[i + 5] = index + width + 1;
+        indices[i + 5] = index + width + 1; 
     }
 }

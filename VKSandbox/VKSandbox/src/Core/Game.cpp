@@ -6,20 +6,22 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
-#include "../Backend/Backend.h"
-#include "../Core/Audio.h"
-#include "../Core/Scene.h"
-#include "../Player/Player.h"
-#include "../Editor/Editor.h"
-#include "../File/File.h"
-#include "../Input/Input.h"
-#include "../Viewport/ViewportManager.h"
-#include "../UI/UIBackEnd.h"
-#include "../Tools/ImageTools.h"
+#include "Backend/Backend.h"
+#include "Core/Audio.h"
+#include "Core/Scene.h"
+#include "Editor/Editor.h"
+#include "File/File.h"
+#include "Input/Input.h"
+#include "Player/Player.h"
+#include "Physics/Physics.h"
+#include "Tools/ImageTools.h"
+#include "UI/UIBackEnd.h"
+#include "Viewport/ViewportManager.h"
 
 namespace Game {
     float g_deltaTime = 0;
+    double g_deltaTimeAccumulator = 0.0;
+    double g_fixedDeltaTime = 1.0 / 60.0;
     std::vector<Player> g_localPlayers;
     std::vector<Player> g_onlinePlayers;
     SplitscreenMode g_splitscreenMode = SplitscreenMode::FULLSCREEN;
@@ -44,27 +46,15 @@ namespace Game {
         Scene::CreateGameObjects();
 
         // Create players
-        AddLocalPlayer(glm::vec3(-2.09f, 1.45f, 0.68f), glm::vec3(-0.30f, -1.32f, 0.0f));
-        AddLocalPlayer(glm::vec3(-2.09f, 1.45f, 0.68f), glm::vec3(-0.30f, -1.32f, 0.0f));
-        AddLocalPlayer(glm::vec3(-2.09f, 1.45f, 0.68f), glm::vec3(-0.30f, -1.32f, 0.0f));
-        AddLocalPlayer(glm::vec3(-2.09f, 1.45f, 0.68f), glm::vec3(-0.30f, -1.32f, 0.0f));
+        AddLocalPlayer(glm::vec3(10, 1.45f, 20), glm::vec3(-0.30f, -1.32f, 0.0f));
+        AddLocalPlayer(glm::vec3(12, 1.45f, 20), glm::vec3(-0.30f, -1.32f, 0.0f));
+        AddLocalPlayer(glm::vec3(10, 1.45f, 22), glm::vec3(-0.30f, -1.32f, 0.0f));
+        AddLocalPlayer(glm::vec3(12, 1.45f, 22), glm::vec3(-0.30f, -1.32f, 0.0f));
 
         SetPlayerKeyboardAndMouseIndex(0, 0, 0);
         SetPlayerKeyboardAndMouseIndex(1, 1, 1);
         SetPlayerKeyboardAndMouseIndex(2, 1, 1);
         SetPlayerKeyboardAndMouseIndex(3, 1, 1);
-
-        AddLocalPlayer(glm::vec3(0.0f, 1.2f, 2.5f), glm::vec3(0.0f, 0.0f, 0.0f));
-        AddLocalPlayer(glm::vec3(0.0f, 2.5f, 0.0f), glm::vec3(-HELL_PI / 2, -HELL_PI / 2, 0.0f));
-        AddLocalPlayer(glm::vec3(-2.5f, 1.2f, 0.0f), glm::vec3(0.0f, -HELL_PI / 2, 0.0f));
-        //AddOnlinePlayer(glm::vec3(1.18f, 0.55f, 0.06f), glm::vec3(-0.40f, 3.34f, 0.0f));
-        //AddOnlinePlayer(glm::vec3(1.18f, 0.55f, 0.06f), glm::vec3(-0.40f, 3.34f, 0.0f));
-
-        // Give control to player 0 only
-        for (Player& player : g_localPlayers) {
-            player.DisableControl();
-        }
-        g_localPlayers[0].EnableControl();
 
         SetSplitscreenMode(SplitscreenMode::FULLSCREEN);
 
@@ -76,6 +66,15 @@ namespace Game {
         double currentTime = glfwGetTime();
         g_deltaTime = static_cast<float>(currentTime - lastTime);
         lastTime = currentTime;
+        g_deltaTimeAccumulator += g_deltaTime;
+
+        // Physics
+        while (g_deltaTimeAccumulator >= g_fixedDeltaTime) {
+            g_deltaTimeAccumulator -= g_fixedDeltaTime;
+            Physics::StepPhysics(g_fixedDeltaTime);
+        }
+
+
 
         UpdateLazyKeypresses();
 
@@ -122,28 +121,28 @@ namespace Game {
                 NextSplitScreenMode();
             }
             if (Input::KeyPressed(HELL_KEY_1) && GetLocalPlayerCount() >= 1) {
-                for (Player& player : g_localPlayers) {
-                    player.DisableControl();
-                }
-                g_localPlayers[0].EnableControl();
+                SetPlayerKeyboardAndMouseIndex(0, 0, 0);
+                SetPlayerKeyboardAndMouseIndex(1, 1, 1);
+                SetPlayerKeyboardAndMouseIndex(2, 1, 1);
+                SetPlayerKeyboardAndMouseIndex(3, 1, 1);
             }
             if (Input::KeyPressed(HELL_KEY_2) && GetLocalPlayerCount() >= 2) {
-                for (Player& player : g_localPlayers) {
-                    player.DisableControl();
-                }
-                g_localPlayers[1].EnableControl();
+                SetPlayerKeyboardAndMouseIndex(0, 1, 1);
+                SetPlayerKeyboardAndMouseIndex(1, 0, 0);
+                SetPlayerKeyboardAndMouseIndex(2, 1, 1);
+                SetPlayerKeyboardAndMouseIndex(3, 1, 1);
             }
             if (Input::KeyPressed(HELL_KEY_3) && GetLocalPlayerCount() >= 3) {
-                for (Player& player : g_localPlayers) {
-                    player.DisableControl();
-                }
-                g_localPlayers[2].EnableControl();
+                SetPlayerKeyboardAndMouseIndex(0, 1, 1);
+                SetPlayerKeyboardAndMouseIndex(1, 1, 1);
+                SetPlayerKeyboardAndMouseIndex(2, 0, 0);
+                SetPlayerKeyboardAndMouseIndex(3, 1, 1);
             }
             if (Input::KeyPressed(HELL_KEY_4) && GetLocalPlayerCount() >= 4) {
-                for (Player& player : g_localPlayers) {
-                    player.DisableControl();
-                }
-                g_localPlayers[3].EnableControl();
+                SetPlayerKeyboardAndMouseIndex(0, 1, 1);
+                SetPlayerKeyboardAndMouseIndex(1, 1, 1);
+                SetPlayerKeyboardAndMouseIndex(2, 1, 1);
+                SetPlayerKeyboardAndMouseIndex(3, 0, 0);
             }
         }
     }

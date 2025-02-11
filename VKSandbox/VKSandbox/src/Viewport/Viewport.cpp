@@ -19,7 +19,7 @@ Viewport::Viewport(const glm::vec2& position, const glm::vec2& size, bool isOrth
     UpdateProjectionMatrices();
 }
 
-void Viewport::UpdateHover() {
+void Viewport::Update() {
     // Pixel bounds
     m_leftPixel = m_position.x * BackEnd::GetCurrentWindowWidth();
     m_rightPixel = m_leftPixel + m_windowSpaceCoords.width;

@@ -13,6 +13,7 @@ void Player::UpdateWeaponLogic() {
 
     AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
     WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
+    WeaponState* weaponState = GetCurrentWeaponState();
 
     if (!viewWeapon) return;
     if (!weaponInfo) return;
@@ -24,22 +25,36 @@ void Player::UpdateWeaponLogic() {
     case WeaponType::SHOTGUN:   UpdateShotgunGunLogic(); break;
     }
 
+    // Need to initiate draw animation?
     if (GetCurrentWeaponAction() == WeaponAction::DRAW_BEGIN) {
-        viewWeapon->PlayAnimation(weaponInfo->animationNames.draw, AnimationPlaybackParams::GetDefaultPararms());
-        m_weaponAction = DRAWING;
-    }
 
-    if (GetCurrentWeaponAction() == WeaponAction::DRAWING) {
-        if (viewWeapon->AnimationByNameIsComplete(weaponInfo->animationNames.draw)) {
-            m_weaponAction = WeaponAction::IDLE;
+        // Shotgun may need pump
+        if (GetCurrentWeaponType() == WeaponType::SHOTGUN && !IsShellInShotgunChamber() && weaponState->ammoInMag > 0) {
+            viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunDrawPump, AnimationPlaybackParams::GetDefaultPararms());
+            weaponState->shotgunAwaitingPumpAudio = true;
+            weaponState->shotgunRequiresPump = true;
+            m_weaponAction = DRAWING_WITH_SHOTGUN_PUMP;
+        }
+        // Initiate regular draw
+        else {
+            viewWeapon->PlayAnimation(weaponInfo->animationNames.draw, AnimationPlaybackParams::GetDefaultPararms());
+            m_weaponAction = DRAWING;
         }
     }
 
+    // Finished drawing? Return to idle
+    if (GetCurrentWeaponAction() == WeaponAction::DRAWING && viewWeapon->AnimationByNameIsComplete(weaponInfo->animationNames.draw) ||
+        GetCurrentWeaponAction() == WeaponAction::DRAWING_WITH_SHOTGUN_PUMP && viewWeapon->AnimationByNameIsComplete(weaponInfo->animationNames.shotgunDrawPump)) {
+        m_weaponAction = WeaponAction::IDLE;
+    }
+
+    // In idle? Then play idle or walk if moving
     if (GetCurrentWeaponAction() == WeaponAction::IDLE) {
         const std::string& animName = IsMoving() ? weaponInfo->animationNames.walk : weaponInfo->animationNames.idle;
         viewWeapon->PlayAndLoopAnimation(animName, AnimationPlaybackParams::GetDefaultLoopingPararms());
     }
 
+    // Everything done? Go to idle
     if (ViewModelAnimationsCompleted()) {
         m_weaponAction = WeaponAction::IDLE;
     }
@@ -47,20 +62,9 @@ void Player::UpdateWeaponLogic() {
 
 void Player::GiveDefaultLoadout() {
     GiveWeapon("Knife");
-    GiveWeapon("SPAS"); 
-    GiveAmmo("Shotgun", 6666);
-    //GiveWeapon("Glock");
-    //GiveWeapon("GoldenGlock");
-    //GiveWeapon("Tokarev");
-    //GiveWeapon("AKS74U");
-    //GiveWeapon("P90");
-    //GiveWeapon("Shotgun");
-    //GiveAmmo("Glock", 80);
-    //GiveAmmo("Tokarev", 200);
-    //GiveAmmo("AKS74U", 999999);
-    //
-    //GiveRedDotToWeapon("GoldenGlock");
-    // GiveSilencerToWeapon("Glock");
+    GiveWeapon("SPAS");    
+    GiveAmmo("Shotgun", 6666); 
+    GiveAmmo("Tokarev", 200);
 }
 
 void Player::NextWeapon() {
@@ -78,7 +82,7 @@ void Player::NextWeapon() {
     SwitchWeapon(m_weaponStates[m_currentWeaponIndex].name, DRAW_BEGIN);
 }
 
-void Player::SwitchWeapon(std::string name, WeaponAction weaponAction) {
+void Player::SwitchWeapon(const std::string& name, WeaponAction weaponAction) {
     WeaponState* state = GetWeaponStateByName(name);
     WeaponInfo* weaponInfo = WeaponManager::GetWeaponInfoByName(name);
     AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
@@ -138,7 +142,7 @@ WeaponInfo* Player::GetCurrentWeaponInfo() {
     return WeaponManager::GetWeaponInfoByName(m_weaponStates[m_currentWeaponIndex].name);;
 }
 
-void Player::GiveWeapon(std::string name) {
+void Player::GiveWeapon(const std::string& name) {
     WeaponState* state = GetWeaponStateByName(name);
     WeaponInfo* weaponInfo = WeaponManager::GetWeaponInfoByName(name);
     if (state && weaponInfo) {
@@ -147,14 +151,14 @@ void Player::GiveWeapon(std::string name) {
     }
 }
 
-void Player::GiveAmmo(std::string name, int amount) {
+void Player::GiveAmmo(const std::string& name, int amount) {
     AmmoState* state = GetAmmoStateByName(name);
     if (state) {
         state->ammoOnHand += amount;
     }
 }
 
-void Player::GiveRedDotToWeapon(std::string name) {
+void Player::GiveRedDotToWeapon(const std::string& name) {
     WeaponInfo* weaponInfo = WeaponManager::GetWeaponInfoByName(name);
     WeaponState* state = GetWeaponStateByName(name);
     if (state && weaponInfo && weaponInfo->type == WeaponType::PISTOL) {
@@ -162,7 +166,7 @@ void Player::GiveRedDotToWeapon(std::string name) {
     }
 }
 
-void Player::GiveSilencerToWeapon(std::string name) {
+void Player::GiveSilencerToWeapon(const std::string& name) {
     WeaponInfo* weaponInfo = WeaponManager::GetWeaponInfoByName(name);
     WeaponState* state = GetWeaponStateByName(name);
     if (state && weaponInfo && weaponInfo->type == WeaponType::PISTOL) {
@@ -170,7 +174,7 @@ void Player::GiveSilencerToWeapon(std::string name) {
     }
 }
 
-WeaponState* Player::GetWeaponStateByName(std::string name) {
+WeaponState* Player::GetWeaponStateByName(const std::string& name) {
     for (int i = 0; i < m_weaponStates.size(); i++) {
         if (m_weaponStates[i].name == name) {
             return &m_weaponStates[i];
@@ -179,7 +183,7 @@ WeaponState* Player::GetWeaponStateByName(std::string name) {
     return nullptr;
 }
 
-AmmoState* Player::GetAmmoStateByName(std::string name) {
+AmmoState* Player::GetAmmoStateByName(const std::string& name) {
     for (int i = 0; i < m_ammoStates.size(); i++) {
         if (m_ammoStates[i].name == name) {
             return &m_ammoStates[i];
@@ -187,3 +191,36 @@ AmmoState* Player::GetAmmoStateByName(std::string name) {
     }
     return nullptr;
 }
+
+AmmoState* Player::GetCurrentAmmoState() {
+    WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
+    if (!weaponInfo) return nullptr;
+
+    return GetAmmoStateByName(weaponInfo->ammoType);
+}
+
+WeaponState* Player::GetCurrentWeaponState() {
+    WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
+    if (!weaponInfo) return nullptr;
+
+    return GetWeaponStateByName(weaponInfo->name);
+}
+
+int Player::GetCurrentWeaponMagAmmo() {
+    WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
+    if (weaponInfo) {
+        WeaponState* weaponState = GetWeaponStateByName(weaponInfo->name);
+        if (weaponState) {
+            return weaponState->ammoInMag;
+        }
+    }
+    return 0;
+}
+
+int Player::GetCurrentWeaponTotalAmmo() {
+    AmmoState* ammoState = GetCurrentAmmoState();
+    if (!ammoState) return 0;
+
+    return ammoState->ammoOnHand;
+}
+

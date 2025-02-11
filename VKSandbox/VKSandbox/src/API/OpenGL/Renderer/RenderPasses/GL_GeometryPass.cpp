@@ -57,7 +57,7 @@ namespace OpenGLRenderer {
         glBindVertexArray(OpenGLBackEnd::GetVertexDataVAO());
 
         shader->Use();
-        gBuffer->DrawBuffers({ "BaseColor", "Normal", "RMA", "MousePick", "WorldSpacePosition" });
+        gBuffer->DrawBuffers({ "BaseColor", "Normal", "RMA", "MousePick", "WorldSpacePosition", "Emissive" });
         SetRasterizerState("GeometryPass_NonBlended");
 
         for (int i = 0; i < 4; i++) {
@@ -90,7 +90,7 @@ namespace OpenGLRenderer {
         }
 
         shader->Use();
-        gBuffer->DrawBuffers({ "BaseColor", "Normal", "RMA", "MousePick", "WorldSpacePosition" });
+        gBuffer->DrawBuffers({ "BaseColor", "Normal", "RMA", "MousePick", "WorldSpacePosition", "Emissive" });
         SetRasterizerState("GeometryPass_NonBlended");
 
         glBindVertexArray(OpenGLBackEnd::GetSkinnedVertexDataVAO());

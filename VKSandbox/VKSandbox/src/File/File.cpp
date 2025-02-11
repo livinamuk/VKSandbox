@@ -131,6 +131,32 @@ ModelData File::ImportModel(const std::string& filepath) {
     return modelData;
 }
 
+void File::ExportSkinnedModel(const SkinnedModelData& modelData) {
+    std::cout << "you haven't written this yet: File::ExportSkinnedModel()\n";
+}
+
+SkinnedModelData File::ImportSkinnedModel(const std::string& filepath) {
+
+    std::cout << "you haven't written this yet: File::ImportSkinnedModel()\n";
+    return SkinnedModelData();
+}
+
+SkinnedModelHeader File::ReadSkinnedModelHeader(const std::string& filepath) {
+    SkinnedModelHeader header;
+    std::ifstream file(filepath, std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Failed to read model header: " << filepath << "\n";
+        return header;
+    }
+    file.read((char*)&header.version, sizeof(header.version));
+    file.read((char*)&header.meshCount, sizeof(header.meshCount));
+    file.read((char*)&header.nameLength, sizeof(header.nameLength));
+    std::string modelName(header.nameLength, '\0');
+    file.read(&modelName[0], header.nameLength);
+    file.read(reinterpret_cast<char*>(&header.timestamp), sizeof(header.timestamp));
+    return header;
+}
+
 /*
  ▀█▀   █ █▀█
   █  ▄▀  █ █
@@ -209,6 +235,31 @@ void File::PrintMeshHeader(MeshHeader header, const std::string& identifier) {
 }
 
 void File::ExportMeshDataToOBJ(const std::string& filepath, const MeshData& mesh) {
+    std::ofstream file(filepath);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file for writing: " << filepath << "\n";
+        return;
+    }
+    for (const auto& vertex : mesh.vertices) {
+        file << "v " << vertex.position.x << " " << vertex.position.y << " " << vertex.position.z << "\n";
+    }
+    for (const auto& vertex : mesh.vertices) {
+        file << "vn " << vertex.normal.x << " " << vertex.normal.y << " " << vertex.normal.z << "\n";
+    }
+    for (const auto& vertex : mesh.vertices) {
+        file << "vt " << vertex.uv.x << " " << vertex.uv.y << "\n";
+    }
+    for (size_t i = 0; i < mesh.indices.size(); i += 3) {
+        file << "f "
+            << mesh.indices[i] + 1 << "/" << mesh.indices[i] + 1 << "/" << mesh.indices[i] + 1 << " "
+            << mesh.indices[i + 1] + 1 << "/" << mesh.indices[i + 1] + 1 << "/" << mesh.indices[i + 1] + 1 << " "
+            << mesh.indices[i + 2] + 1 << "/" << mesh.indices[i + 2] + 1 << "/" << mesh.indices[i + 2] + 1 << "\n";
+    }
+    file.close();
+    std::cout << "Exported OBJ: " << filepath << "\n";
+}
+
+void File::ExportSkinnedMeshDataToOBJ(const std::string& filepath, const SkinnedMeshData& mesh) {
     std::ofstream file(filepath);
     if (!file.is_open()) {
         std::cerr << "Failed to open file for writing: " << filepath << "\n";

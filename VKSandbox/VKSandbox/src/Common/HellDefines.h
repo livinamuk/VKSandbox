@@ -27,6 +27,11 @@
 #define MAX_INSTANCE_DATA_COUNT 8192
 #define MAX_INDIRECT_DRAW_COMMAND_COUNT 4096
 #define MAX_ANIMATED_TRANSFORMS 2048 // is this needed?
+#define MAX_VIEWPORT_COUNT 4
+#define SHADOW_CASCADE_COUNT 4
+#define MAX_GPU_LIGHTS 512
+
+
 
 // System audio
 #define AUDIO_SELECT "UI_Select.wav"
@@ -68,3 +73,6 @@
 
 
 #define HEIGHTMAP_SIZE 256
+
+#define PLAYER_CAPSULE_HEIGHT 0.4f
+#define PLAYER_CAPSULE_RADIUS 0.15f

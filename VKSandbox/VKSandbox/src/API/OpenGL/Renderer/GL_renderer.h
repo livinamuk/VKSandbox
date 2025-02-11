@@ -8,15 +8,14 @@
 #include "../Types/GL_ssbo.hpp"
 
 struct OpenGLRasterizerState {
-    GLboolean depthTestEnabled;
-    GLboolean blendEnable;
-    GLboolean cullfaceEnable;
-    GLboolean stencilEnable;
-    GLboolean depthMask;
-    GLfloat pointSize;
-    GLenum blendFuncSrcfactor;
-    GLenum blendFuncDstfactor;
-    GLenum depthFunc;
+    GLboolean depthTestEnabled = true;
+    GLboolean blendEnable = false;
+    GLboolean cullfaceEnable = true;
+    GLboolean depthMask = true;
+    GLfloat pointSize = 1.0f;
+    GLenum blendFuncSrcfactor = GL_SRC_ALPHA;
+    GLenum blendFuncDstfactor = GL_ONE_MINUS_SRC_ALPHA;
+    GLenum depthFunc = GL_LESS;
 };
 
 namespace OpenGLRenderer {
@@ -29,15 +28,17 @@ namespace OpenGLRenderer {
     void ComputeSkinningPass();
 
     // Render passes
-    void HeightMapPass();
-    void SkyBoxPass();
-    void GeometryPass();
-    void LightingPass();
     void DebugPass();
-    void HairPass();
-    void RenderHairLayer(const DrawCommands& drawCommands, int peelCount);
-    void UIPass();
     void EditorPass();
+    void GeometryPass();
+    void HairPass();
+    void HeightMapPass();
+    void LightingPass();
+    void SkyBoxPass();
+    void SpriteSheetPass();
+    void UIPass();
+
+    void RenderHairLayer(const DrawCommands& drawCommands, int peelCount);
 
     // Debug
     void UpdateDebugLinesMesh();
@@ -52,6 +53,7 @@ namespace OpenGLRenderer {
     inline OpenGLDetachedMesh g_debugPointsMesh;
 
     void HotloadShaders();
+    void RecreateBlurBuffers();
 
     OpenGLCubemapView* GetCubemapView(const std::string& name);
     OpenGLFrameBuffer* GetFrameBuffer(const std::string& name);

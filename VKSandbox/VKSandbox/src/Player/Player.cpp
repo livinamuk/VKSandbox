@@ -10,6 +10,12 @@
 #include "Input/Input.h"
 #include "Viewport/ViewportManager.h"
 
+
+
+
+#include "Physics/Physics.h"
+#include "Physics/Physics_util.h"
+
 void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex) {
     m_position = position;
     m_camera.SetEulerRotation(rotation);
@@ -28,20 +34,46 @@ void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex)
     m_characterModelAnimatedGameObjectIndex = Scene::GetAnimatedGameObjects().size() - 1;
     AnimatedGameObject* characterModel = GetCharacterModelAnimatedGameObject();
     characterModel->SetPlayerIndex(viewportIndex);
+    
+    CreateCharacterController(m_position);
 }
 
 void Player::Update(float deltaTime) {
+    if (Editor::IsOpen()) {
+        return;
+    }
+
     if (IsAwaitingSpawn()) Respawn();
     
     UpdateMovement(deltaTime);
+    UpdateCharacterController();
     UpdateCamera();
-    UpdateWeaponLogic();
-    UpdateViewWeapon();
+    UpdateWeaponLogic();       
+    UpdateViewWeapon(deltaTime);
     UpdateUI();
 
     if (Input::KeyPressed(HELL_KEY_K)) {
         m_awaitingSpawn = true;
     }
+
+
+    if (Input::KeyPressed(HELL_KEY_N) && m_viewportIndex == 0) {
+
+        Transform transform;
+        transform.position = m_position + m_camera.GetForward();
+
+        PhysicsFilterData filterData;
+        filterData.raycastGroup = RAYCAST_DISABLED;
+        filterData.collisionGroup = CollisionGroup::GENERIC_BOUNCEABLE;
+        filterData.collidesWith = (CollisionGroup)(ENVIROMENT_OBSTACLE | GENERIC_BOUNCEABLE | RAGDOLL);
+
+        PxShape* pxShape = PhysicsUtil::CreateBoxShape(1.0f, 1.0f, 1.0f, Transform());
+        PxRigidDynamic* pxRigid = PhysicsUtil::CreateRigidDynamic(transform, filterData, pxShape, Transform());
+
+    }
+
+
+
 }
 
 void Player::Respawn() {
@@ -183,4 +215,12 @@ bool Player::ViewModelAnimationsCompleted() {
         }
     }
     return true;
+}
+
+float Player::GetWeaponAudioFrequency() {
+    return m_weaponAudioFrequency;
+}
+
+glm::mat4 Player::GetViewWeaponCameraMatrix() {
+    return m_viewWeaponCameraMatrix;
 }

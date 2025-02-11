@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include "HellEnums.h"
+#include "HellDefines.h"
 #include "Input/keycodes.h"
 
 struct BlitRegion {
@@ -41,9 +42,14 @@ struct RenderItem {
     int ignoredViewportIndex = -1;
 
     int exclusiveViewportIndex = -1;
-    int skinned = 0; // True or false
-    int padding1;
-    int padding2;
+    int skinned = 0;    // True or false
+    float emissiveR = 0.0f;
+    float emissiveG = 0.0f;
+
+    float emissiveB = 0.0f;
+    float padding0 = 0.0f;
+    float padding1 = 0.0f;
+    float padding2 = 0.0f;
 };
 
 //struct SkinnedRenderItem {
@@ -193,7 +199,7 @@ struct AnimatedTransform {
 
 struct Material {
     Material() {}
-    std::string m_name = "UNDEFINED_STRING";
+    std::string m_name = UNDEFINED_STRING;
     int m_basecolor = 0;
     int m_normal = 0;
     int m_rma = 0;
@@ -324,7 +330,12 @@ struct WeaponState {
     bool useSlideOffset = false;
     bool hasScope = false;
     bool hasSilencer = false;
+    bool shotgunAwaitingFirstShellReload = false;
+    bool shotgunAwaitingSecondShellReload = false;
+    bool shotgunRequiresPump = true;
+    bool shotgunAwaitingPumpAudio = true;
     int ammoInMag = 0;
+    bool shellInShotgunChamber = false;
     std::string name = "UNDEFINED_STRING";
 };
 
@@ -374,9 +385,35 @@ struct PlayerControls {
 struct Bullet {
     glm::vec3 spawnPosition;
     glm::vec3 direction;
-    Weapon type;
+    //Weapon type;
     uint32_t raycastFlags;
     glm::vec3 parentPlayersViewRotation;
     int damage = 0;
     int parentPlayerIndex = -1;
+};
+
+struct PhysicsFilterData {
+    RaycastGroup raycastGroup = RaycastGroup::RAYCAST_DISABLED;
+    CollisionGroup collisionGroup = CollisionGroup::NO_COLLISION;
+    CollisionGroup collidesWith = CollisionGroup::ENVIROMENT_OBSTACLE;
+};
+
+struct GPULight {
+    float posX;
+    float posY;
+    float posZ;
+    float colorR;
+
+    float colorG;
+    float colorB;
+    float strength;
+    float radius;
+};
+
+struct ViewportSelectionRectangleState {
+    bool dragging = false;
+    int beginX = 0;
+    int beginY = 0;
+    int currentX = 0;
+    int currentY = 0;
 };

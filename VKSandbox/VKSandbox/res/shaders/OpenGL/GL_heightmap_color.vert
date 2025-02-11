@@ -22,7 +22,7 @@ uniform mat4 inverseModelMatrix;
 
 void main() {
     // Pass UV coordinates (scaled as desired)
-    TexCoord = vUV * 2.0;
+    TexCoord = vUV * 50.0;
     
     // Retrieve projection and view info from the viewport buffer.
     int viewportIndex = gl_BaseInstance;
