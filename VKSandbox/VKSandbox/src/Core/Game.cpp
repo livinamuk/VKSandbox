@@ -20,6 +20,7 @@
 
 namespace Game {
     float g_deltaTime = 0;
+    float g_totalTime = 0;
     double g_deltaTimeAccumulator = 0.0;
     double g_fixedDeltaTime = 1.0 / 60.0;
     std::vector<Player> g_localPlayers;
@@ -46,10 +47,10 @@ namespace Game {
         Scene::CreateGameObjects();
 
         // Create players
-        AddLocalPlayer(glm::vec3(10, 1.45f, 20), glm::vec3(-0.30f, -1.32f, 0.0f));
-        AddLocalPlayer(glm::vec3(12, 1.45f, 20), glm::vec3(-0.30f, -1.32f, 0.0f));
-        AddLocalPlayer(glm::vec3(10, 1.45f, 22), glm::vec3(-0.30f, -1.32f, 0.0f));
-        AddLocalPlayer(glm::vec3(12, 1.45f, 22), glm::vec3(-0.30f, -1.32f, 0.0f));
+        AddLocalPlayer(glm::vec3(12.82, -4.5f, 18.27f), glm::vec3(-0.13f, -1.46f, 0.0f));
+        AddLocalPlayer(glm::vec3(15.21, -4.5f, 19.57), glm::vec3(-0.49f, -0.74f, 0.0f));
+        AddLocalPlayer(glm::vec3(10, -4.5f, 22), glm::vec3(-0.30f, -4.5f, 0.0f));
+        AddLocalPlayer(glm::vec3(12, -4.5f, 22), glm::vec3(-0.30f, -4.5f, 0.0f));
 
         SetPlayerKeyboardAndMouseIndex(0, 0, 0);
         SetPlayerKeyboardAndMouseIndex(1, 1, 1);
@@ -57,8 +58,10 @@ namespace Game {
         SetPlayerKeyboardAndMouseIndex(3, 1, 1);
 
         SetSplitscreenMode(SplitscreenMode::FULLSCREEN);
+        SetSplitscreenMode(SplitscreenMode::TWO_PLAYER);
 
         std::cout << "Created players\n";
+        Audio::PlayAudio("Glock_Equip.wav", 0.5f);
     }
 
     void Update() {
@@ -68,15 +71,18 @@ namespace Game {
         lastTime = currentTime;
         g_deltaTimeAccumulator += g_deltaTime;
 
+        // Total time
+        g_totalTime += g_deltaTime;
+        if (g_totalTime > TIME_WRAP) {
+            g_totalTime -= TIME_WRAP; // Keep it continuous
+        }
+
         // Physics
         while (g_deltaTimeAccumulator >= g_fixedDeltaTime) {
             g_deltaTimeAccumulator -= g_fixedDeltaTime;
             Physics::StepPhysics(g_fixedDeltaTime);
         }
 
-
-
-        UpdateLazyKeypresses();
 
         std::string debugText = "Mousepick: ";
         debugText += std::to_string(BackEnd::GetMousePickR()) + ", ";
@@ -110,7 +116,7 @@ namespace Game {
         }
         if (Input::KeyPressed(HELL_KEY_TAB)) {
             Editor::ToggleOpenState();
-            ViewportManager::UpdateViewports();
+            //ViewportManager::UpdateViewports();
         }
         if (Input::KeyPressed(HELL_KEY_GRAVE_ACCENT)) {
             Audio::PlayAudio(AUDIO_SELECT, 1.00f);
@@ -144,12 +150,19 @@ namespace Game {
                 SetPlayerKeyboardAndMouseIndex(2, 1, 1);
                 SetPlayerKeyboardAndMouseIndex(3, 0, 0);
             }
+            if (Input::KeyPressed(HELL_KEY_B)) {
+                Audio::PlayAudio(AUDIO_SELECT, 1.00f);
+                Renderer::NextDebugLineRenderMode();
+            }
         }
     }
 
-
     float GetDeltaTime() {
         return g_deltaTime;
+    }
+
+    float GetTotalTime() {
+        return g_totalTime;
     }
 
     Player* GetLocalPlayerByIndex(uint32_t index) {
@@ -180,7 +193,7 @@ namespace Game {
 
     void SetSplitscreenMode(SplitscreenMode mode) {
         g_splitscreenMode = mode;
-        ViewportManager::UpdateViewports();
+        //ViewportManager::UpdateViewports();
     }
 
     const SplitscreenMode& GetSplitscreenMode() {
@@ -215,5 +228,28 @@ namespace Game {
             g_localPlayers[playerIndex].SetKeyboardIndex(keyboardIndex);
             g_localPlayers[playerIndex].SetMouseIndex(mouseIndex);
         }
+    }
+
+
+    void PlayFootstepIndoorAudio() {
+        const std::vector<const char*> indoorFootstepFilenames = {
+                    "player_step_1.wav",
+                    "player_step_2.wav",
+                    "player_step_3.wav",
+                    "player_step_4.wav",
+        };
+        int random = rand() % 4;
+        Audio::PlayAudio(indoorFootstepFilenames[random], 0.5f);
+    }
+
+    void PlayFootstepOutdoorAudio() {
+        const std::vector<const char*> indoorFootstepFilenames = {
+                "player_step_grass_1.wav",
+                "player_step_grass_2.wav",
+                "player_step_grass_3.wav",
+                "player_step_grass_4.wav",
+        };
+        int random = rand() % 4;
+        Audio::PlayAudio(indoorFootstepFilenames[random], 0.5f);
     }
 }

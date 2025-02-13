@@ -7,6 +7,7 @@
 #include "Core/Debug.h"
 #include "Core/Scene.h"
 #include "Input/Input.h"
+#include "Renderer/Renderer.h"
 #include "Viewport/ViewportManager.h"
 
 namespace Editor {
@@ -152,12 +153,12 @@ namespace Editor {
 
     void SetSplitX(float value) {
         g_verticalDividerXPos = value;
-        ViewportManager::UpdateViewports();
+        //ViewportManager::UpdateViewports();
     }
 
     void SetSplitY(float value) {
         g_splitY = value;
-        ViewportManager::UpdateViewports();
+        //ViewportManager::UpdateViewports();
     }
 
     int GetSelectedObjectIndex() {

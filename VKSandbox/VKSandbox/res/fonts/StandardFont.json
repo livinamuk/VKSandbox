@@ -3,7 +3,7 @@
   "textureWidth": 112,
   "textureHeight": 112,
   "lineHeight": 14,
-  "characters": "!\"#$%&'*+,-.\/0123456789:;<=>?_ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz ",
+  "characters": "!\"#$%&'*+,-./0123456789:;<=>?_ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz ",
   "charDataList": [
     { "width": 3, "height": 13, "offsetX": 0, "offsetY": 0 },
     { "width": 9, "height": 14, "offsetX": 3, "offsetY": 0 },

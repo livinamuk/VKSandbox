@@ -12,7 +12,7 @@ enum class WindowedMode {
     FULLSCREEN 
 };
 
-enum Alignment {
+enum class Alignment {
     CENTERED,
     CENTERED_HORIZONTAL,
     CENTERED_VERTICAL,
@@ -118,6 +118,7 @@ enum struct ViewportResizeState {
 enum WeaponAction {
     IDLE = 0,
     FIRE,
+    DRY_FIRE,
     RELOAD,
     RELOAD_FROM_EMPTY,
     DRAW_BEGIN,
@@ -136,7 +137,8 @@ enum WeaponAction {
     ADS_OUT,
     ADS_IDLE,
     ADS_FIRE,
-    MELEE
+    MELEE,
+    TOGGLING_AUTO
 };
 
 enum class ShellEjectionState {

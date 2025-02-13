@@ -7,8 +7,8 @@ namespace WeaponManager {
     int GetWeaponCount();
     int GetAmmoTypeCount();
     //void PreLoadWeaponPickUpConvexHulls();
-    WeaponInfo* GetWeaponInfoByName(std::string name);
+    WeaponInfo* GetWeaponInfoByName(const std::string& name);
     WeaponInfo* GetWeaponInfoByIndex(int index);
-    AmmoInfo* GetAmmoInfoByName(std::string name);
+    AmmoInfo* GetAmmoInfoByName(const std::string& name);
     AmmoInfo* GetAmmoInfoByIndex(int index);
 }

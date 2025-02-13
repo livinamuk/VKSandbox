@@ -1,5 +1,4 @@
 #include "Physics.h"
-#include "Physics_util.h"
 #include "HellDefines.h"
 #include "HellEnums.h"
 #include <iostream>
@@ -92,8 +91,7 @@ namespace Physics {
     }
 
     void StepPhysics(float deltaTime) {
-        g_collisionReports.clear();
-        g_characterCollisionReports.clear();
+        ClearCollisionReports();
         g_scene->simulate(deltaTime);
         g_scene->fetchResults(true);
     }
@@ -106,6 +104,10 @@ namespace Physics {
         g_collisionReports.clear();
     }
 
+    void ClearCharacterControllerCollsionReports() {
+        g_characterCollisionReports.clear();
+    }
+
     std::vector<CollisionReport>& GetCollisionReports() {
         return g_collisionReports;
     }
@@ -115,6 +117,7 @@ namespace Physics {
     }
 
     std::vector<Vertex> GetDebugLineVertices(DebugLineRenderMode debugLineRenderMode, std::vector<PxRigidActor*> ignoreList) {
+        if (debugLineRenderMode == DebugLineRenderMode::SHOW_NO_LINES) return std::vector<Vertex>();
 
         // Prepare
         PxU32 nbActors = g_scene->getNbActors(PxActorTypeFlag::eRIGID_DYNAMIC | PxActorTypeFlag::eRIGID_STATIC);
@@ -148,8 +151,8 @@ namespace Physics {
         for (unsigned int i = 0; i < renderBuffer->getNbLines(); i++) {
             auto pxLine = renderBuffer->getLines()[i];
             Vertex v1, v2;
-            v1.position = PhysicsUtil::PxVec3toGlmVec3(pxLine.pos0);
-            v2.position = PhysicsUtil::PxVec3toGlmVec3(pxLine.pos1);
+            v1.position = Physics::PxVec3toGlmVec3(pxLine.pos0);
+            v2.position = Physics::PxVec3toGlmVec3(pxLine.pos1);
             if (debugLineRenderMode == DebugLineRenderMode::PHYSX_ALL) {
                 v1.normal = GREEN;
                 v2.normal = GREEN;
@@ -191,8 +194,8 @@ namespace Physics {
 
 void CCTHitCallback::onShapeHit(const PxControllerShapeHit& hit) {
     CharacterCollisionReport report;
-    report.hitNormal = PhysicsUtil::PxVec3toGlmVec3(hit.worldNormal);
-    report.worldPosition = PhysicsUtil::PxVec3toGlmVec3(hit.worldPos);
+    report.hitNormal = Physics::PxVec3toGlmVec3(hit.worldNormal);
+    report.worldPosition = Physics::PxVec3toGlmVec3(hit.worldPos);
     report.characterController = hit.controller;
     report.hitShape = hit.shape;
     report.hitActor = hit.actor;

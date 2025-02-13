@@ -86,6 +86,7 @@ namespace BackEnd {
         else if (GetAPI() == API::VULKAN) {
             //VulkanBackEnd::BeginFrame();
         }
+        //Physics::ClearCollisionReports();
     }
 
     void UpdateGame() {
@@ -108,6 +109,7 @@ namespace BackEnd {
 
         Debug::Update();
         RenderDataManager::Update();
+        ViewportManager::Update();
         UIBackEnd::Update();
     }
 
@@ -119,6 +121,7 @@ namespace BackEnd {
     }
 
     void UpdateSubSystems() {
+        Game::UpdateLazyKeypresses();
         Input::Update();
         InputMulti::Update();
         Audio::Update();
@@ -131,7 +134,6 @@ namespace BackEnd {
         if (Input::KeyPressed(HELL_KEY_H)) {
             Renderer::HotloadShaders();
         }
-        ViewportManager::UpdateMouseHoverStates();
     }
 
     void CleanUp() {

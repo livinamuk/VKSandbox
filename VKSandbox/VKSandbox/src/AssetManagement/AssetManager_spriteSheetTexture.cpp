@@ -6,3 +6,13 @@ void AssetManager::BuildSpriteSheetTextures() {
         spriteSheetTexture.Init();
     }
 }
+
+SpriteSheetTexture* AssetManager::GetSpriteSheetTextureByName(const std::string& textureName) {
+    std::vector<SpriteSheetTexture>& spriteSheetTextures = GetSpriteSheetTextures();
+    for (SpriteSheetTexture& spriteSheetTexture : spriteSheetTextures) {
+        if (spriteSheetTexture.GetFileInfo().name == textureName) {
+            return &spriteSheetTexture;
+        }
+    }
+    return nullptr;
+}

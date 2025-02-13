@@ -3,6 +3,7 @@
 #include "Camera/Camera.h"
 #include "Physics/Physics.h"
 #include "Types/AnimatedGameObject.h"
+#include "Types/SpriteSheetObject.h"
 #include "Weapon/WeaponManager.h"
 
 struct Player {
@@ -30,10 +31,13 @@ struct Player {
     AnimatedGameObject* GetCharacterModelAnimatedGameObject();
     AnimatedGameObject* GetViewWeaponAnimatedGameObject();
 
-    void UpdateCamera();
+    void UpdateCamera(float deltaTime);
     void UpdateViewWeapon(float deltaTime);
     void UpdateMovement(float deltaTime);
     void UpdateUI();
+    void UpdateSpriteSheets(float deltaTime);
+    void UpdateHeadBob(float deltaTime);
+    void UpdateBreatheBob(float deltaTime);
 
     // Weapon shit
     int GetCurrentWeaponMagAmmo();
@@ -53,13 +57,13 @@ struct Player {
     void GiveSilencerToWeapon(const std::string& name);
     void DropWeapons();
     void UpdateWeaponSway(float deltaTime);
-    void SpawnMuzzleFlash();
     WeaponAction& GetWeaponAction();
     WeaponInfo* GetCurrentWeaponInfo();
     WeaponState* GetWeaponStateByName(const std::string &name);
     WeaponState* GetCurrentWeaponState();
     AmmoState* GetAmmoStateByName(const std::string& name);
     AmmoState* GetCurrentAmmoState();
+    AmmoInfo* GetCurrentAmmoInfo();
 
     //RenderItem CreateAttachmentRenderItem(WeaponAttachmentInfo* weaponAttachmentInfo, const char* boneName);
    
@@ -82,6 +86,7 @@ struct Player {
 
     // State queries
     bool IsMoving();
+    bool IsGrounded();
     bool IsCrouching();
     bool IsDead();
     bool IsAlive();
@@ -115,9 +120,9 @@ struct Player {
     bool PressedMelee();
     bool PressedFlashlight();
 
-
-    //void SpawnBullet(float variance, Weapon type);
-    void SpawnCasing(AmmoInfo* ammoInfo);
+    void DisplayInfoText(const std::string& text);
+    std::string m_infoText = "";
+    float m_infoTextTimer = 0;
 
     // Dev keys
     bool PressedFullscreen();
@@ -128,9 +133,19 @@ struct Player {
 
 private:
     glm::vec3 m_position = glm::vec3(0.0f);
+
+    glm::vec3 m_headBob = glm::vec3(0.0f);
+    glm::vec3 m_breatheBob = glm::vec3(0.0f);
+    float m_headBobTime = 0.0f;
+    float m_breatheBobTime = 0.0f;
+    bool m_footstepPlayed = false;
+
+    float m_currentSpeed = 0.0f;
+
     int m_revolverReloadIterations = 0;
     int m_currentWeaponIndex = 0;
-    bool m_Moving = false;
+    bool m_moving = false;
+    bool m_crouching = false;
     bool m_controlEnabled = true;
     bool m_awaitingSpawn = true;
     bool m_firedThisFrame = false;
@@ -156,8 +171,6 @@ private:
 
     float m_waterImpactVelocity = 0;
 
-
-
     float m_realViewHeightStanding = 1.65f;
     float m_realViewHeightCrouching = 1.15f;
     float m_viewHeightStanding = m_realViewHeightStanding;
@@ -180,8 +193,6 @@ private:
     public:
         float _muzzleFlashTimer = 0;
 
-        glm::vec2 m_headBob = glm::vec2(0, 0);
-        glm::vec2 m_breatheBob = glm::vec2(0, 0);
         Transform m_weaponSwayTransform;
 
         glm::mat4 m_weaponSwayMatrix = glm::mat4(1);
@@ -207,14 +218,23 @@ private:
         void FireGun();
         bool CanFireGun();
 
+
         // Shotgun
-        void FireShotgun();
+        void FireShotgun(); 
+        void DryFireShotgun();
         void ReloadShotgun();
+        void ToggleAutoShotgun();
         void UpdatePumpAudio();        
-        void UpdateShotgunReloadLogic();       
+        void UpdateShotgunReloadLogic();
+        bool CanToggleShotgunAuto();
         bool CanFireShotgun();
+        bool CanDryFireShotgun();
         bool CanReloadShotgun();
         bool ShotgunRequiresPump();
+
+        // Casings and Muzzle flash
+        void SpawnMuzzleFlash(float speed, float scale);
+        void SpawnCasing(AmmoInfo* ammoInfo);
 
 
         bool ViewModelAnimationsCompleted();
@@ -229,7 +249,6 @@ private:
 
         glm::mat4 m_viewWeaponCameraMatrix;
 
-
         bool m_grounded = true;
         float m_yVelocity = 0;
 
@@ -237,5 +256,11 @@ private:
         float m_weaponSwayY = 0;
 
     private:
+        SpriteSheetObject m_muzzleFlash;
         PxController* m_characterController = NULL;
+
+        std::vector<SpriteSheetRenderItem> m_spriteSheetRenderItems;
+
+    public:
+        const std::vector<SpriteSheetRenderItem>& GetSpriteSheetRenderItems() { return m_spriteSheetRenderItems; }
 };

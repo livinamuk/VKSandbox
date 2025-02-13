@@ -287,6 +287,6 @@ namespace Editor {
 
         //SetCameraView(viewportIndex, targetView);
         SetViewportOrthographicState(viewportIndex, true);
-        ViewportManager::UpdateViewports();
+        //ViewportManager::UpdateViewports();
     }
 }

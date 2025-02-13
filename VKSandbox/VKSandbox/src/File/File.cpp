@@ -8,6 +8,8 @@
 
 #define PRINT_MODEL_HEADERS_ON_READ 0
 #define PRINT_MODEL_HEADERS_ON_WRITE 0
+#define PRINT_SKINNED_MODEL_HEADERS_ON_READ 0
+#define PRINT_SKINNED_MODEL_HEADERS_ON_WRITE 1
 #define PRINT_MESH_HEADERS_ON_READ 0
 #define PRINT_MESH_HEADERS_ON_WRITE 0
 
@@ -132,7 +134,50 @@ ModelData File::ImportModel(const std::string& filepath) {
 }
 
 void File::ExportSkinnedModel(const SkinnedModelData& modelData) {
-    std::cout << "you haven't written this yet: File::ExportSkinnedModel()\n";
+    std::string outputPath = "res/skinned_models_export_test/" + modelData.name + ".model";
+    std::ofstream file(outputPath, std::ios::binary);
+    if (!file.is_open()) {
+        std::cout << "Failed to open file for writing: " << outputPath << "\n";
+        return;
+    }
+    SkinnedModelHeader modelHeader;
+    modelHeader.version = 1;
+    modelHeader.meshCount = modelData.meshCount;
+    modelHeader.nameLength = modelData.name.size();
+    modelHeader.timestamp = modelData.timestamp;
+    modelHeader.aabbMin = modelData.aabbMin;
+    modelHeader.aabbMax = modelData.aabbMax;
+    file.write((char*)&modelHeader.version, sizeof(modelHeader.version));
+    file.write((char*)&modelHeader.meshCount, sizeof(modelHeader.meshCount));
+    file.write((char*)&modelHeader.nameLength, sizeof(modelHeader.nameLength));
+    file.write(modelData.name.data(), modelHeader.nameLength);
+    file.write(reinterpret_cast<char*>(&modelHeader.timestamp), sizeof(modelHeader.timestamp));
+    file.write(reinterpret_cast<const char*>(&modelHeader.aabbMin), sizeof(glm::vec3));
+    file.write(reinterpret_cast<const char*>(&modelHeader.aabbMax), sizeof(glm::vec3));
+#if PRINT_SKINNED_MODEL_HEADERS_ON_WRITE
+    PrintSkinnedModelHeader(modelHeader, "Wrote skinned model header: " + modelData.name);
+#endif
+    for (const SkinnedMeshData& meshData : modelData.meshes) {
+        MeshHeader meshHeader;
+        meshHeader.nameLength = (uint32_t)meshData.name.size();
+        meshHeader.vertexCount = (uint32_t)meshData.vertices.size();
+        meshHeader.indexCount = (uint32_t)meshData.indices.size();
+        meshHeader.aabbMin = meshData.aabbMin;
+        meshHeader.aabbMax = meshData.aabbMax;
+        file.write((char*)&meshHeader.nameLength, sizeof(meshHeader.nameLength));
+        file.write((char*)&meshHeader.vertexCount, sizeof(meshHeader.vertexCount));
+        file.write((char*)&meshHeader.indexCount, sizeof(meshHeader.indexCount));
+        file.write(meshData.name.data(), meshHeader.nameLength);
+        file.write(reinterpret_cast<const char*>(&meshHeader.aabbMin), sizeof(glm::vec3));
+        file.write(reinterpret_cast<const char*>(&meshHeader.aabbMax), sizeof(glm::vec3));
+        file.write(reinterpret_cast<const char*>(meshData.vertices.data()), meshData.vertices.size() * sizeof(Vertex));
+        file.write(reinterpret_cast<const char*>(meshData.indices.data()), meshData.indices.size() * sizeof(uint32_t));
+#if PRINT_MESH_HEADERS_ON_WRITE
+        PrintMeshHeader(meshHeader, "Wrote mesh: " + meshData.name);
+#endif
+    }
+    file.close();
+    std::cout << "Exported: " << outputPath << "\n";
 }
 
 SkinnedModelData File::ImportSkinnedModel(const std::string& filepath) {
@@ -230,6 +275,16 @@ void File::PrintMeshHeader(MeshHeader header, const std::string& identifier) {
     std::cout << " Name Length: " << header.nameLength << "\n";
     std::cout << " Vertex Count: " << header.vertexCount << "\n";
     std::cout << " Index Count: " << header.indexCount << "\n";
+    std::cout << " AABB min: " << Util::Vec3ToString(header.aabbMin) << "\n";
+    std::cout << " AABB max: " << Util::Vec3ToString(header.aabbMax) << "\n\n";
+}
+
+void File::PrintSkinnedModelHeader(SkinnedModelHeader header, const std::string& identifier) {
+    std::cout << identifier << "\n";
+    std::cout << " Version: " << header.version << "\n";
+    std::cout << " Mesh Count: " << header.meshCount << "\n";
+    std::cout << " Name Length: " << header.nameLength << "\n";
+    std::cout << " Timestamp: " << header.timestamp << "\n\n";
     std::cout << " AABB min: " << Util::Vec3ToString(header.aabbMin) << "\n";
     std::cout << " AABB max: " << Util::Vec3ToString(header.aabbMax) << "\n\n";
 }

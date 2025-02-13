@@ -79,7 +79,7 @@ namespace AssetManager {
             text += AssetManager::GetLoadLog()[i] + "\n";
         }
 
-        UIBackEnd::BlitText(text, "StandardFont", 0, 0, 2.0f);
+        UIBackEnd::BlitText(text, "StandardFont", 0, 0, Alignment::TOP_LEFT, 2.0f);
 
         // Loading complete?
         g_loadingComplete = true;

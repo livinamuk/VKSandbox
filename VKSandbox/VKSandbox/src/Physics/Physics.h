@@ -40,6 +40,7 @@ namespace Physics {
     void StepPhysics(float deltaTime);
     void AddCollisionReport(CollisionReport& collisionReport);
     void ClearCollisionReports();
+    void ClearCharacterControllerCollsionReports();
     std::vector<CollisionReport>& GetCollisionReports();
     std::vector<CharacterCollisionReport>& GetCharacterCollisionReports();
     std::vector<Vertex> GetDebugLineVertices(DebugLineRenderMode debugLineRenderMode, std::vector<PxRigidActor*> ignoreList);
@@ -48,6 +49,26 @@ namespace Physics {
     PxScene* GetPxScene();
     CCTHitCallback& GetCharacterControllerHitCallback();    
     PxControllerManager* GetCharacterControllerManager();
+
+    // Create
+    PxShape* CreateBoxShape(float width, float height, float depth, Transform shapeOffset = Transform(), PxMaterial* material = NULL);
+    PxRigidDynamic* CreateRigidDynamic(Transform transform, PhysicsFilterData filterData, PxShape* shape, Transform shapeOffset = Transform());
+
+    // Destroy
+    void Destroy(PxRigidDynamic*& rigidDynamic);
+    void Destroy(PxRigidStatic*& rigidStatic);
+    void Destroy(PxShape*& shape);
+    void Destroy(PxRigidBody*& rigidBody);
+    void Destroy(PxTriangleMesh*& triangleMesh);
+
+    // Util
+    glm::vec3 PxVec3toGlmVec3(PxVec3 vec);
+    glm::vec3 PxVec3toGlmVec3(PxExtendedVec3 vec);
+    glm::quat PxQuatToGlmQuat(PxQuat quat);
+    glm::mat4 PxMat44ToGlmMat4(physx::PxMat44 pxMatrix);
+    PxVec3 GlmVec3toPxVec3(glm::vec3 vec);
+    PxQuat GlmQuatToPxQuat(glm::quat quat);
+    PxMat44 GlmMat4ToPxMat44(glm::mat4 glmMatrix);
 }
 
 class ContactReportCallback : public PxSimulationEventCallback {

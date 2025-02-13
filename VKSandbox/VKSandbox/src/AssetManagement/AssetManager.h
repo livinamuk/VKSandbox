@@ -63,6 +63,7 @@ namespace AssetManager {
 
     // Spritesheet Textures
     std::vector<SpriteSheetTexture>& GetSpriteSheetTextures();
+    SpriteSheetTexture* GetSpriteSheetTextureByName(const std::string& textureName);
     void BuildSpriteSheetTextures();
 
     // Skinned Model

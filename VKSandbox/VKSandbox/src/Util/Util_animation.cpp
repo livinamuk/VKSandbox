@@ -3,6 +3,102 @@
 
 namespace Util {
 
+    const AnimatedNode* FindAnimatedNode(Animation* animation, const char* NodeName) {
+        for (unsigned int i = 0; i < animation->m_animatedNodes.size(); i++) {
+            const AnimatedNode* animatedNode = &animation->m_animatedNodes[i];
+
+            if (Util::StrCmp(animatedNode->m_nodeName, NodeName)) {
+                return animatedNode;
+            }
+        }
+        return nullptr;
+    }
+
+    int FindAnimatedNodeIndex(float AnimationTime, const AnimatedNode* animatedNode) {
+        // bail if current animation time is earlier than the this nodes first keyframe time
+        if (AnimationTime < animatedNode->m_nodeKeys[0].timeStamp)
+            return -1; // you WERE returning -1 here
+
+        for (unsigned int i = 1; i < animatedNode->m_nodeKeys.size(); i++) {
+            if (AnimationTime < animatedNode->m_nodeKeys[i].timeStamp)
+                return i - 1;
+        }
+        return (int)animatedNode->m_nodeKeys.size() - 1;
+    }
+
+    void CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const AnimatedNode* animatedNode) {
+        int Index = FindAnimatedNodeIndex(AnimationTime, animatedNode);
+        int NextIndex = (Index + 1);
+
+        // Is next frame out of range?
+        if (NextIndex == animatedNode->m_nodeKeys.size()) {
+            Out = animatedNode->m_nodeKeys[Index].positon;
+            return;
+        }
+
+        // Nothing to report
+        if (Index == -1 || animatedNode->m_nodeKeys.size() == 1) {
+            Out = animatedNode->m_nodeKeys[0].positon;
+            return;
+        }
+        float DeltaTime = animatedNode->m_nodeKeys[NextIndex].timeStamp - animatedNode->m_nodeKeys[Index].timeStamp;
+        float Factor = (AnimationTime - animatedNode->m_nodeKeys[Index].timeStamp) / DeltaTime;
+
+        glm::vec3 start = animatedNode->m_nodeKeys[Index].positon;
+        glm::vec3 end = animatedNode->m_nodeKeys[NextIndex].positon;
+        glm::vec3 delta = end - start;
+        Out = start + Factor * delta;
+    }
+
+    void CalcInterpolatedScale(glm::vec3& Out, float AnimationTime, const AnimatedNode* animatedNode) {
+        int Index = FindAnimatedNodeIndex(AnimationTime, animatedNode);
+        int NextIndex = (Index + 1);
+
+        // Is next frame out of range?
+        if (NextIndex == animatedNode->m_nodeKeys.size()) {
+            Out = animatedNode->m_nodeKeys[Index].scale;
+            return;
+        }
+
+        // Nothing to report
+        if (Index == -1 || animatedNode->m_nodeKeys.size() == 1) {
+            Out = animatedNode->m_nodeKeys[0].scale;
+            return;
+        }
+        float DeltaTime = animatedNode->m_nodeKeys[NextIndex].timeStamp - animatedNode->m_nodeKeys[Index].timeStamp;
+        float Factor = (AnimationTime - animatedNode->m_nodeKeys[Index].timeStamp) / DeltaTime;
+
+        glm::vec3 start = animatedNode->m_nodeKeys[Index].scale;
+        glm::vec3 end = animatedNode->m_nodeKeys[NextIndex].scale;
+        glm::vec3 delta = end - start;
+        Out = start + Factor * delta;
+    }
+
+    void CalcInterpolatedRotation(glm::quat& Out, float AnimationTime, const AnimatedNode* animatedNode) {
+        int Index = FindAnimatedNodeIndex(AnimationTime, animatedNode);
+        int NextIndex = (Index + 1);
+
+        // Is next frame out of range?
+        if (NextIndex == animatedNode->m_nodeKeys.size()) {
+            Out = animatedNode->m_nodeKeys[Index].rotation;
+            return;
+        }
+
+        // Nothing to report
+        if (Index == -1 || animatedNode->m_nodeKeys.size() == 1) {
+            Out = animatedNode->m_nodeKeys[0].rotation;
+            return;
+        }
+        float DeltaTime = animatedNode->m_nodeKeys[NextIndex].timeStamp - animatedNode->m_nodeKeys[Index].timeStamp;
+        float Factor = (AnimationTime - animatedNode->m_nodeKeys[Index].timeStamp) / DeltaTime;
+
+        const glm::quat& StartRotationQ = animatedNode->m_nodeKeys[Index].rotation;
+        const glm::quat& EndRotationQ = animatedNode->m_nodeKeys[NextIndex].rotation;
+
+        Util::InterpolateQuaternion(Out, StartRotationQ, EndRotationQ, Factor);
+        Out = glm::normalize(Out);
+    }
+
     glm::mat4 Mat4InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ) {
         return glm::scale(glm::mat4(1.0), glm::vec3(ScaleX, ScaleY, ScaleZ));
     }

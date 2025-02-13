@@ -101,6 +101,19 @@ ModelData AssimpImporter::ImportFbx(const std::string filepath) {
     return modelData;
 }
 
+
+//void GrabSkeleton(std::vector<Bone>& bones, const aiNode* pNode, int parentIndex) {
+//    Bone bone;
+//    bone.name = Util::CopyConstChar(pNode->mName.C_Str());
+//    bone.inverseBindTransform = Util::aiMatrix4x4ToGlm(pNode->mTransformation);
+//    bone.parentIndex = parentIndex;
+//    parentIndex = (int)bones.size();
+//    bones.push_back(bone);
+//    for (unsigned int i = 0; i < pNode->mNumChildren; i++) {
+//        GrabSkeleton(bones, pNode->mChildren[i], parentIndex);
+//    }
+//}
+
 SkinnedModelData AssimpImporter::ImportSkinnedFbx(const std::string filepath) {
     SkinnedModelData modelData;
     Assimp::Importer importer;
@@ -150,7 +163,6 @@ SkinnedModelData AssimpImporter::ImportSkinnedFbx(const std::string filepath) {
             }
         }
     }
-
 
 
 

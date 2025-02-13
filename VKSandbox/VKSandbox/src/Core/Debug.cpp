@@ -1,13 +1,14 @@
 #include "Debug.h"
 #include "Util.h"
-#include "../BackEnd/BackEnd.h"
-#include "../Config/Config.h"
-#include "../Core/Game.h"
-#include "../Input/Input.h"
-#include "../Editor/Editor.h"
-#include "../Renderer/RenderDataManager.h"
-#include "../Viewport/ViewportManager.h"
-#include "../UI/UIBackEnd.h"
+#include "API/OpenGL/Renderer/GL_Renderer.h"
+#include "BackEnd/BackEnd.h"
+#include "Config/Config.h"
+#include "Core/Game.h"
+#include "Input/Input.h"
+#include "Editor/Editor.h"
+#include "Renderer/RenderDataManager.h"
+#include "Viewport/ViewportManager.h"
+#include "UI/UIBackEnd.h"
 
 namespace Debug {
     std::string g_text = "";
@@ -17,6 +18,7 @@ namespace Debug {
         if (!g_showDebugText) return;
 
         AddText("Viewport Resize State: " + Util::ViewportResizeStateToString(Editor::GetViewportResizeState()));
+
         return;
 
         const Resolutions& resolutions = Config::GetResolutions();
@@ -80,6 +82,7 @@ namespace Debug {
         AddText("Mouse ray origin: " + Util::Vec3ToString(Editor::GetMouseRayOriginByViewportIndex(hoveredViewportIndex)));
         AddText("Mouse ray direction: " + Util::Vec3ToString(Editor::GetMouseRayDirectionByViewportIndex(hoveredViewportIndex)));
         //AddText("Hovered viewport cam position: " + Util::Vec3ToString(Editor::GetCameraByIndex(hoveredViewportIndex)->GetPosition()));
+
 
 
         //AddText("MousePick: " + std::to_string(BackEnd::GetMousePickR()) + ", " + std::to_string(BackEnd::GetMousePickG()));

@@ -1,8 +1,8 @@
-#include "GL_renderer_util.h"
+#include "GL_renderer.h"
 #include "../AssetManagement/AssetManager.h"
 #include "../BackEnd/BackEnd.h"
 
-namespace OpenGLRendererUtil {
+namespace OpenGLRenderer {
 
     void BlitToDefaultFrameBuffer(OpenGLFrameBuffer* srcFrameBuffer, const char* srcName, GLbitfield mask, GLenum filter) {
         GLint srcAttachmentSlot = srcFrameBuffer->GetColorAttachmentSlotByName(srcName);
@@ -180,6 +180,23 @@ namespace OpenGLRendererUtil {
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(4 * sizeof(float)));
         glBindVertexArray(0);
         return vao;
+    }
+
+    BlitRect BlitRectFromFrameBufferViewport(OpenGLFrameBuffer* framebuffer, Viewport* viewport) {
+        GLuint fbWidth = framebuffer->GetWidth();
+        GLuint fbHeight = framebuffer->GetHeight();
+        glm::vec2 pos = viewport->GetPosition();
+        glm::vec2 size = viewport->GetSize();
+        GLint x = static_cast<GLint>(pos.x * fbWidth);
+        GLint y = static_cast<GLint>(pos.y * fbHeight);
+        GLsizei w = static_cast<GLsizei>(size.x * fbWidth);
+        GLsizei h = static_cast<GLsizei>(size.y * fbHeight);
+        BlitRect blitRect;
+        blitRect.x0 = x;
+        blitRect.x1 = x + w;
+        blitRect.y0 = y;
+        blitRect.y1 = y + h;
+        return blitRect;
     }
 
     void SetViewport(OpenGLFrameBuffer* framebuffer, Viewport* viewport) {

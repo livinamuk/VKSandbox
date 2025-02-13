@@ -1,5 +1,4 @@
 ﻿#include "GL_renderer.h"
-#include "GL_renderer_util.h"
 #include "../GL_backend.h"
 #include "../GL_Util.h"
 #include "../Types/GL_indirectBuffer.hpp"
@@ -30,12 +29,12 @@
 
 namespace OpenGLRenderer {
 
-
     std::unordered_map<std::string, OpenGLShader> g_shaders;
     std::unordered_map<std::string, OpenGLFrameBuffer> g_frameBuffers;
     std::unordered_map<std::string, OpenGLCubemapView> g_cubemapViews;
     std::unordered_map<std::string, OpenGLSSBO> g_ssbos;
     std::unordered_map<std::string, OpenGLRasterizerState> g_rasterizerStates;
+    OpenGLFrameBuffer g_blurBuffers[4][4] = {};
 
     std::vector<float> g_shadowCascadeLevels{ FAR_PLANE / 50.0f, FAR_PLANE / 25.0f, FAR_PLANE / 10.0f, FAR_PLANE / 2.0f };
     const glm::vec3 g_lightDir = glm::normalize(glm::vec3(20.0f, 50, 20.0f));
@@ -102,9 +101,13 @@ namespace OpenGLRenderer {
         g_indirectBuffer.PreAllocate(sizeof(DrawIndexedIndirectCommand) * MAX_INDIRECT_DRAW_COMMAND_COUNT);
 
         // Load shaders
+        g_shaders["BlurHorizontal"] = OpenGLShader({ "GL_blur_horizontal.vert", "GL_blur.frag" });
+        g_shaders["BlurVertical"] = OpenGLShader({ "GL_blur_vertical.vert", "GL_blur.frag" });
         g_shaders["ComputeSkinning"] = OpenGLShader({ "GL_compute_skinning.comp" });
         g_shaders["EditorMesh"] = OpenGLShader({ "GL_editor_mesh.vert", "GL_editor_mesh.frag" });
+        g_shaders["EmissiveComposite"] = OpenGLShader({ "GL_emissive_composite.comp" });
         g_shaders["Gizmo"] = OpenGLShader({ "GL_gizmo.vert", "GL_gizmo.frag" });
+        g_shaders["Grass"] = OpenGLShader({ "GL_grass.vert", "GL_grass.frag" });
         g_shaders["HairDepthPeel"] = OpenGLShader({ "GL_hair_depth_peel.vert", "GL_hair_depth_peel.frag" });
         g_shaders["HairFinalComposite"] = OpenGLShader({ "GL_hair_final_composite.comp" });
         g_shaders["HairLayerComposite"] = OpenGLShader({ "GL_hair_layer_composite.comp" });
@@ -142,7 +145,7 @@ namespace OpenGLRenderer {
             g_cubemapViews["SkyboxNightSky"] = OpenGLCubemapView(texturesHandles);
         }
 
-        RecreateBlurBuffers();
+        CreateBlurBuffers();
 
 
         // glGenFramebuffers(1, &g_lightFBO);
@@ -223,7 +226,9 @@ namespace OpenGLRenderer {
         SkyBoxPass();
         HeightMapPass();
         GeometryPass();
+        GrassPass();
         LightingPass();
+        EmissivePass();
         HairPass();
         SpriteSheetPass();
         EditorPass();
@@ -234,10 +239,10 @@ namespace OpenGLRenderer {
         OpenGLFrameBuffer& finalImageBuffer = g_frameBuffers["FinalImage"];
 
         // Downscale blit
-        OpenGLRendererUtil::BlitFrameBuffer(&gBuffer, &finalImageBuffer, "FinalLighting", "Color", GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        OpenGLRenderer::BlitFrameBuffer(&gBuffer, &finalImageBuffer, "FinalLighting", "Color", GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
         // Blit to swapchain
-        OpenGLRendererUtil::BlitToDefaultFrameBuffer(&finalImageBuffer, "Color", GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        OpenGLRenderer::BlitToDefaultFrameBuffer(&finalImageBuffer, "Color", GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
         OpenGLFrameBuffer& heightmapFramebuffer = g_frameBuffers["HeightMap"]; 
         BlitRect srcRect;
@@ -250,7 +255,7 @@ namespace OpenGLRenderer {
         dstRect.x1 = heightmapFramebuffer.GetWidth() * 2;
         dstRect.y1 = heightmapFramebuffer.GetHeight() * 2;
            
-        //OpenGLRendererUtil::BlitToDefaultFrameBuffer(&heightmapFramebuffer, "Color", srcRect, dstRect, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        //OpenGLRenderer::BlitToDefaultFrameBuffer(&heightmapFramebuffer, "Color", srcRect, dstRect, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
         UIPass();
     }
@@ -273,7 +278,7 @@ namespace OpenGLRenderer {
         for (unsigned int i = 0; i < 4; i++) {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
             if (viewport->IsVisible()) {
-                OpenGLRendererUtil::ClearFrameBufferByViewportUInt(finalImageFBO, "ViewportIndex", viewport, i);
+                OpenGLRenderer::ClearFrameBufferByViewportUInt(finalImageFBO, "ViewportIndex", viewport, i);
             }
         }
     }
@@ -336,46 +341,37 @@ namespace OpenGLRenderer {
     //
 
 
-    OpenGLFrameBuffer g_blurBuffers[4][4] = {};
+    void DrawQuad() {
+        Mesh* mesh = AssetManager::GetMeshByModelNameMeshIndex("Quad", 0);
+        glDrawElementsBaseVertex(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), mesh->baseVertex);
+    }
 
+    void CreateBlurBuffers() {
+        const Resolutions& resolutions = Config::GetResolutions();
 
-    void RecreateBlurBuffers() {
-        // Clean up all existing framebuffers
-        for (int x = 0; x < 4; x++) {
-            for (int y = 0; y < 4; y++) {
-                g_blurBuffers[0][0].CleanUp();
-            }
-        }
         // Iterate each viewport
         for (int x = 0; x < 4; x++) {
             Viewport* viewport = ViewportManager::GetViewportByIndex(x);
 
             // Start the first blur buffer at the full viewport dimensions
             SpaceCoords spaceCoords = viewport->GetGBufferSpaceCoords();
-            float width = spaceCoords.width;
-            float height = spaceCoords.height;
-
-            std::cout << "viewport " << x << "\n";
-            std::cout << " - full size: " << width << ", " << height << "\n";
+            float width = resolutions.gBuffer.x;
+            float height = resolutions.gBuffer.y;
 
             // Create framebuffers, downscale by 50% each time
+            std::cout << "Created blur buffer: " << x << "\n";
             for (int y = 0; y < 4; y++) {
 
+                // Clean up existing framebuffer
                 std::cout << "-" << y << ": " << width << ", " << height << "\n";
-
                 g_blurBuffers[x][y].Create("BlurBuffer", width, height);
                 g_blurBuffers[x][y].CreateAttachment("ColorA", GL_RGBA8);
                 g_blurBuffers[x][y].CreateAttachment("ColorB", GL_RGBA8);
                 width *= 0.5f;
                 height *= 0.5f;
-
-
             }
-            std::cout << "\n";
         }
     }
-
-
 
     OpenGLShader* GetShader(const std::string& name) {
         auto it = g_shaders.find(name);
@@ -385,6 +381,12 @@ namespace OpenGLRenderer {
     OpenGLFrameBuffer* GetFrameBuffer(const std::string& name) {
         auto it = g_frameBuffers.find(name);
         return (it != g_frameBuffers.end()) ? &it->second : nullptr;
+    }
+
+    OpenGLFrameBuffer* GetBlurBuffer(int viewportIndex, int bufferIndex) {
+        if (viewportIndex < 0 || viewportIndex >= 4) return nullptr;
+        if (bufferIndex < 0 || bufferIndex >= 4) return nullptr;
+        return &g_blurBuffers[viewportIndex][bufferIndex];
     }
 
     OpenGLSSBO* GetSSBO(const std::string& name) {

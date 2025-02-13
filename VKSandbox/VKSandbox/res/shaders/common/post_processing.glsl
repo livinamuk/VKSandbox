@@ -151,3 +151,9 @@ vec3 AdjustLightness(vec3 color, float lightness) {
     float factor = 1.0 + lightness;
     return clamp(color * factor, 0.0, 1.0);
 }
+
+vec3 FilmPixel(vec2 uv, float time) {
+    mat2x3 uvs = mat2x3(uv.xxx, uv.yyy) + mat2x3(vec3(0, 0.1, 0.2), vec3(0, 0.3, 0.4));
+    return fract(sin(uvs * vec2(12.9898, 78.233) * time) * 43758.5453);
+}
+

@@ -2,6 +2,7 @@
 #include "BackEnd/BackEnd.h"
 #include "Config/Config.h"
 #include "Input/Input.h"
+#include "Renderer/Renderer.h"
 
 namespace Editor {
     bool g_horizontalDividerHovered = false;
@@ -34,7 +35,7 @@ namespace Editor {
             }
         }
         // End drag
-        if (!Input::LeftMouseDown()) {
+        if (!Input::LeftMouseDown() && GetViewportResizeState() != ViewportResizeState::IDLE) {
             SetViewportResizeState(ViewportResizeState::IDLE);
         }
         if (GetViewportResizeState() == ViewportResizeState::RESIZING_HORIZONTAL ||

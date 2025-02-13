@@ -7,10 +7,10 @@ struct ViewportData {
     mat4 projectionView;
     mat4 inverseProjectionView;
     mat4 skyboxProjectionView;
-    float clipSpaceXMin;
-    float clipSpaceXMax;
-    float clipSpaceYMin;
-    float clipSpaceYMax;
+    int xOffset;
+    int yOffset;
+    int width;
+    int height;
 };
 
 struct RendererData {
@@ -21,6 +21,7 @@ struct RendererData {
     float hairBufferWidth;
     float hairBufferHeight;
     int splitscreenMode;
+    float time;
 };
 
 struct RenderItem {

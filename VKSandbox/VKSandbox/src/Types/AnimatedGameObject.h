@@ -31,7 +31,6 @@ public:
 
     glm::mat4 GetAnimatedTransformByBoneName(const char* name);
 
-    std::vector<JointWorldMatrix> m_jointWorldMatrices;
     AnimatedTransforms m_animatedTransforms;
 
     const size_t GetAnimatedTransformCount();
@@ -41,6 +40,9 @@ public:
     const int32_t GetPlayerIndex();
     const uint32_t GetVerteXCount();
     std::vector<uint32_t> m_skinnedBufferIndices;
+    int GetBoneIndex(const std::string& boneName);
+    glm::mat4 GetBoneWorldMatrix(const std::string& boneName);
+    glm::vec3 GetBoneWorldPosition(const std::string& boneName);
 
 	void Update(float deltaTime);
 	void SetName(std::string name);
@@ -62,7 +64,6 @@ public:
 	std::string GetName();
 	const glm::mat4 GetModelMatrix();
 	bool IsAnimationComplete();
-	//AnimationIsPastPercentage(float percent);
     glm::vec3 GetScale();
 
 	SkinnedModel* m_skinnedModel = nullptr;
@@ -78,20 +79,12 @@ public:
     glm::mat4 m_cameraMatrix = glm::mat4(1);
     glm::mat4 m_cameraSpawnMatrix = glm::mat4(1);
 
-	// Hacky shit
-	//glm::vec3 GetGlockBarrelPostion();
-	glm::vec3 GetGlockCasingSpawnPostion();
-	glm::vec3 GetAKS74UBarrelPostion();
-	glm::vec3 GetShotgunBarrelPosition();
-	glm::vec3 GetAK74USCasingSpawnPostion();
-
     void EnableDrawingForAllMesh();
     void EnableDrawingForMeshByMeshName(std::string meshName);
     void DisableDrawingForMeshByMeshName(std::string meshName);
+    void PrintBoneNames();
     void PrintMeshNames();
     void EnableBlendingByMeshIndex(int index);
-
-    glm::mat4 GetJointWorldTransformByName(const char* jointName);
 
     //std::vector<glm::mat4> _debugTransformsA;
     //std::vector<glm::mat4> _debugTransformsB;

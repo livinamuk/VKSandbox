@@ -1,0 +1,20 @@
+{
+  "name": "AmmoFont",
+  "textureWidth": 93,
+  "textureHeight": 93,
+  "lineHeight": 31,
+  "characters": "0123456789/",
+  "charDataList": [
+    { "width": 16, "height": 31, "offsetX": 0, "offsetY": 0 },
+    { "width": 9, "height": 31, "offsetX": 16, "offsetY": 0 },
+    { "width": 15, "height": 31, "offsetX": 25, "offsetY": 0 },
+    { "width": 15, "height": 31, "offsetX": 40, "offsetY": 0 },
+    { "width": 17, "height": 31, "offsetX": 0, "offsetY": 31 },
+    { "width": 15, "height": 31, "offsetX": 17, "offsetY": 31 },
+    { "width": 16, "height": 31, "offsetX": 32, "offsetY": 31 },
+    { "width": 15, "height": 31, "offsetX": 48, "offsetY": 31 },
+    { "width": 16, "height": 31, "offsetX": 0, "offsetY": 62 },
+    { "width": 15, "height": 31, "offsetX": 16, "offsetY": 62 },
+    { "width": 10, "height": 31, "offsetX": 31, "offsetY": 62 }
+  ]
+}

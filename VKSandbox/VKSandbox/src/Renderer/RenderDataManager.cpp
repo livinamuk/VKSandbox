@@ -38,6 +38,7 @@ namespace RenderDataManager {
     }
 
     void UpdateViewportData() {
+        const Resolutions& resolutions = Config::GetResolutions();
         g_viewportData.resize(4);
         for (int i = 0; i < 4; i++) {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
@@ -58,54 +59,10 @@ namespace RenderDataManager {
             g_viewportData[i].projectionView = g_viewportData[i].projection * g_viewportData[i].view;
             g_viewportData[i].inverseProjectionView = glm::inverse(g_viewportData[i].projectionView);
             g_viewportData[i].skyboxProjectionView = viewport->GetPerpsectiveMatrix() * g_viewportData[i].view;
-
-            // Clipspace range
-            if (Game::GetSplitscreenMode() == SplitscreenMode::FULLSCREEN) {
-                g_viewportData[i].clipSpaceXMin = 0.0f;
-                g_viewportData[i].clipSpaceXMax = 1.0f;
-                g_viewportData[i].clipSpaceYMin = 0.0f;
-                g_viewportData[i].clipSpaceYMax = 1.0f;
-            }
-            else if (Game::GetSplitscreenMode() == SplitscreenMode::TWO_PLAYER) {
-                if (i == 0) {
-                    g_viewportData[i].clipSpaceXMin = 0.0f;
-                    g_viewportData[i].clipSpaceXMax = 1.0f;
-                    g_viewportData[i].clipSpaceYMin = 0.5f;
-                    g_viewportData[i].clipSpaceYMax = 1.0f;
-                }
-                if (i == 1) {
-                    g_viewportData[i].clipSpaceXMin = 0.0f;
-                    g_viewportData[i].clipSpaceXMax = 1.0f;
-                    g_viewportData[i].clipSpaceYMin = 0.0f;
-                    g_viewportData[i].clipSpaceYMax = 0.5f;
-                }
-            }
-            else if (Game::GetSplitscreenMode() == SplitscreenMode::FOUR_PLAYER) {
-                if (i == 0) {
-                    g_viewportData[i].clipSpaceXMin = 0.0f;
-                    g_viewportData[i].clipSpaceXMax = 0.5f;
-                    g_viewportData[i].clipSpaceYMin = 0.5f;
-                    g_viewportData[i].clipSpaceYMax = 1.0f;
-                }
-                if (i == 1) {
-                    g_viewportData[i].clipSpaceXMin = 0.5f;
-                    g_viewportData[i].clipSpaceXMax = 1.0f;
-                    g_viewportData[i].clipSpaceYMin = 0.5f;
-                    g_viewportData[i].clipSpaceYMax = 1.0f;
-                }
-                if (i == 2) {
-                    g_viewportData[i].clipSpaceXMin = 0.0f;
-                    g_viewportData[i].clipSpaceXMax = 0.5f;
-                    g_viewportData[i].clipSpaceYMin = 0.0f;
-                    g_viewportData[i].clipSpaceYMax = 0.5f;
-                }
-                if (i == 3) {
-                    g_viewportData[i].clipSpaceXMin = 0.5f;
-                    g_viewportData[i].clipSpaceXMax = 1.0f;
-                    g_viewportData[i].clipSpaceYMin = 0.0f;
-                    g_viewportData[i].clipSpaceYMax = 0.5f;
-                }
-            }
+            g_viewportData[i].width = resolutions.gBuffer.x * viewport->GetSize().x;
+            g_viewportData[i].height = resolutions.gBuffer.y * viewport->GetSize().y;
+            g_viewportData[i].xOffset = resolutions.gBuffer.x * viewport->GetPosition().x;
+            g_viewportData[i].yOffset = resolutions.gBuffer.y * viewport->GetPosition().y;
         }
     }
 
@@ -142,6 +99,7 @@ namespace RenderDataManager {
         g_rendererData.hairBufferWidth = resolutions.hair.x;
         g_rendererData.hairBufferHeight = resolutions.hair.y;
         g_rendererData.splitscreenMode = (int)Game::GetSplitscreenMode();
+        g_rendererData.time = Game::GetTotalTime();
     }
 
     void SortRenderItems(std::vector<RenderItem>& renderItems) {

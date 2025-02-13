@@ -24,6 +24,7 @@ namespace File {
     // Debug
     void ExportMeshDataToOBJ(const std::string& filepath, const MeshData& mesh);
     void ExportSkinnedMeshDataToOBJ(const std::string& filepath, const SkinnedMeshData& mesh);
+    void PrintSkinnedModelHeader(SkinnedModelHeader header, const std::string& identifier);
     void PrintModelHeader(ModelHeader header, const std::string& identifier);
     void PrintMeshHeader(MeshHeader header, const std::string& identifier);
 }

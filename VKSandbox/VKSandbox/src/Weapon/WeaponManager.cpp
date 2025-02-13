@@ -503,8 +503,11 @@ namespace WeaponManager {
         spas.pickUpMeshMaterials["SPAS12_Main"] = "SPAS_Main";
         spas.pickUpMeshMaterials["SPAS12_Moving"] = "SPAS_Moving";
         spas.pickUpMeshMaterials["SPAS12_Stamped"] = "SPAS_Stamped";
-        spas.animationNames.shotgunFireEmpty = "SPAS_FireEmpty";
+        spas.animationNames.shotgunFireNoPump = "SPAS_FireNoPump";
         spas.animationNames.shotgunReloadEndPump = "SPAS_ReloadEndPump";
+        spas.animationNames.dryFire = "SPAS_DryFire";
+        spas.animationNames.toggleAutoShotgun = "SPAS_ToggleAuto";
+        spas.hasAutoSwitch = true;
 
 
 
@@ -721,7 +724,7 @@ namespace WeaponManager {
     }
 
 
-    WeaponInfo* GetWeaponInfoByName(std::string name) {
+    WeaponInfo* GetWeaponInfoByName(const std::string& name) {
         for (int i = 0; i < g_weapons.size(); i++) {
             if (g_weapons[i].name == name) {
                 return &g_weapons[i];
@@ -737,7 +740,7 @@ namespace WeaponManager {
         return nullptr;
     }
 
-    AmmoInfo* GetAmmoInfoByName(std::string name) {
+    AmmoInfo* GetAmmoInfoByName(const std::string& name) {
         for (int i = 0; i < g_ammos.size(); i++) {
             if (g_ammos[i].name == name) {
                 return &g_ammos[i];

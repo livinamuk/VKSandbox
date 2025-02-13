@@ -86,4 +86,20 @@ namespace Util {
             weight /= sum;
         }
     }
+
+    bool IsNan(float value) {
+        return glm::isnan(value);
+    }
+
+    bool IsNan(glm::vec2 value) {
+        return glm::isnan(value.x) || glm::isnan(value.y);
+    }
+
+    bool IsNan(glm::vec3 value) {
+        return glm::isnan(value.x) || glm::isnan(value.y) || glm::isnan(value.z);
+    }
+
+    bool IsNan(glm::vec4 value) {
+        return glm::isnan(value.x) || glm::isnan(value.y) || glm::isnan(value.z) || glm::isnan(value.w);
+    }
 }

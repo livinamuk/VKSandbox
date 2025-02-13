@@ -5,9 +5,9 @@
 
 namespace Scene {
     std::vector<AnimatedGameObject> g_animatedGameObjects;
+    std::vector<BulletCasing> g_bulletCasings;
     std::vector<GameObject> g_gameObjects;
     std::vector<Light> g_lights;
-
 
     std::vector<RenderItem> g_renderItems;
     std::vector<RenderItem> g_renderItemsBlended;
@@ -27,14 +27,20 @@ namespace Scene {
         LightCreateInfo createInfo;
         createInfo.position = glm::vec3(16.0f, -5.0f + magic, 16.0f);
         createInfo.type = LightType::LAMP_POST;
-        createInfo.strength = 4.0f;
-        createInfo.radius = 4;
+        createInfo.strength = 5.0f;
+        createInfo.radius = 7;
         AddLight(createInfo);
 
         createInfo.position = glm::vec3(22.87f, -5.0f + magic, 21.13f);
         createInfo.type = LightType::LAMP_POST;
-        createInfo.strength = 4.0f;
-        createInfo.radius = 4;
+        createInfo.strength = 5.0f;
+        createInfo.radius = 7;
+        AddLight(createInfo);
+
+        createInfo.position = glm::vec3(6.2f, -5.0f + magic, 34.13f);
+        createInfo.type = LightType::LAMP_POST;
+        createInfo.strength = 5.0f;
+        createInfo.radius = 7;
         AddLight(createInfo);
 
     }
@@ -83,6 +89,17 @@ namespace Scene {
             light.UpdateRenderItems();
             light.SetMousePickIndex(mousePickIndex++);
             g_renderItems.insert(g_renderItems.end(), light.GetRenderItems().begin(), light.GetRenderItems().end());
+        }
+
+        for (BulletCasing& casing : Scene::g_bulletCasings) {
+            RenderItem& renderItem = g_renderItems.emplace_back();
+            renderItem.modelMatrix = casing.GetModelMatrix();
+            renderItem.inverseModelMatrix = inverse(renderItem.modelMatrix);
+            Material* material = AssetManager::GetMaterialByIndex(casing.GetMaterialIndex());
+            renderItem.baseColorTextureIndex = material->m_basecolor;
+            renderItem.rmaTextureIndex = material->m_rma;
+            renderItem.normalMapTextureIndex = material->m_normal;       
+            renderItem.meshIndex = casing.GetMeshIndex();
         }
 
         RenderDataManager::ResetBaseSkinnedVertex();
@@ -170,17 +187,17 @@ namespace Scene {
         mermaid->SetMeshBlendingMode("HairInner", BlendingMode::HAIR_UNDER_LAYER);
         mermaid->SetName("Mermaid");
 
-        for (int i = 0; i < 500; i++) {
-            float x = Util::RandomFloat(-30.0f, 30.0f);
-            float y = Util::RandomFloat(3.0f, 25);
-            float z = Util::RandomFloat(-30.0f, 30.0f);
-            CreateGameObject();
-            GameObject* cube = &g_gameObjects.back();
-            cube->SetPosition(glm::vec3(x, y, z));
-            cube->SetRotation(glm::vec3(Util::RandomFloat(-HELL_PI, HELL_PI), Util::RandomFloat(-HELL_PI, HELL_PI), Util::RandomFloat(-HELL_PI, HELL_PI)));
-            cube->SetModel("Cube");
-            cube->SetMeshMaterials("MermaidTail");
-        }
+      //for (int i = 0; i < 500; i++) {
+      //    float x = Util::RandomFloat(-30.0f, 30.0f);
+      //    float y = Util::RandomFloat(3.0f, 25);
+      //    float z = Util::RandomFloat(-30.0f, 30.0f);
+      //    CreateGameObject();
+      //    GameObject* cube = &g_gameObjects.back();
+      //    cube->SetPosition(glm::vec3(x, y, z));
+      //    cube->SetRotation(glm::vec3(Util::RandomFloat(-HELL_PI, HELL_PI), Util::RandomFloat(-HELL_PI, HELL_PI), Util::RandomFloat(-HELL_PI, HELL_PI)));
+      //    cube->SetModel("Cube");
+      //    cube->SetMeshMaterials("MermaidTail");
+      //}
 
 
 
@@ -211,7 +228,9 @@ namespace Scene {
         object.SetScale(0.01);
         object.PlayAndLoopAnimation("Shark_Attack_Left_Quick");
 
+
         return;
+      
 
         CreateAnimatedGameObject();
         AnimatedGameObject& object2 = g_animatedGameObjects.back();
@@ -223,7 +242,7 @@ namespace Scene {
         object2.SetPosition(glm::vec3(7.8f, -0.5, 11.3f));
         object2.SetScale(0.01);
         object2.SetAnimationModeToBindPose();
-
+        return;
         CreateAnimatedGameObject();
         AnimatedGameObject& object3 = g_animatedGameObjects.back();
         object3.SetPlayerIndex(1);
@@ -241,13 +260,18 @@ namespace Scene {
         g_lights.push_back(Light(createInfo));
     }
 
+    void AddBulletCasing(BulletCasingCreateInfo createInfo) {
+        g_bulletCasings.push_back(BulletCasing(createInfo));
+    }
+
     std::vector<AnimatedGameObject>& GetAnimatedGameObjects()   { return g_animatedGameObjects; }
+    std::vector<BulletCasing>& GetBulletCasings()               { return g_bulletCasings; };
     std::vector<GameObject>& GetGameObjects()                   { return g_gameObjects; }
+    std::vector<Light>& GetLights()                             { return g_lights; };
     std::vector<RenderItem>& GetRenderItems()                   { return g_renderItems; }
     std::vector<RenderItem>& GetRenderItemsBlended()            { return g_renderItemsBlended; }
     std::vector<RenderItem>& GetRenderItemsAlphaDiscarded()     { return g_renderItemsAlphaDiscarded; }
     std::vector<RenderItem>& GetRenderItemsHairTopLayer()       { return g_renderItemsHairTopLayer; }
     std::vector<RenderItem>& GetRenderItemsHairBottomLayer()    { return g_renderItemsHairBottomLayer; }
     std::vector<RenderItem>& GetSkinnedRenderItems()            { return g_skinnedRenderItems; }
-    std::vector<Light>& GetLights() { return g_lights; };
 }

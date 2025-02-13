@@ -22,4 +22,5 @@ void main() {
     compositeColor.a = hairColor.a * (1.0 - compositeColor.a) + compositeColor.a;
 
     // Output
-    imageStore(compositeTexture, pixelCoords, compositeColor);}
+    imageStore(compositeTexture, pixelCoords, compositeColor);
+}

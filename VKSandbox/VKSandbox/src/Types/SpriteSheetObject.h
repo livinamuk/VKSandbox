@@ -1,33 +1,53 @@
 #pragma once
 #include "HellTypes.h"
 #include "CreateInfo.h"
+#include "Renderer/Types/SpriteSheetTexture.h"
 #include <string>
 
 struct SpriteSheetObject {
 public:
-    SpriteSheetObject(SpriteSheetObjectCreateInfo createInfo);
+    SpriteSheetObject() = default;
+    SpriteSheetObject(const SpriteSheetObjectCreateInfo& createInfo);
+
+    void Init(const SpriteSheetObjectCreateInfo& createInfo);
     void Update(float deltaTime);
-    glm::mat4 GetModelMatrix();
-    glm::mat4 GetBillboardModelMatrix(glm::vec3 cameraForward, glm::vec3 cameraRight, glm::vec3 cameraUp);
-    uint32_t GetFrameIndex();
-    uint32_t GetNextFrameIndex();
-    bool IsBillboard();
-    float GetMixFactor();
-    const std::string& GetTextureName();
-    glm::vec3 GetPosition();
-    bool IsComplete();
+    void SetPosition(glm::vec3 position);
+    void SetRotation(glm::vec3 position);
+    void SetScale(glm::vec3 scale);
+    void SetTime(float time);
+    void SetSpeed(float speed);
+    void EnableRendering();
+    void DisableRendering();
+
+    const bool IsRenderingEnabled()                 { return m_renderingEnabled; }
+    const bool IsBillboard()                        { return m_billboard; }
+    const bool IsComplete()                         { return m_animationComplete; }
+    const float GetTime()                           { return m_time; }
+    const float GetTimeAsPercentage()               { return m_timeAsPercentage; }
+    const float GetMixFactor()                      { return m_mixFactor; }
+    const std::string& GetTextureName()             { return m_textureName; }
+    const glm::vec3 GetPosition()                   { return m_position; }
+    const glm::vec3 GetRotation()                   { return m_rotation; }
+    const glm::vec3 GetScale()                      { return m_scale; }
+    const uint32_t GetFrameIndex()                  { return m_frameIndex; }
+    const uint32_t GetNextFrameIndex()              { return m_frameIndexNext; }
+    const SpriteSheetRenderItem& GetRenderItem()    { return m_renderItem; }
 
 private:
-    uint32_t m_textureIndex = 0;
-    Transform m_transform;
+    glm::vec3 m_position;
+    glm::vec3 m_rotation;
+    glm::vec3 m_scale;
     uint32_t m_frameIndex = 0;
     uint32_t m_frameIndexNext = 1;
-    float m_time = 0;
-    float m_animationSpeed = 3.5f;
-    bool m_loop = true;
-    bool m_billboard = true;
     std::string m_textureName;
-    uint32_t m_frameCount = 0;
-    float m_mixFactor = 0.0f;
     bool m_animationComplete = false;
+    bool m_billboard = true;
+    bool m_loop = true;
+    bool m_renderingEnabled = true;
+    float m_animationSpeed = 3.5f;
+    float m_mixFactor = 0.0f;
+    float m_time = 0;
+    float m_timeAsPercentage = 0.0f;
+    SpriteSheetTexture* m_spriteSheetTexture;
+    SpriteSheetRenderItem m_renderItem;
 };

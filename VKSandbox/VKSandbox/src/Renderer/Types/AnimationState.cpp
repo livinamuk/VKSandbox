@@ -84,6 +84,8 @@ void AnimationState::SetToBindPose() {
     m_index = -1;
 }
 
+
+
 void AnimationState::Update(int skinnedModelIndex, float deltaTime) {
     Animation* animation = AssetManager::GetAnimationByIndex(m_index, false);
     SkinnedModel* skinnedModel = AssetManager::GetSkinnedModelByIndex(skinnedModelIndex);
@@ -91,7 +93,7 @@ void AnimationState::Update(int skinnedModelIndex, float deltaTime) {
         return;
     }
     // Ensure transforms match the number of joints
-    m_globalNodeTransforms.resize(skinnedModel->m_joints.size());
+    m_globalNodeTransforms.resize(skinnedModel->m_nodes.size());
 
     // Update current animation time based on deltaTime
     float timeInTicks = 0;
@@ -114,30 +116,30 @@ void AnimationState::Update(int skinnedModelIndex, float deltaTime) {
     }
 
     // Traverse the tree
-    for (int i = 0; i < skinnedModel->m_joints.size(); i++) {
+    for (int i = 0; i < skinnedModel->m_nodes.size(); i++) {
         glm::mat4 nodeTransformation = glm::mat4(1);
-        const char* NodeName = skinnedModel->m_joints[i].m_name;
+        const char* NodeName = skinnedModel->m_nodes[i].m_name;
 
         // Interpolate the node transformation if it's animated
         if (animation) {
-            const AnimatedNode* animatedNode = skinnedModel->FindAnimatedNode(animation, NodeName);
+            const AnimatedNode* animatedNode = Util::FindAnimatedNode(animation, NodeName);
             if (animatedNode) {
                 glm::vec3 translation;
                 glm::quat rotation;
                 glm::vec3 scale;
-                skinnedModel->CalcInterpolatedPosition(translation, timeInTicks, animatedNode);
-                skinnedModel->CalcInterpolatedRotation(rotation, timeInTicks, animatedNode);
-                skinnedModel->CalcInterpolatedScale(scale, timeInTicks, animatedNode);
+                Util::CalcInterpolatedPosition(translation, timeInTicks, animatedNode);
+                Util::CalcInterpolatedRotation(rotation, timeInTicks, animatedNode);
+                Util::CalcInterpolatedScale(scale, timeInTicks, animatedNode);
                 nodeTransformation = glm::translate(glm::mat4(1.0f), translation) * glm::mat4(rotation);
                 nodeTransformation = glm::scale(nodeTransformation, scale);
             }
         }
         else {
-            nodeTransformation = skinnedModel->m_joints[i].m_inverseBindTransform;
+            nodeTransformation = skinnedModel->m_nodes[i].m_inverseBindTransform;
         }
 
         // Calculate the world transform for this joint
-        unsigned int parentIndex = skinnedModel->m_joints[i].m_parentIndex;
+        unsigned int parentIndex = skinnedModel->m_nodes[i].m_parentIndex;
         glm::mat4 ParentTransformation = (parentIndex == -1) ? glm::mat4(1) : m_globalNodeTransforms[parentIndex].to_mat4();
         glm::mat4 GlobalTransformation = ParentTransformation * nodeTransformation;
         m_globalNodeTransforms[i] = AnimatedTransform(GlobalTransformation);
@@ -225,3 +227,4 @@ void AnimationState::ForceStop() {
 void AnimationState::ForceEaseOut() {
     m_easeOut = true;
 }
+

@@ -1,6 +1,7 @@
 #pragma once
 #include "HellEnums.h"
 #include "HellTypes.h"
+#include "Renderer/Types/Animation.h"
 #include <vector>
 #include <filesystem>
 #include <assimp/matrix3x3.h>
@@ -17,6 +18,10 @@ namespace Util {
     glm::ivec2 WorldToScreenCoords(const glm::vec3& worldPos, const glm::mat4& viewProjection, int screenWidth, int screenHeight, bool flipY = false);
     glm::vec3 Vec3Min(const glm::vec3& a, const glm::vec3& b);
     glm::vec3 Vec3Max(const glm::vec3& a, const glm::vec3& b);
+    bool IsNan(float value);
+    bool IsNan(glm::vec2 value);
+    bool IsNan(glm::vec3 value);
+    bool IsNan(glm::vec4 value);
 
     // Raycasting
     glm::vec3 GetMouseRayDir(glm::mat4 projection, glm::mat4 view, int windowWidth, int windowHeight, int mouseX, int mouseY);
@@ -65,6 +70,11 @@ namespace Util {
     AABB ComputeWorldAABB(glm::vec3& localAabbMin, glm::vec3& localAabbMax, glm::mat4& modelMatrix);
 
     // Animation
+    //int FindAnimatedNodeIndex(float AnimationTime, const AnimatedNode* animatedNode);
+    const AnimatedNode* FindAnimatedNode(Animation* animation, const char* NodeName);
+    void CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const AnimatedNode* animatedNode);
+    void CalcInterpolatedScale(glm::vec3& Out, float AnimationTime, const AnimatedNode* animatedNode);
+    void CalcInterpolatedRotation(glm::quat& Out, float AnimationTime, const AnimatedNode* animatedNode);
     float SmoothStep(float t);
     float SmoothStepReverse(float t);
     float SteepSlowDownCurve(float t);
@@ -72,8 +82,8 @@ namespace Util {
     glm::mat4 Mat4InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ);
     glm::mat4 Mat4InitRotateTransform(float RotateX, float RotateY, float RotateZ);
     glm::mat4 Mat4InitTranslationTransform(float x, float y, float z);
+    glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4& from);
+    glm::mat4 aiMatrix3x3ToGlm(const aiMatrix3x3& from); 
     AnimatedTransform BlendTransforms(const AnimatedTransform& transformA, const AnimatedTransform& transformB, float blendFactor);
     AnimatedTransform BlendMultipleTransforms(const std::vector<AnimatedTransform>& transforms, const std::vector<float>& weights);
-    glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4& from);
-    glm::mat4 aiMatrix3x3ToGlm(const aiMatrix3x3& from);
 }

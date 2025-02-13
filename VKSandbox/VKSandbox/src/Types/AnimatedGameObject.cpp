@@ -63,7 +63,7 @@ void AnimatedGameObject::Update(float deltaTime) {
     if (!m_skinnedModel) return;
 
     if (m_animationMode == AnimationMode::BINDPOSE && m_skinnedModel) {
-        m_skinnedModel->UpdateBoneTransformsFromBindPose(m_animatedTransforms);
+        //m_skinnedModel->UpdateBoneTransformsFromBindPose(m_animatedTransforms);
         m_animationLayer.ClearAllAnimationStates();
     }
 
@@ -102,12 +102,12 @@ void AnimatedGameObject::Update(float deltaTime) {
         }
     }*/
 
-    for (int i = 0; i < m_skinnedModel->m_joints.size(); i++) {
-        const char* NodeName = m_skinnedModel->m_joints[i].m_name;
+    for (int i = 0; i < m_skinnedModel->m_nodes.size(); i++) {
+        const char* NodeName = m_skinnedModel->m_nodes[i].m_name;
         if (m_skinnedModel->m_BoneMapping.find(NodeName) != m_skinnedModel->m_BoneMapping.end()) {
             unsigned int boneIndex = m_skinnedModel->m_BoneMapping[NodeName];
             if (boneIndex >= 0 && boneIndex < m_globalBlendedNodeTransforms.size()) {
-                m_LocalBlendedBoneTransforms[boneIndex] = m_globalBlendedNodeTransforms[i] * m_skinnedModel->m_joints[i].m_boneOffset;
+                m_LocalBlendedBoneTransforms[boneIndex] = m_globalBlendedNodeTransforms[i] * m_skinnedModel->m_nodes[i].m_boneOffset;
             }
             else {
                 std::cout << "your animation shit is broken\n";
@@ -167,18 +167,6 @@ void AnimatedGameObject::EnableBlendingByMeshIndex(int meshIndex) {
     }
 }
 
-glm::mat4 AnimatedGameObject::GetJointWorldTransformByName(const char* jointName) {
-    for (int i = 0; i < m_jointWorldMatrices.size(); i++) {
-        if (jointName != "undefined" && Util::StrCmp(m_jointWorldMatrices[i].name, jointName)) {
-            return GetModelMatrix() * m_jointWorldMatrices[i].worldMatrix;
-        }
-    }
-    std::cout << "AnimatedGameObject::GetJointWorldTransformByName() failed, could not find bone name " << jointName << "\n";
-    return glm::mat4();
-}
-
-
-
 void AnimatedGameObject::SetAllMeshMaterials(std::string materialName) {
     if (!m_skinnedModel) {
         return;
@@ -189,9 +177,9 @@ void AnimatedGameObject::SetAllMeshMaterials(std::string materialName) {
 }
 
 glm::mat4 AnimatedGameObject::GetBindPoseByBoneName(const std::string& name) {
-    for (int i = 0; i < m_skinnedModel->m_joints.size(); i++) {
-        if (m_skinnedModel->m_joints[i].m_name == name) {
-            return m_skinnedModel->m_joints[i].m_inverseBindTransform;
+    for (int i = 0; i < m_skinnedModel->m_nodes.size(); i++) {
+        if (m_skinnedModel->m_nodes[i].m_name == name) {
+            return m_skinnedModel->m_nodes[i].m_inverseBindTransform;
         }
     }
     std::cout << "GetBindPoseByBoneName() failed to find name " << name << "\n";
@@ -268,8 +256,8 @@ void AnimatedGameObject::SetSkinnedModel(std::string name) {
 
         // Store bone indices
         m_boneMapping.clear();
-        for (int i = 0; i < m_skinnedModel->m_joints.size(); i++) {
-            m_boneMapping[m_skinnedModel->m_joints[i].m_name] = i;
+        for (int i = 0; i < m_skinnedModel->m_nodes.size(); i++) {
+            m_boneMapping[m_skinnedModel->m_nodes[i].m_name] = i;
         }
     }
     else {
@@ -310,131 +298,6 @@ void AnimatedGameObject::SetRotationZ(float rotation) {
     _transform.rotation.z = rotation;
 }
 
-glm::vec3 AnimatedGameObject::GetAK74USCasingSpawnPostion() {
-    if (m_name == "AKS74U") {
-        int boneIndex = m_skinnedModel->m_BoneMapping["Weapon"];
-        if (m_animatedTransforms.worldspace.size()) {
-            glm::mat4 boneMatrix = m_animatedTransforms.worldspace[boneIndex];
-            Transform offset;
-            offset.position = glm::vec3(-2.0f, 2.0f, -2.0f); // real
-
-            static float x2 = -44.0f;
-            static float y2 = -28.0f;
-            static float z2 = 175.0f;
-            float amount = 0.5f;
-            if (Input::KeyDown(HELL_KEY_LEFT)) {
-                x2 -= amount;
-            }
-            if (Input::KeyDown(HELL_KEY_RIGHT)) {
-                x2 += amount;
-            }
-            if (Input::KeyDown(HELL_KEY_LEFT_BRACKET)) {
-                y2 -= amount;
-            }
-            if (Input::KeyDown(HELL_KEY_RIGHT_BRACKET)) {
-                y2 += amount;
-            }
-            if (Input::KeyDown(HELL_KEY_UP)) {
-                z2 -= amount;
-            }
-            if (Input::KeyDown(HELL_KEY_DOWN)) {
-                z2 += amount;
-            }
-             //std::cout << x2 << ", " << y2 << ", " << z2 << "\n";
-
-             //offset.position = glm::vec3(x2, y2, z2); // hack to look good
-            offset.position = glm::vec3(-95, -54, 236.5); // hack to look good
-
-
-            glm::mat4 m = GetModelMatrix() * boneMatrix * offset.to_mat4();
-            float x = m[3][0];
-            float y = m[3][1];
-            float z = m[3][2];
-            return glm::vec3(x, y, z);
-        }
-    }
-    return glm::vec3(0);
-}
-
-glm::vec3 AnimatedGameObject::GetGlockCasingSpawnPostion() {
-    if (!m_skinnedModel) {
-        return glm::vec3(0); // REMOVE ONCE YOU HAVE VULKAN LOADING SHIT CORRECTLY!
-    }
-    if (m_name == "Glock") {
-        int boneIndex = m_skinnedModel->m_BoneMapping["Barrel"];
-        if (m_animatedTransforms.worldspace.size()) {
-            glm::mat4 boneMatrix = m_animatedTransforms.worldspace[boneIndex];
-            Transform offset;
-            offset.position = glm::vec3(-2.0f, 2.0f, -2.0f); // real
-
-            static float x2 = -44.0f;
-            static float y2 = -28.0f;
-            static float z2 = 175.0f;
-            float amount = 0.5f;
-            if (Input::KeyDown(HELL_KEY_LEFT)) {
-                x2 -= amount;
-            }
-            if (Input::KeyDown(HELL_KEY_RIGHT)) {
-                x2 += amount;
-            }
-            if (Input::KeyDown(HELL_KEY_LEFT_BRACKET)) {
-                y2 -= amount;
-            }
-            if (Input::KeyDown(HELL_KEY_RIGHT_BRACKET)) {
-                y2 += amount;
-            }
-            if (Input::KeyDown(HELL_KEY_UP)) {
-                z2 -= amount;
-            }
-            if (Input::KeyDown(HELL_KEY_DOWN)) {
-                z2 += amount;
-            }
-          // std::cout << x2 << ", " << y2 << ", " << z2 << "\n";
-
-           // offset.position = glm::vec3(x2, y2, z2); // hack to look good
-            offset.position = glm::vec3(-90.5, -29.5, 267.5); // hack to look good
-
-            glm::mat4 m = GetModelMatrix() * boneMatrix * offset.to_mat4();
-            float x = m[3][0];
-            float y = m[3][1];
-            float z = m[3][2];
-            return glm::vec3(x, y, z);
-        }
-    }
-    return glm::vec3(0);
-}
-
-
-
-glm::vec3 AnimatedGameObject::GetAKS74UBarrelPostion() {
-    if (m_name == "AKS74U") {
-        int boneIndex = m_skinnedModel->m_BoneMapping["Weapon"];
-        glm::mat4 boneMatrix = m_animatedTransforms.worldspace[boneIndex];
-        Transform offset;
-        offset.position = glm::vec3(0, 0 + 1, 36);
-        glm::mat4 m = GetModelMatrix() * boneMatrix * offset.to_mat4();
-        float x = m[3][0];
-        float y = m[3][1];
-        float z = m[3][2];
-        return glm::vec3(x, y, z);
-    }
-    else {
-        return glm::vec3(0);
-    }
-}
-
-glm::vec3 AnimatedGameObject::GetShotgunBarrelPosition() {
-    int boneIndex = m_skinnedModel->m_BoneMapping["Weapon"];
-    glm::mat4 boneMatrix = m_animatedTransforms.worldspace[boneIndex];
-    Transform offset;
-    offset.position = glm::vec3(82, 2, -10);
-    glm::mat4 m = GetModelMatrix() * boneMatrix * offset.to_mat4();
-    float x = m[3][0];
-    float y = m[3][1];
-    float z = m[3][2];
-    return glm::vec3(x, y, z);
-}
-
 void AnimatedGameObject::EnableDrawingForAllMesh() {
     for (MeshRenderingEntry& meshRenderingEntry : m_meshRenderingEntries) {
         meshRenderingEntry.drawingEnabled = true;
@@ -459,6 +322,13 @@ void AnimatedGameObject::DisableDrawingForMeshByMeshName(std::string meshName) {
         }
     }
     //std::cout << "DisableDrawingForMeshByMeshName() called but name " << meshName << " was not found!\n";
+}
+
+void AnimatedGameObject::PrintBoneNames() {
+    std::cout << m_skinnedModel->GetName() << "\n";
+    for (int i = 0; i < m_skinnedModel->m_nodes.size(); i++) {
+        std::cout << "-" << i << " " << m_skinnedModel->m_nodes[i].m_name << "\n";
+    }
 }
 
 void AnimatedGameObject::PrintMeshNames() {
@@ -521,7 +391,6 @@ void AnimatedGameObject::SetIgnoredViewportIndex(int index) {
     m_ignoredViewportIndex = index;
 }
 
-
 bool AnimatedGameObject::AnimationByNameIsComplete(const std::string& name) {
     for (AnimationState& AnimationState : m_animationLayer.m_animationStates) {
         int animationIndex = AssetManager::GetAnimationIndexByName(name);
@@ -530,4 +399,23 @@ bool AnimatedGameObject::AnimationByNameIsComplete(const std::string& name) {
         }
     }
     return true;
+}
+
+int AnimatedGameObject::GetBoneIndex(const std::string& boneName) {
+    auto it = m_boneMapping.find(boneName);
+    return (it != m_boneMapping.end()) ? it->second : -1;
+}
+
+glm::mat4 AnimatedGameObject::GetBoneWorldMatrix(const std::string& boneName) {
+    int boneIndex = GetBoneIndex(boneName);
+    if (boneIndex == -1 || m_animationLayer.m_globalBlendedNodeTransforms.empty()) {
+        return glm::mat4(1.0f);
+    }
+    else {
+        return GetModelMatrix() * m_animationLayer.m_globalBlendedNodeTransforms[boneIndex];
+    }
+}
+
+glm::vec3 AnimatedGameObject::GetBoneWorldPosition(const std::string& boneName) {
+    return GetBoneWorldMatrix(boneName)[3];
 }

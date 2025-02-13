@@ -4,8 +4,7 @@
 
 namespace ViewportManager {
     void Init();
-    void UpdateMouseHoverStates();
-    void UpdateViewports();
+    void Update();
     Viewport* GetViewportByIndex(int32_t viewportIndex);
     std::vector<Viewport>& GetViewports();
 }

@@ -10,14 +10,9 @@
 #include "Input/Input.h"
 #include "Viewport/ViewportManager.h"
 
-
-
-
-#include "Physics/Physics.h"
-#include "Physics/Physics_util.h"
-
 void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex) {
     m_position = position;
+    m_camera.SetPosition(m_position + glm::vec3(0.0f, m_viewHeightStanding, 0.0f));
     m_camera.SetEulerRotation(rotation);
     m_viewportIndex = viewportIndex;
 
@@ -34,8 +29,16 @@ void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex)
     m_characterModelAnimatedGameObjectIndex = Scene::GetAnimatedGameObjects().size() - 1;
     AnimatedGameObject* characterModel = GetCharacterModelAnimatedGameObject();
     characterModel->SetPlayerIndex(viewportIndex);
+
+    SpriteSheetObjectCreateInfo createInfo;
+    createInfo.textureName = "MuzzleFlash_4x5";
+    createInfo.loop = false;
+    createInfo.billboard = true;
+    createInfo.renderingEnabled = false;
+    m_muzzleFlash.Init(createInfo);
     
     CreateCharacterController(m_position);
+
 }
 
 void Player::Update(float deltaTime) {
@@ -47,15 +50,24 @@ void Player::Update(float deltaTime) {
     
     UpdateMovement(deltaTime);
     UpdateCharacterController();
-    UpdateCamera();
+    UpdateHeadBob(deltaTime);
+    UpdateBreatheBob(deltaTime);
+    UpdateCamera(deltaTime);
     UpdateWeaponLogic();       
     UpdateViewWeapon(deltaTime);
+    UpdateSpriteSheets(deltaTime);
     UpdateUI();
-
     if (Input::KeyPressed(HELL_KEY_K)) {
         m_awaitingSpawn = true;
     }
 
+    if (m_infoTextTimer > 0) {
+        m_infoTextTimer -= deltaTime;
+    }
+    else {
+        m_infoTextTimer = 0;
+        m_infoText = "";
+    }
 
     if (Input::KeyPressed(HELL_KEY_N) && m_viewportIndex == 0) {
 
@@ -67,8 +79,8 @@ void Player::Update(float deltaTime) {
         filterData.collisionGroup = CollisionGroup::GENERIC_BOUNCEABLE;
         filterData.collidesWith = (CollisionGroup)(ENVIROMENT_OBSTACLE | GENERIC_BOUNCEABLE | RAGDOLL);
 
-        PxShape* pxShape = PhysicsUtil::CreateBoxShape(1.0f, 1.0f, 1.0f, Transform());
-        PxRigidDynamic* pxRigid = PhysicsUtil::CreateRigidDynamic(transform, filterData, pxShape, Transform());
+        PxShape* pxShape = Physics::CreateBoxShape(1.0f, 1.0f, 1.0f, Transform());
+        PxRigidDynamic* pxRigid = Physics::CreateRigidDynamic(transform, filterData, pxShape, Transform());
 
     }
 
@@ -101,16 +113,25 @@ void Player::Respawn() {
     }
 
     GiveDefaultLoadout();
-    SwitchWeapon("Knife", WeaponAction::DRAW_BEGIN);
+    //SwitchWeapon("Knife", WeaponAction::DRAW_BEGIN);
 
+    if (m_viewportIndex == 0) {
+        SwitchWeapon("SPAS", WeaponAction::DRAW_BEGIN);
+    }
+    else {
+        SwitchWeapon("Knife", WeaponAction::DRAW_BEGIN);
+    }
+        
     //if (_characterController) {
     //    PxExtendedVec3 globalPose = PxExtendedVec3(spawnPoint.position.x, spawnPoint.position.y, spawnPoint.position.z);
     //    _characterController->setFootPosition(globalPose);
     //}
     //_position = spawnPoint.position;
     //_rotation = spawnPoint.rotation;
-    Audio::PlayAudio("Glock_Equip.wav", 0.5f);
-    
+
+    if (Game::GetTotalTime() > 1.0) {
+        Audio::PlayAudio("Glock_Equip.wav", 0.5f);
+    }
     m_awaitingSpawn = false;
 }
 
@@ -223,4 +244,10 @@ float Player::GetWeaponAudioFrequency() {
 
 glm::mat4 Player::GetViewWeaponCameraMatrix() {
     return m_viewWeaponCameraMatrix;
+}
+
+
+void Player::DisplayInfoText(const std::string& text) {
+    m_infoTextTimer = 2.0f;
+    m_infoText = text;
 }

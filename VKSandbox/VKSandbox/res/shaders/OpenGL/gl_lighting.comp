@@ -38,8 +38,6 @@ void main() {
         return;
     }    
     
-    vec4 WOLRD_POS_FROM_TEXTURE = texture(WorldPositionTexture, uv_screenspace);
-
     // Inputs
     vec4 baseColor = texture(BaseColorTexture, uv_screenspace);
     vec4 normal = texture(NormalTexture, uv_screenspace);
@@ -55,44 +53,51 @@ void main() {
     vec2 renderTargetSize = vec2(rendererData.gBufferWidth, rendererData.gBufferHeight);
     int splitScreenMode = rendererData.splitscreenMode;
 
-    float clipSpaceXMin = viewportData[viewportIndex].clipSpaceXMin;
-    float clipSpaceXMax = viewportData[viewportIndex].clipSpaceXMax;
-    float clipSpaceYMin = viewportData[viewportIndex].clipSpaceYMin;
-    float clipSpaceYMax = viewportData[viewportIndex].clipSpaceYMax;
+    //float clipSpaceXMin = viewportData[viewportIndex].clipSpaceXMin;
+    //float clipSpaceXMax = viewportData[viewportIndex].clipSpaceXMax;
+    //float clipSpaceYMin = viewportData[viewportIndex].clipSpaceYMin;
+    //float clipSpaceYMax = viewportData[viewportIndex].clipSpaceYMax;
     mat4 inverseProjection = viewportData[viewportIndex].inverseProjection;
     mat4 inverseView = viewportData[viewportIndex].inverseView;
     vec3 viewPos = inverseView[3].xyz;
 
     // Position from depth reconstruction
-    float z = texture(DepthTexture, uv_screenspace).r;
-    vec2 clipSpaceTexCoord = uv_screenspace;
-	clipSpaceTexCoord.x = (clipSpaceTexCoord.x - clipSpaceXMin) / (clipSpaceXMax - clipSpaceXMin);
-	clipSpaceTexCoord.y = (clipSpaceTexCoord.y - clipSpaceYMin) / (clipSpaceYMax - clipSpaceYMin);
-	vec4 clipSpacePosition = vec4(clipSpaceTexCoord * 2.0 - 1.0, z, 1.0);
-    vec4 viewSpacePosition = inverseProjection * clipSpacePosition;
-    viewSpacePosition /= viewSpacePosition.w;
-    vec4 worldSpacePosition = inverseView * viewSpacePosition;
+    //float z = texture(DepthTexture, uv_screenspace).r;
+    //vec2 clipSpaceTexCoord = uv_screenspace;
+	//clipSpaceTexCoord.x = (clipSpaceTexCoord.x - clipSpaceXMin) / (clipSpaceXMax - clipSpaceXMin);
+	//clipSpaceTexCoord.y = (clipSpaceTexCoord.y - clipSpaceYMin) / (clipSpaceYMax - clipSpaceYMin);
+	//vec4 clipSpacePosition = vec4(clipSpaceTexCoord * 2.0 - 1.0, z, 1.0);
+    //vec4 viewSpacePosition = inverseProjection * clipSpacePosition;
+    //viewSpacePosition /= viewSpacePosition.w;
+    //vec4 worldSpacePosition = inverseView * viewSpacePosition;
 
-    //worldSpacePosition.rgb = WOLRD_POS_FROM_TEXTURE.rgb;
+    vec3 worldSpacePosition = texture(WorldPositionTexture, uv_screenspace).rgb;
 
 
 
 
     // Direct light
     vec3 directLighting = vec3(0); 
-    for (int i = 0; i < 2; i++) {    
+    for (int i = 0; i < 3; i++) {    
         Light light = lights[i];
         vec3 lightPosition = vec3(light.posX, light.posY, light.posZ);
         vec3 lightColor =  vec3(light.colorR, light.colorG, light.colorB);
         float lightStrength = light.strength;
         float lightRadius = light.radius;
-        directLighting += GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal.xyz, worldSpacePosition.xyz, gammaBaseColor.rgb, roughness, metallic, viewPos);
+       
+       directLighting += GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal.xyz, worldSpacePosition.xyz, gammaBaseColor.rgb, roughness, metallic, viewPos);
+   
+
+        // Hack to render lighting for faces of grass blades facing away from light
+        if (worldSpacePosition.y < -4.8) {
+            directLighting += GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, -normal.xyz, worldSpacePosition.xyz, gammaBaseColor.rgb, roughness, metallic, viewPos);
+        }
     }
         
     		  
     // Ambient light
     vec3 amibentLightColor = vec3(1, 0.98, 0.94);
-   float ambientIntensity = 0.005;
+   float ambientIntensity = 0.0025;
    vec3 ambientColor = baseColor.rgb * amibentLightColor;
    vec3 ambientLighting = ambientColor * ambientIntensity;
 
@@ -101,23 +106,27 @@ void main() {
     float finalAlpha = baseColor.a;
     
     // Composite
-    vec3 finalColor = directLighting.rgb;// + ambientLighting;
+    vec3 finalColor = directLighting.rgb + ambientLighting;
+    
+    // Emissive
+    vec3 emssiveColor = texture(EmissiveTexture, uv_screenspace).rgb;
+    //finalColor += emssiveColor;
 
     // Tone mapping
-	finalColor = mix(finalColor, Tonemap_ACES(finalColor), 1.0);    
-	finalColor = pow(finalColor, vec3(1.0/2.2));
-	finalColor = mix(finalColor, Tonemap_ACES(finalColor), 0.1235);  
+    finalColor = mix(finalColor, Tonemap_ACES(finalColor), 1.0);   
+    
+    // Gamma correct
+    finalColor = pow(finalColor, vec3(1.0/2.2));
+
+	finalColor = mix(finalColor, Tonemap_ACES(finalColor), 0.35);  
     
     finalColor.rgb = finalColor.rgb * finalAlpha;    
     vec4 outputColor = vec4(finalColor, finalAlpha);
     
     // Don't apply lighting to skybox
     float skyboxFlag = float(normal.x == 0.0 && normal.y == 0.0 && normal.z == 0.0);
-    outputColor.rgb = mix(outputColor.rgb, baseColor.rgb, skyboxFlag);
+    outputColor.rgba = mix(outputColor.rgba, baseColor.rgba, skyboxFlag);
     
-    // Post process vibrance
-    outputColor = Vibrance(outputColor, 1.5);
-
     if (false) {
         if (viewportIndex == 0) {
             outputColor.rgb = vec3(1.0) - outputColor.rgb;
@@ -133,16 +142,27 @@ void main() {
         }
     }
 
-    //vec3 N = normal.xyz;
-    //vec3 L = normalize(lightPosition - worldSpacePosition.xyz);
-    //float NoL = clamp(dot(N, L), 0.0, 1.0);
-    //outputColor.rgb = vec3(NoL);
-    //outputColor.rgb = normal.rgb;
+    
+	// Noise
+	vec2 filmRes = vec2(rendererData.gBufferWidth, rendererData.gBufferHeight);
+    vec2 uv = uv_screenspace;
+    float time = rendererData.time;
+	vec2 coord = pixelCoords;
+	vec2 rest = modf(uv * filmRes, coord);
+	vec3 noise00 = FilmPixel(coord / filmRes, time);
+	vec3 noise01 = FilmPixel((coord + vec2(0, 1)) / filmRes, time);
+	vec3 noise10 = FilmPixel((coord + vec2(1, 0)) / filmRes, time);
+	vec3 noise11 = FilmPixel((coord + vec2(1, 1)) / filmRes, time);
+	vec3 noise = mix(mix(noise00, noise01, rest.y), mix(noise10, noise11, rest.y), rest.x) * vec3(0.7, 0.6, 0.8);
+	float noiseSpeed = 15.0;
+	float x = Rand(uv + Rand(vec2(int(time * noiseSpeed), int(-time * noiseSpeed))));
+	float noiseFactor = 0.035;
+	outputColor = outputColor + (x * -noiseFactor) + (noiseFactor / 2);
 
-
-    vec4 emssiveColor = texture(EmissiveTexture, uv_screenspace);
-    outputColor += emssiveColor;
-
-
+    // Output
     imageStore(outputImage, pixelCoords, outputColor);
+    
+    //imageStore(outputImage, pixelCoords, vec4(normal.rgb, 1.0));
+    //imageStore(outputImage, pixelCoords, vec4(baseColor.rgb, 1.0));
+    //imageStore(outputImage, pixelCoords, vec4(worldSpacePosition.rgb, 1.0));
 }

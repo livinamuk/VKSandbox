@@ -1,6 +1,7 @@
 #pragma once
 
 #define UNDEFINED_STRING "UNDEFINED_STRING"
+#define TIME_WRAP 10000.0f
 
 #define NEAR_PLANE 0.0025f
 #define FAR_PLANE 500.0f

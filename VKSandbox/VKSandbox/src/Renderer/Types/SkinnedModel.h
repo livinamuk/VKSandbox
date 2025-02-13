@@ -8,14 +8,6 @@
 #include "Animation.h"
 #include "SkinnedMesh.hpp"
 
-struct Joint {
-    const char* m_name;
-    int m_parentIndex;
-    glm::mat4 m_inverseBindTransform;
-    glm::mat4 m_currentFinalTransform;
-    glm::mat4 m_boneOffset;
-};
-
 struct AnimatedTransforms {
     std::vector<glm::mat4> local;
     std::vector<glm::mat4> worldspace;
@@ -32,19 +24,24 @@ struct AnimatedTransforms {
     }
 };
 
-struct BoneInfo {
-    glm::mat4 BoneOffset;
-    glm::mat4 FinalTransformation;
-    glm::mat4 ModelSpace_AnimatedTransform;
-    glm::mat4 DebugMatrix_BindPose;
-    std::string BoneName;
 
-    BoneInfo() {
-        BoneOffset = glm::mat4(0);
-        FinalTransformation = glm::mat4(0);
-        DebugMatrix_BindPose = glm::mat4(1);
-        ModelSpace_AnimatedTransform = glm::mat4(1);
-    }
+struct Node {
+    const char* m_name;
+    int m_parentIndex;
+    glm::mat4 m_inverseBindTransform;
+    glm::mat4 m_currentFinalTransform;
+    glm::mat4 m_boneOffset;
+};
+
+struct Bone {
+    std::string name = "";
+    glm::mat4 inverseBindTransform = glm::mat4(1);
+    int parentIndex = -1;
+};
+
+struct BoneInfo {
+    glm::mat4 BoneInfoOffset = glm::mat4(0);
+    std::string BoneName = "";
 };
 
 struct VertexBoneData {
@@ -80,17 +77,9 @@ public:
         m_NumBones = 0;
     }
 
-    void UpdateBoneTransformsFromAnimation(float animTime, Animation* animation, AnimatedTransforms& animatedTransforms, glm::mat4& outCameraMatrix);
-    void UpdateBoneTransformsFromBindPose(AnimatedTransforms& animatedTransforms);
-    void CalcInterpolatedScaling(glm::vec3& Out, float AnimationTime, const AnimatedNode* animatedNode);
-    void CalcInterpolatedRotation(glm::quat& Out, float AnimationTime, const AnimatedNode* animatedNode);
-    void CalcInterpolatedPosition(glm::vec3& Out, float AnimationTime, const AnimatedNode* animatedNode);
-    void CalcInterpolatedScale(glm::vec3& Out, float AnimationTime, const AnimatedNode* animatedNode);
-    int FindAnimatedNodeIndex(float AnimationTime, const AnimatedNode* animatedNode);
-    const AnimatedNode* FindAnimatedNode(Animation* animation, const char* NodeName);
-
-    std::vector<Joint> m_joints;
-    //unsigned int m_Buffers[NUM_VBs];
+    std::vector<Node> m_nodes;
+    std::vector<Bone> m_bones; 
+    
     std::map<std::string, unsigned int> m_BoneMapping;
     unsigned int m_NumBones;
     std::vector<BoneInfo> m_BoneInfo;

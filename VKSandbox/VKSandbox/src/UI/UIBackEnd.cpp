@@ -21,16 +21,26 @@ namespace UIBackEnd {
         std::string outputPath = "res/fonts/";
         FontSpriteSheetPacker::Export(name, characters, textureSourcePath, outputPath);
 
+        name = "AmmoFont";
+        characters = "0123456789/";
+        textureSourcePath = "res/fonts/raw_images/ammo_font/";
+        FontSpriteSheetPacker::Export(name, characters, textureSourcePath, outputPath);
+
         // Import fonts
         FontSpriteSheet standardFont = FontSpriteSheetPacker::Import("res/fonts/StandardFont.json");
+        FontSpriteSheet ammoFont = FontSpriteSheetPacker::Import("res/fonts/AmmoFont.json");
         TextBlitter::AddFont(standardFont);
+        TextBlitter::AddFont(ammoFont);
     }
 
     void Update() {
         
         if (Debug::IsDebugTextVisible()) {
-            BlitText(Debug::GetText(), "StandardFont", 0, 0, 2.0f);
+            BlitText(Debug::GetText(), "StandardFont", 0, 0, Alignment::TOP_LEFT, 2.0f);
         }
+
+        const Resolutions& resolutions = Config::GetResolutions();
+     //   BlitText("0123456789/", "AmmoFont", 100, 250, 2.0f);
 
         //if (AssetManager::LoadingComplete()) {
         //    BlitTexture("ui_test", glm::ivec2(250, 150), Alignment::TOP_LEFT, glm::vec4(1.0, 0.0, 0.0, 0.5), glm::ivec2(-1, -1));
@@ -53,16 +63,17 @@ namespace UIBackEnd {
         g_renderItems.clear();
     }
 
-    void BlitText(const std::string& text, const std::string& fontName, int originX, int originY, float scale) {
+    void BlitText(const std::string& text, const std::string& fontName, int originX, int originY, Alignment alignment, float scale, TextureFilter textureFilter) {
         FontSpriteSheet* fontSpriteSheet = TextBlitter::GetFontSpriteSheet(fontName);
         if (!fontSpriteSheet) {
+            std::cout << "UIBackEnd::BlitText() failed to find " << fontName << "\n";
             return;
         }
         int baseVertex = g_vertices.size();
 
         const Resolutions& resolutions = Config::GetResolutions();
 
-        MeshData2D meshData = TextBlitter::BlitText(text, fontName, originX, originY, resolutions.ui, scale, baseVertex);
+        MeshData2D meshData = TextBlitter::BlitText(text, fontName, originX, originY, resolutions.ui, alignment, scale, baseVertex);
         g_vertices.insert(std::end(g_vertices), std::begin(meshData.vertices), std::end(meshData.vertices));
         g_indices.insert(std::end(g_indices), std::begin(meshData.indices), std::end(meshData.indices));
 
@@ -70,9 +81,11 @@ namespace UIBackEnd {
         renderItem.baseVertex = 0;
         renderItem.baseIndex = g_indices.size() - meshData.indices.size();
         renderItem.indexCount = meshData.indices.size();
+        renderItem.textureIndex = AssetManager::GetTextureIndexByName(fontName); 
+        renderItem.filter = (textureFilter == TextureFilter::NEAREST) ? 1 : 0;
     }
 
-    void BlitTexture(const std::string& textureName, glm::ivec2 location, Alignment alignment, glm::vec4 colorTint, glm::ivec2 size) {
+    void BlitTexture(const std::string& textureName, glm::ivec2 location, Alignment alignment, glm::vec4 colorTint, glm::ivec2 size, TextureFilter textureFilter) {
         // Bail if texture not found
         int textureIndex = AssetManager::GetTextureIndexByName(textureName);
         if (textureIndex == -1) {
@@ -139,6 +152,7 @@ namespace UIBackEnd {
         renderItem.baseIndex = baseIndex;
         renderItem.indexCount = 6;
         renderItem.textureIndex = textureIndex;
+        renderItem.filter = (textureFilter == TextureFilter::NEAREST) ? 1 : 0;
     }
 
 

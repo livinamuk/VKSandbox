@@ -18,26 +18,26 @@ namespace ViewportManager {
         g_viewports[1].SetPerspective(1.0f, NEAR_PLANE, FAR_PLANE);
         g_viewports[2].SetPerspective(1.0f, NEAR_PLANE, FAR_PLANE);
         g_viewports[3].SetPerspective(1.0f, NEAR_PLANE, FAR_PLANE);
+        Update();
     }
 
-    void UpdateMouseHoverStates() {
+    void Update() {
         for (Viewport& viewport : g_viewports) {
             viewport.Update();
         }
-    }
 
-    void UpdateViewports() {
-
+        // Set state / recreate matrices based on editor/splitscreen mode
+        // Clean this up when you have a moment.
         if (Editor::IsOpen()) {
             float splitX = Editor::GetVerticalDividerXPos();
             float splitY = Editor::GetHorizontalDividerYPos();
-            g_viewports[0].SetPosition(glm::vec2(0.0f,   1.0f - splitY));  // Top-left
-            g_viewports[1].SetPosition(glm::vec2(splitX, 1.0f - splitY));  // Top-right
-            g_viewports[2].SetPosition(glm::vec2(0.0f,   0.0f));           // Bottom-left
-            g_viewports[3].SetPosition(glm::vec2(splitX, 0.0f));           // Bottom-right
-            g_viewports[0].SetSize(glm::vec2(splitX,        splitY));
+            g_viewports[0].SetPosition(glm::vec2(0.0f, 1.0f - splitY));     // Top-left
+            g_viewports[1].SetPosition(glm::vec2(splitX, 1.0f - splitY));   // Top-right
+            g_viewports[2].SetPosition(glm::vec2(0.0f, 0.0f));              // Bottom-left
+            g_viewports[3].SetPosition(glm::vec2(splitX, 0.0f));            // Bottom-right
+            g_viewports[0].SetSize(glm::vec2(splitX, splitY));
             g_viewports[1].SetSize(glm::vec2(1.0f - splitX, splitY));
-            g_viewports[2].SetSize(glm::vec2(splitX,        1.0f - splitY));
+            g_viewports[2].SetSize(glm::vec2(splitX, 1.0f - splitY));
             g_viewports[3].SetSize(glm::vec2(1.0f - splitX, 1.0f - splitY));
             g_viewports[0].Show();
             g_viewports[1].Show();
@@ -95,7 +95,6 @@ namespace ViewportManager {
                 g_viewports[3].Show();
             }
         }
-        //Renderer::RecreateBlurBuffers();
     }
 
     Viewport* GetViewportByIndex(int32_t viewportIndex) {

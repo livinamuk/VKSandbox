@@ -8,8 +8,8 @@ void SpriteSheetTexture::Init() {
     size_t dot = m_fileInfo.name.find_last_of('.');
     std::string dims = m_fileInfo.name.substr(lastUnderscore + 1, dot - lastUnderscore - 1);
     size_t x = dims.find('x');
-    m_rows = std::stoi(dims.substr(0, x));
-    m_columns = std::stoi(dims.substr(x + 1));
+    m_columns = std::stoi(dims.substr(0, x));
+    m_rows = std::stoi(dims.substr(x + 1));
 
     Texture* texture = AssetManager::GetTextureByName(m_textureName);
     if (!texture) {
@@ -21,15 +21,12 @@ void SpriteSheetTexture::Init() {
     m_fullHeight = texture->GetHeight(0);
     m_frameWidth = m_fullWidth / m_columns;
     m_frameHeight = m_fullHeight / m_rows;
-    m_frameCount = m_rows * m_columns;
+    m_frameCount = m_rows * m_columns; 
+    m_textureIndex = AssetManager::GetTextureIndexByName(m_textureName);
 }
 
 void SpriteSheetTexture::SetFileInfo(FileInfo fileInfo) {
     m_fileInfo = fileInfo;
-}
-
-FileInfo SpriteSheetTexture::GetFileInfo() {
-    return m_fileInfo;
 }
 
 std::string SpriteSheetTexture::GetDebugInfo() {

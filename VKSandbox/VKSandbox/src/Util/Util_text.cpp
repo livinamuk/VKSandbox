@@ -110,6 +110,8 @@ namespace Util {
         case WeaponAction::ADS_IDLE:                      return "ADS_IDLE";
         case WeaponAction::ADS_FIRE:                      return "ADS_FIRE";
         case WeaponAction::MELEE:                         return "MELEE";
+        case WeaponAction::TOGGLING_AUTO:                 return "TOGGLING_AUTO";
+        case WeaponAction::DRY_FIRE:                      return "DRY_FIRE";
         default:                                          return "UNDEFINED";
         }
     }

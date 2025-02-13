@@ -12,8 +12,8 @@
 #endif
 
 namespace InputMulti {
-    std::vector<MouseState> g_mouseStates;
-    std::vector<KeyboardState> g_keyboardStates;
+    MouseState g_mouseStates[4];
+    KeyboardState g_keyboardStates[4];
     std::vector<HANDLE> g_mouseHandles;
     std::vector<HANDLE> g_keyboardHandles;
     const USHORT HID_USAGE_GENERIC_MOUSE = 0x02;
@@ -88,7 +88,7 @@ namespace InputMulti {
         RAWINPUTDEVICE rid = {};
         rid.usUsagePage = 0x01;
         rid.usUsage = type;
-        rid.dwFlags = RIDEV_INPUTSINK;
+        rid.dwFlags = 0;
         rid.hwndTarget = eventWindow;
         return RegisterRawInputDevices(&rid, 1, sizeof(rid));
     }
@@ -114,12 +114,6 @@ namespace InputMulti {
         }
         RegisterDeviceOfType(HID_USAGE_GENERIC_MOUSE, eventWindow);
         RegisterDeviceOfType(HID_USAGE_GENERIC_KEYBOARD, eventWindow);
-
-        // Add support for 2 mice/keyboard
-        for (int i = 0; i < 2; i++) {
-            g_mouseStates.push_back(MouseState());
-            g_keyboardStates.push_back(KeyboardState());
-        }
     }
 
     void Update() {

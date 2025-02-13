@@ -1,28 +1,28 @@
 #include "SpriteSheetObject.h"
 #include "AssetManagement/AssetManager.h"
+#include "Util/Util.h"
 
-SpriteSheetObject::SpriteSheetObject(SpriteSheetObjectCreateInfo createInfo) {
-    m_transform.position = createInfo.position;
-    m_transform.rotation = createInfo.rotation;
-    m_transform.scale = createInfo.scale;
+SpriteSheetObject::SpriteSheetObject(const SpriteSheetObjectCreateInfo& createInfo) {
+    Init(createInfo);
+}
+
+void SpriteSheetObject::Init(const SpriteSheetObjectCreateInfo& createInfo) {
+    m_position = createInfo.position;
+    m_rotation = createInfo.rotation;
+    m_scale = createInfo.scale;
     m_loop = createInfo.loop;
     m_billboard = createInfo.billboard;
     m_textureName = createInfo.textureName;
     m_animationSpeed = createInfo.animationSpeed;
-
-
-   //m_textureName = AssetManager::GetTextureIndexByName(m_textureName);
-   //
-   //
-   //m_frameCount = SpriteSheetTexture->m_frameCount;
-  
+    m_renderingEnabled = createInfo.renderingEnabled;
+    m_spriteSheetTexture = AssetManager::GetSpriteSheetTextureByName(m_textureName);
 }
 
 void SpriteSheetObject::Update(float deltaTime) {
-    int frameCount = m_frameCount;
+    // Calculate animation
+    uint32_t frameCount = m_spriteSheetTexture->GetFrameCount();
     float frameDuration = 1.0f / m_animationSpeed;
     float totalAnimationTime = frameCount * frameDuration;
-    m_loop = false;
     if (!m_loop) {
         m_time = std::min(m_time + deltaTime, totalAnimationTime);
     }
@@ -40,51 +40,50 @@ void SpriteSheetObject::Update(float deltaTime) {
     }
     else {
         m_frameIndex = static_cast<int>(floor(frameTime)) % frameCount;
-        m_frameIndexNext = m_loop ? (m_frameIndex + 1) % m_frameCount : std::min(m_frameIndex + 1, m_frameCount - 1);
+        m_frameIndexNext = m_loop ? (m_frameIndex + 1) % frameCount : std::min(m_frameIndex + 1, frameCount - 1);
     }
     m_animationComplete = !m_loop && m_time >= totalAnimationTime;
+    m_timeAsPercentage = totalAnimationTime > 0.0f ? (m_time / totalAnimationTime) : 0.0f;
+
+    // Construct render item
+    if (m_renderingEnabled) {
+        m_renderItem.frameIndex = m_frameIndex;
+        m_renderItem.frameIndexNext = m_frameIndexNext;
+        m_renderItem.columnCount = m_spriteSheetTexture->GetColumnCount();
+        m_renderItem.rowCount = m_spriteSheetTexture->GetRowCount();
+        m_renderItem.mixFactor = m_mixFactor;
+        m_renderItem.textureIndex = m_spriteSheetTexture->GetTextureIndex();
+        m_renderItem.isBillboard = (int)m_billboard;
+        m_renderItem.position = glm::vec4(m_position, 1.0);
+        m_renderItem.rotation = glm::vec4(m_rotation, 0.0);
+        m_renderItem.scale = glm::vec4(m_scale, 0.0);
+    }
 }
 
-glm::mat4 SpriteSheetObject::GetModelMatrix() {
-    return m_transform.to_mat4();
+void SpriteSheetObject::SetPosition(glm::vec3 position) {
+    m_position = position;
 }
 
-glm::mat4 SpriteSheetObject::GetBillboardModelMatrix(glm::vec3 cameraForward, glm::vec3 cameraRight, glm::vec3 cameraUp) {
-    glm::mat4 billboardMatrix = glm::mat4(1.0f);
-    billboardMatrix[0] = glm::vec4(cameraRight, 0.0f);
-    billboardMatrix[1] = glm::vec4(cameraUp, 0.0f);
-    billboardMatrix[2] = glm::vec4(cameraForward, 0.0f);
-    billboardMatrix[3] = glm::vec4(m_transform.position, 1.0f);
-    Transform scaleTransform;
-    scaleTransform.scale = m_transform.scale;
-    return billboardMatrix * scaleTransform.to_mat4();
+void SpriteSheetObject::SetRotation(glm::vec3 rotation) {
+    m_rotation = rotation;
 }
 
-uint32_t SpriteSheetObject::GetFrameIndex() {
-    return m_frameIndex;
+void SpriteSheetObject::SetScale(glm::vec3 scale) {
+    m_scale = scale;
 }
 
-uint32_t SpriteSheetObject::GetNextFrameIndex() {
-    return m_frameIndexNext;
-
+void SpriteSheetObject::SetTime(float time) {
+    m_time = time;
 }
 
-bool SpriteSheetObject::IsBillboard() {
-    return m_billboard;
+void SpriteSheetObject::SetSpeed(float speed) {
+    m_animationSpeed= speed;
 }
 
-float SpriteSheetObject::GetMixFactor() {
-    return m_mixFactor;
+void SpriteSheetObject::EnableRendering() {
+    m_renderingEnabled = true;
 }
 
-const std::string& SpriteSheetObject::GetTextureName() {
-    return m_textureName;
-}
-
-glm::vec3 SpriteSheetObject::GetPosition() {
-    return m_transform.position;
-}
-
-bool SpriteSheetObject::IsComplete() {
-    return !m_loop && m_animationComplete;
+void SpriteSheetObject::DisableRendering() {
+    m_renderingEnabled = false;
 }

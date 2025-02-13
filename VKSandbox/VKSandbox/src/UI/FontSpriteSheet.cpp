@@ -244,7 +244,7 @@ namespace FontSpriteSheetPacker {
             switch (c) {
             case '\"': escaped += "\\\""; break; // Escape double quote
             case '\\': escaped += "\\\\"; break; // Escape backslash
-            case '/': escaped += "\\/"; break;  // Escape forward slash (optional)
+            //case '/': escaped += "\\/"; break;  // Escape forward slash (optional)
             case '\b': escaped += "\\b"; break; // Escape backspace
             case '\f': escaped += "\\f"; break; // Escape form feed
             case '\n': escaped += "\\n"; break; // Escape newline
@@ -264,7 +264,7 @@ namespace FontSpriteSheetPacker {
                 switch (str[i + 1]) {
                 case '\"': unescaped += '\"'; break; // Unescape double quote
                 case '\\': unescaped += '\\'; break; // Unescape backslash
-                case '/': unescaped += '/'; break;  // Unescape forward slash
+                //case '/': unescaped += '/'; break;  // Unescape forward slash
                 case 'b': unescaped += '\b'; break; // Unescape backspace
                 case 'f': unescaped += '\f'; break; // Unescape form feed
                 case 'n': unescaped += '\n'; break; // Unescape newline

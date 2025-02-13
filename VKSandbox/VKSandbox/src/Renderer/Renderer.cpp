@@ -5,6 +5,8 @@
 
 namespace Renderer {
 
+    DebugLineRenderMode g_debugLineRenderMode = DebugLineRenderMode::SHOW_NO_LINES;
+
     void InitMain() {
         if (BackEnd::GetAPI() == API::OPENGL) {
             OpenGLRenderer::InitMain();
@@ -38,15 +40,6 @@ namespace Renderer {
         }
         else if (BackEnd::GetAPI() == API::VULKAN) {
             //VulkanRenderer::HotloadShaders();
-        }
-    }
-
-    void RecreateBlurBuffers() {
-        if (BackEnd::GetAPI() == API::OPENGL) {
-            OpenGLRenderer::RecreateBlurBuffers();
-        }
-        else if (BackEnd::GetAPI() == API::VULKAN) {
-            //VulkanRenderer::RecreateBlurBuffers();
         }
     }
 
@@ -84,5 +77,38 @@ namespace Renderer {
         else if (BackEnd::GetAPI() == API::VULKAN) {
             // TODO
         }
+    }
+
+    void Renderer::NextDebugLineRenderMode() {
+        std::vector<DebugLineRenderMode> allowedDebugLineRenderModes = {
+            SHOW_NO_LINES,
+            PHYSX_ALL,
+            //PATHFINDING,
+            //PHYSX_COLLISION,
+            //PATHFINDING_RECAST,
+            //RTX_LAND_TOP_LEVEL_ACCELERATION_STRUCTURE,
+            //RTX_LAND_BOTTOM_LEVEL_ACCELERATION_STRUCTURES,
+            //BOUNDING_BOXES,
+        };
+
+        g_debugLineRenderMode = (DebugLineRenderMode)(int(g_debugLineRenderMode) + 1);
+        if (g_debugLineRenderMode == DEBUG_LINE_MODE_COUNT) {
+            g_debugLineRenderMode = (DebugLineRenderMode)0;
+        }
+        // If mode isn't in available modes list, then go to next
+        bool allowed = false;
+        for (auto& avaliableMode : allowedDebugLineRenderModes) {
+            if (g_debugLineRenderMode == avaliableMode) {
+                allowed = true;
+                break;
+            }
+        }
+        if (!allowed && g_debugLineRenderMode != DebugLineRenderMode::SHOW_NO_LINES) {
+            NextDebugLineRenderMode();
+        }
+    }
+
+    DebugLineRenderMode GetDebugLineRenderMode() {
+        return g_debugLineRenderMode;
     }
 }

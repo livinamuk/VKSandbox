@@ -19,6 +19,8 @@ struct AnimationNames {
     std::string reload;
     std::string draw;
     std::string spawn;
+    std::string dryFire;
+    std::string toggleAutoShotgun;
     std::vector<std::string> adsFire;
     std::vector<std::string> fire;
     std::vector<std::string> reloadempty;
@@ -35,7 +37,7 @@ struct AnimationNames {
     std::string shotgunReloadEndPump;
     std::string shotgunReloadOneShell;
     std::string shotgunReloadTwoShells;
-    std::string shotgunFireEmpty;
+    std::string shotgunFireNoPump;
     std::string shotgunDrawPump;
 };
 
@@ -61,7 +63,7 @@ struct AnimationSpeeds {
     float shotgunReloadEndPump = 1.0f;
     float shotgunReloadOneShell = 1.0f;
     float shotgunReloadTwoShells = 1.0f;
-    float shotgunFireEmpty = 1.0f;
+    float shotgunFireNoPump = 1.0f;
 };
 
 struct AudioFiles {
@@ -95,6 +97,7 @@ struct WeaponInfo {
     AnimationCancelPercentages animationCancelPercentages;
     bool auomaticOverride = false;
     bool isGold = false;
+    bool hasAutoSwitch = false;
     float muzzleFlashScale = 1;
     float casingEjectionForce = 1;
     float pistolSlideOffset = 0;
@@ -121,4 +124,24 @@ struct WeaponAttachmentInfo {
     const char* materialName = UNDEFINED_STRING;
     const char* modelName = UNDEFINED_STRING;
     bool isGold = false;
+};
+
+struct WeaponState {
+    bool has = false;
+    bool useSlideOffset = false;
+    bool hasScope = false;
+    bool hasSilencer = false;
+    bool shotgunAwaitingFirstShellReload = false;
+    bool shotgunAwaitingSecondShellReload = false;
+    bool shotgunRequiresPump = true;
+    bool shotgunAwaitingPumpAudio = true;
+    bool shotgunShellChambered = false;
+    bool shotgunInAutoMode = false;
+    int ammoInMag = 0;
+    std::string name = "UNDEFINED_STRING";
+};
+
+struct AmmoState {
+    std::string name = "UNDEFINED_STRING";
+    int ammoOnHand = 0;
 };

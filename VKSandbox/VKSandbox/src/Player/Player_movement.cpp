@@ -5,7 +5,12 @@
 #include "../Input/Input.h"
 
 void Player::UpdateMovement(float deltaTime) {
-    m_Moving = false;
+    m_moving = false;
+    m_crouching = PressingCrouch();
+
+    if (!ViewportIsVisible()) {
+        //return;
+    }
 
     if (!Editor::IsOpen() && m_controlEnabled) {
         // Speed factor
@@ -27,30 +32,32 @@ void Player::UpdateMovement(float deltaTime) {
         glm::vec3 displacement = glm::vec3(0);
         if (PressingWalkLeft()) {
             displacement -= m_camera.GetRight();
-            m_Moving = true;
+            m_moving = true;
         }
         if (PressingWalkRight()) {
             displacement += m_camera.GetRight();
-            m_Moving = true;
+            m_moving = true;
         }
         if (PressingWalkForward()) {
             displacement += m_camera.GetForwardXZ();
-            m_Moving = true;
+            m_moving = true;
         }
         if (PressingWalkBackward()) {
             displacement -= m_camera.GetForwardXZ();
-            m_Moving = true;
+            m_moving = true;
         }
 
-        displacement *= m_walkSpeed * deltaTime * speedFactor;
-
-        // Check grounded state
-        m_grounded = false;
-        for (CharacterCollisionReport& report : Physics::GetCharacterCollisionReports()) {
-            if (report.characterController == m_characterController && report.hitNormal.y > 0.5f) {
-                m_grounded = true;
-            }
+        // Calculate movement speed
+        float targetSpeed = m_crouching ? m_crouchingSpeed : m_walkingSpeed;
+        float interpolationSpeed = 18.0f;
+        if (!IsMoving()) {
+            targetSpeed = 0.0f;
+            interpolationSpeed = 22.0f;
         }
+        m_currentSpeed = Util::FInterpTo(m_currentSpeed, targetSpeed, deltaTime, interpolationSpeed);
+
+        displacement *= m_currentSpeed * deltaTime * speedFactor;
+
 
         // Jump
         if (PresingJump() && HasControl() && m_grounded) {
@@ -66,18 +73,31 @@ void Player::UpdateMovement(float deltaTime) {
             m_yVelocity = -3.5f;
         }
         else {
-            float gravity = 9.8f;// 15.75f; // 9.8 feels like the moon
+            float gravity = 15.75f; // 9.8 feels like the moon
             m_yVelocity -= gravity * deltaTime;
         }
-
         displacement.y += m_yVelocity * deltaTime;
-
         MoveCharacterController(glm::vec3(displacement.x, displacement.y, displacement.z));
+
+        // Check grounded state
+        m_grounded = false;
+        for (CharacterCollisionReport& report : Physics::GetCharacterCollisionReports()) {
+            m_grounded = (report.characterController == m_characterController && report.hitNormal.y > 0.5f);
+        }
+        Physics::ClearCharacterControllerCollsionReports();
     }
 }
 
 bool Player::IsMoving() {
-    return m_Moving;
+    return m_moving;
+}
+
+bool Player::IsCrouching() {
+    return m_crouching;
+}
+
+bool Player::IsGrounded() {
+    return m_grounded;
 }
 
 bool Player::FeetEnteredUnderwater() {

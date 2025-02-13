@@ -23,17 +23,28 @@ namespace AssetManager {
         }
     }
     
-    void GrabSkeleton(SkinnedModel& skinnedModel, const aiNode* pNode, int parentIndex) {
-        Joint joint;
-        joint.m_name = Util::CopyConstChar(pNode->mName.C_Str());
-        joint.m_inverseBindTransform = Util::aiMatrix4x4ToGlm(pNode->mTransformation);
-        joint.m_parentIndex = parentIndex;
-        parentIndex = (int)skinnedModel.m_joints.size(); // don't do your head in with why this works, just be thankful it does..well its actually pretty clear. if u look below
-        skinnedModel.m_joints.push_back(joint);
+    void GrabSkeleton(SkinnedModel& skinnedModel, const aiNode* pNode, int parentIndex,
+        const std::unordered_set<std::string>& requiredNodes) {
+        std::string nodeName = pNode->mName.C_Str();
+
+        // Only store nodes that are part of the required set
+        if (requiredNodes.find(nodeName) != requiredNodes.end()) {
+            Node joint;
+            joint.m_name = Util::CopyConstChar(pNode->mName.C_Str());
+            joint.m_inverseBindTransform = Util::aiMatrix4x4ToGlm(pNode->mTransformation);
+            joint.m_parentIndex = parentIndex;
+            parentIndex = (int)skinnedModel.m_nodes.size();
+            skinnedModel.m_nodes.push_back(joint);
+        }
+
+        // Recursively process children
         for (unsigned int i = 0; i < pNode->mNumChildren; i++) {
-            GrabSkeleton(skinnedModel, pNode->mChildren[i], parentIndex);
+            GrabSkeleton(skinnedModel, pNode->mChildren[i], parentIndex, requiredNodes);
         }
     }
+
+
+
 
     void AssetManager::LoadSkinnedModel(SkinnedModel* skinnedModel) {
 
@@ -58,9 +69,21 @@ namespace AssetManager {
         glm::mat4 globalInverseTransform = glm::inverse(Util::aiMatrix4x4ToGlm(scene->mRootNode->mTransformation));
         for (int i = 0; i < scene->mNumMeshes; i++) {
             const aiMesh* assimpMesh = scene->mMeshes[i];
+
+            //if (skinnedModel->GetName() == "Knife") {
+            //    std::cout << i << " " << assimpMesh->mNumBones << " bones\n";
+            //}
+
             for (unsigned int j = 0; j < assimpMesh->mNumBones; j++) {
                 unsigned int boneIndex = 0;
                 std::string boneName = (assimpMesh->mBones[j]->mName.data);
+
+
+
+                //if (skinnedModel->GetName() == "Knife") {
+                //    std::cout << " " << j << " " << boneName << "\n";
+                //}
+
                 // Created bone if it doesn't exist yet
                 if (skinnedModel->m_BoneMapping.find(boneName) == skinnedModel->m_BoneMapping.end()) {
                     // Allocate an index for a new bone
@@ -68,7 +91,7 @@ namespace AssetManager {
                     skinnedModel->m_NumBones++;
                     BoneInfo bi;
                     skinnedModel->m_BoneInfo.push_back(bi);
-                    skinnedModel->m_BoneInfo[boneIndex].BoneOffset = Util::aiMatrix4x4ToGlm(assimpMesh->mBones[j]->mOffsetMatrix);
+                    skinnedModel->m_BoneInfo[boneIndex].BoneInfoOffset = Util::aiMatrix4x4ToGlm(assimpMesh->mBones[j]->mOffsetMatrix);
                     skinnedModel->m_BoneInfo[boneIndex].BoneName = boneName;
                     skinnedModel->m_BoneMapping[boneName] = boneIndex;
                 }
@@ -166,12 +189,32 @@ namespace AssetManager {
         }
         skinnedModel->m_GlobalInverseTransform = globalInverseTransform;
         skinnedModel->m_vertexCount = totalVertexCount;
-        GrabSkeleton(*skinnedModel, scene->mRootNode, -1);
 
-        for (auto& joint : skinnedModel->m_joints) {
+
+        
+        std::unordered_set<std::string> requiredNodes;
+
+        for (int i = 0; i < scene->mNumMeshes; i++) {
+            const aiMesh* assimpMesh = scene->mMeshes[i];
+            for (unsigned int j = 0; j < assimpMesh->mNumBones; j++) {
+                std::string boneName = assimpMesh->mBones[j]->mName.C_Str();
+                requiredNodes.insert(boneName); 
+
+                // Add the bones parent node also, walking up to the root
+                const aiNode* parentNode = scene->mRootNode->FindNode(boneName.c_str())->mParent;
+                while (parentNode) {
+                    requiredNodes.insert(parentNode->mName.C_Str());
+                    parentNode = parentNode->mParent;
+                }
+            }
+        }
+
+        GrabSkeleton(*skinnedModel, scene->mRootNode, -1, requiredNodes);
+
+        for (auto& joint : skinnedModel->m_nodes) {
             if (skinnedModel->m_BoneMapping.find(joint.m_name) != skinnedModel->m_BoneMapping.end()) {
                 unsigned int boneIndex = skinnedModel->m_BoneMapping[joint.m_name];
-                joint.m_boneOffset = skinnedModel->m_BoneInfo[boneIndex].BoneOffset;
+                joint.m_boneOffset = skinnedModel->m_BoneInfo[boneIndex].BoneInfoOffset;
             }
         }
 
@@ -180,10 +223,33 @@ namespace AssetManager {
         skinnedModel->SetLoadingState(LoadingState::LOADING_COMPLETE);
 
         std::lock_guard<std::mutex> lock(mutex);
-        std::cout << "Loaded " << skinnedModel->GetFileInfo().name << "\n";
+
+        if (skinnedModel->GetFileInfo().name == "Knife") {
+
+
+
+
+
+            std::cout << "Loaded " << skinnedModel->GetFileInfo().name << "\n";
+            std::cout << " skinnedModel->m_BoneInfo.size(): " << skinnedModel->m_BoneInfo.size() << "\n";
+            std::cout << " skinnedModel->m_joints.size(): " << skinnedModel->m_nodes.size() << "\n";
+
+            std::cout << "\n";
+            for (int i = 0; i < skinnedModel->m_BoneInfo.size(); i++) {
+                std::cout << " " << i << ": " << skinnedModel->m_BoneInfo[i].BoneName << "\n";
+            }
+            std::cout << "\n";
+            for (int i = 0; i < skinnedModel->m_nodes.size(); i++) {
+                std::cout << " " << i << ": " << skinnedModel->m_nodes[i].m_name << "\n";
+            }
+        
+        }
     }
 
     void ExportMissingSkinnedModels() {
+
+        return; 
+
         // Scan for new obj and fbx and export custom model format
         for (FileInfo& fileInfo : Util::IterateDirectory("res/skinned_models_raw", { "obj", "fbx" })) {
             std::string assetPath = "res/skinned_models_export_test/" + fileInfo.name + ".skinnedmodel";

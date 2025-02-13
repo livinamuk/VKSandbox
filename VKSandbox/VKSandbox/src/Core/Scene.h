@@ -3,6 +3,7 @@
 #include "AssetManagement/AssetManager.h"
 #include "Core/Debug.h"
 #include "Types/AnimatedGameObject.h"
+#include "Types/BulletCasing.h"
 #include "Types/GameObject.h"
 #include "Types/Light.h"
 #include "Util/Util.h"
@@ -20,9 +21,12 @@ namespace Scene {
     GameObject* GetGameObjectByName(const std::string& name);
     AnimatedGameObject* GetAnimatedGameObjectByIndex(int32_t index);
 
-
     std::vector<AnimatedGameObject>& GetAnimatedGameObjects();
     std::vector<GameObject>& GetGameObjects();
+
+    std::vector<BulletCasing>& GetBulletCasings();
+    std::vector<Light>& GetLights();
+
     std::vector<RenderItem>& GetRenderItems();
     std::vector<RenderItem>& GetRenderItemsBlended();
     std::vector<RenderItem>& GetRenderItemsAlphaDiscarded();
@@ -30,6 +34,7 @@ namespace Scene {
     std::vector<RenderItem>& GetRenderItemsHairBottomLayer();
     std::vector<RenderItem>& GetSkinnedRenderItems();
 
-    std::vector<Light>& GetLights();
+    void AddBulletCasing(BulletCasingCreateInfo createInfo);
     void AddLight(LightCreateInfo createInfo);
+
 }

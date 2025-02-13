@@ -77,6 +77,20 @@ struct RenderItem2D {
     int baseIndex = 0;
 };
 
+struct SpriteSheetRenderItem {
+    glm::vec4 position;
+    glm::vec4 rotation;
+    glm::vec4 scale;
+    int textureIndex;
+    int frameIndex;
+    int frameIndexNext;
+    int rowCount;
+    int columnCount;
+    int isBillboard;
+    float mixFactor;
+    float padding;
+};
+
 struct Vertex2D {
     glm::vec2 position;
     glm::vec2 uv;
@@ -226,10 +240,10 @@ struct ViewportData {
     glm::mat4 projectionView;
     glm::mat4 inverseProjectionView;
     glm::mat4 skyboxProjectionView;
-    float clipSpaceXMin;
-    float clipSpaceXMax;
-    float clipSpaceYMin;
-    float clipSpaceYMax;
+    int xOffset;
+    int yOffset;
+    int width;
+    int height;
 };
 
 struct RendererData {
@@ -240,6 +254,7 @@ struct RendererData {
     float hairBufferWidth;
     float hairBufferHeight;
     int splitscreenMode;
+    float time;
 };
 
 struct Resolutions {
@@ -323,25 +338,6 @@ public: // make private later
             (point.y >= boundsMin.y && point.y <= boundsMax.y) &&
             (point.z >= boundsMin.z && point.z <= boundsMax.z);
     }
-};
-
-struct WeaponState {
-    bool has = false;
-    bool useSlideOffset = false;
-    bool hasScope = false;
-    bool hasSilencer = false;
-    bool shotgunAwaitingFirstShellReload = false;
-    bool shotgunAwaitingSecondShellReload = false;
-    bool shotgunRequiresPump = true;
-    bool shotgunAwaitingPumpAudio = true;
-    int ammoInMag = 0;
-    bool shellInShotgunChamber = false;
-    std::string name = "UNDEFINED_STRING";
-};
-
-struct AmmoState {
-    std::string name = "UNDEFINED_STRING";
-    int ammoOnHand = 0;
 };
 
 struct WaterState {

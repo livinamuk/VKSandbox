@@ -61,7 +61,7 @@ namespace Editor {
                // text += " localMouseX: " + std::to_string(gBufferSpaceCoords.localMouseX) + "\n";
                // text += " localMouseY: " + std::to_string(gBufferSpaceCoords.localMouseY) + "\n";
 
-                UIBackEnd::BlitText(text, "StandardFont", xLeft + 2, yTop + 2, 2.0f);
+                UIBackEnd::BlitText(text, "StandardFont", xLeft + 2, yTop + 2, Alignment::TOP_LEFT, 2.0f);
             }
         }
     }
