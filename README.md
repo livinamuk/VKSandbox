@@ -1,8 +1,8 @@
-﻿# OpenGL Depth Peeled Hair
+﻿# VK Sandbox 
 
 ![Screenshot](screen.jpg)
 
-The current working project for the rewrite of Hell Engine. At some point soon I'm gonna push this over the top of Hell2025.
+The current working project for the rewrite of Hell Engine. Vulkan renderer is broken and missing all features of the GL one (of course it is). At some point soon I'm gonna push this over the top of Hell2025.
 
 ```
 git clone https://github.com/livinamuk/VKSandbox.git
