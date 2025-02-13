@@ -1,27 +1,25 @@
 ﻿# OpenGL Depth Peeled Hair
 
-![Screenshot](Screenshot.jpg)
+![Screenshot](screen.jpg)
 
-Hair rendered with depth peeling, implemented in OpenGL. Should build off the rip in both Debug/Release.
+The current working project for the rewrite of Hell Engine. At some point soon I'm gonna push this over the top of Hell2025.
 
 ```
-git clone https://github.com/livinamuk/GLDepthPeeledHair.git
+git clone https://github.com/livinamuk/VKSandbox.git
 ```
 
 Controls
 
 ```
-WSAD:    walk
-CTRL:    lower camera
-SPACE:   raise camera
-Q:       lower depth peel count
-E:       increase depth peel count
-SHIFT:   slow movement
-F:       fullscreen
+WSAD:      walk
+CTRL:      duck
+SPACE:     jump
+L MOUSE:   fire 
+R MOUSE:   toggle auto shotty
+Q:         next weapon
+V:         next splitscreen mode
+F:         toggle fullscreen
+1/2/3/4:   switch player
 ```
-
-Been using this repo as a playground to implement a new asset loading system too. It uploads compressed dds files with embedded mipmaps asynchronously to the gpu in parallel at full framerate via alternating persistently mapped Pixel Buffer Objects.
-
-![AsyncLoading](AsyncLoading.gif)
 
 Never quit, never waver 🌹
