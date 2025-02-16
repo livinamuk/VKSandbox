@@ -4,10 +4,12 @@
 
 layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
+layout(binding = 0) uniform sampler2D HeightMapTexture;
 layout(binding = 1) uniform sampler2D WorldPositionTexture;
 
 uniform int gridSize;
 uniform vec3 offset;
+uniform float u_heightMapWorldSpaceSize;
 //uniform float spacing;
 
 struct Vertex {
@@ -97,149 +99,159 @@ void main() {
     int index = gid.y * gridSize + gid.x;
 
     float spacing = 0.0185;
+    //spacing = 0.0185 * 0.5;
 
-  //  if (gid.x < gridSize && gid.y < gridSize) 
-    {
+    // World position
+    float posX = float(gid.x) * spacing + floor(offset.x / spacing) * spacing;       
+    float posZ = float(gid.y) * spacing + floor(offset.z / spacing) * spacing;
 
-        // World position
-        float posX = float(gid.x) * spacing + floor(offset.x / spacing) * spacing;        
-        float posY = -4.99;
-        float posZ = float(gid.y) * spacing + floor(offset.z / spacing) * spacing;
 
-        vec3 basePos = vec3(posX, posY, posZ); 
+    
+    float heightMapYHeight = -5;
+    float heightMapYScale = 5;
+    vec2 normalizedCoords = vec2(posX / u_heightMapWorldSpaceSize, posZ / u_heightMapWorldSpaceSize);
+    vec2 texelSize = 1.0 / textureSize(HeightMapTexture, 0);
+    normalizedCoords += texelSize * 0.5;
+    float height = texture(HeightMapTexture, normalizedCoords).r;
+    float posY = heightMapYHeight + (height * heightMapYScale);
+
+    
+    vec3 basePos = vec3(posX, posY, posZ); 
+
+    //vec2 texCoords = normalizedCoords * (heightmapSize / textureSize(HeightMapTexture, 0));
        
 
-       bladeHeight += (Rand(vec2(basePos.z, basePos.x))) * bladeHeight;
-       bladeHeight -= bladeHeight * 0.5;
+    bladeHeight += (Rand(vec2(basePos.z, basePos.x))) * bladeHeight;
+    bladeHeight -= bladeHeight * 0.5;
 
-       //bladeHeight = (0.38+0.62*(Rand(vec2(basePos.z, basePos.x)))) * bladeHeight;
+    //bladeHeight = (0.38+0.62*(Rand(vec2(basePos.z, basePos.x)))) * bladeHeight;
 
-       // Jitter the positon - Commented this out because it doesn't look much different without it
-       // float jitterX = (Rand(vec2(basePos.x, basePos.z)) - 0.5) * 0.1;
-       // float jitterZ = (Rand(vec2(basePos.z, basePos.x)) - 0.5) * 0.1;
-       // basePos.x += jitterX;
-       // basePos.z += jitterZ;
+    // Jitter the positon - Commented this out because it doesn't look much different without it
+    // float jitterX = (Rand(vec2(basePos.x, basePos.z)) - 0.5) * 0.1;
+    // float jitterZ = (Rand(vec2(basePos.z, basePos.x)) - 0.5) * 0.1;
+    // basePos.x += jitterX;
+    // basePos.z += jitterZ;
 
-        // Frustum cull
-        if (!IntersectsSphere(basePos, bladeHeight * 10, viewportIndex)) {
-            return;        
-        }
+    // Frustum cull
+    if (!IntersectsSphere(basePos, bladeHeight * 10, viewportIndex)) {
+       return;        
+    }
         
-        // Cull to screen bounds        
-        vec2 screenUV = WorldToScreen(basePos, projectionView, viewportPos, viewportSize);
-        screenUV = clamp(screenUV, vec2(0.0), vec2(1.0));
+    // Cull to screen bounds        
+    vec2 screenUV = WorldToScreen(basePos, projectionView, viewportPos, viewportSize);
+    screenUV = clamp(screenUV, vec2(0.0), vec2(1.0));
 
-        // Occlusion cull
-        vec3 sceneWorldPos = texture(WorldPositionTexture, screenUV).rgb;
-        float sceneDistanceToCamera = length(sceneWorldPos - viewPos);
-        float baseDistanceToCamera = length(basePos - viewPos);        
-        float boundingRadius = bladeHeight * 0.5;
-        if ((baseDistanceToCamera - boundingRadius) > sceneDistanceToCamera) {
-            return;
-        }
+    // Occlusion cull
+    vec3 sceneWorldPos = texture(WorldPositionTexture, screenUV).rgb;
+    float sceneDistanceToCamera = length(sceneWorldPos - viewPos);
+    float baseDistanceToCamera = length(basePos - viewPos);        
+    float boundingRadius = bladeHeight * 0.5;
+    if ((baseDistanceToCamera - boundingRadius) > sceneDistanceToCamera) {
+        return;
+    }
         
-        // Don't sample skybox
-        if (sceneWorldPos.x == 0.0 && sceneWorldPos.y == 0.0 && sceneWorldPos.z == 0.0) {
-            return;
-        }
+    // Don't sample skybox
+    if (sceneWorldPos.x == 0.0 && sceneWorldPos.y == 0.0 && sceneWorldPos.z == 0.0) {
+        return;
+    }
 
-        // Bend direction
-        vec3 bendDirection = vec3(
-            (Rand(vec2(basePos.z, basePos.x)) * 2.0 - 1.0) * bendStrength, 
-            0.0, 
-            (Rand(vec2(basePos.z, basePos.x)) * 2.0 - 1.0) * bendStrength
+    // Bend direction
+    vec3 bendDirection = vec3(
+        (Rand(vec2(basePos.z, basePos.x)) * 2.0 - 1.0) * bendStrength, 
+        0.0, 
+        (Rand(vec2(basePos.z, basePos.x)) * 2.0 - 1.0) * bendStrength
+    );
+
+
+    // Rotation matrix
+    float rotationAngle = Rand(vec2(basePos.x, basePos.z)) * 3.14159265 * 2.0;
+    mat2 rotationMatrix = mat2(cos(rotationAngle), -sin(rotationAngle), sin(rotationAngle), cos(rotationAngle));
+
+    uint baseIndex = atomicAdd(drawCmd.count, 12);         
+    uint baseVertex = (baseIndex * 4) / 6;
+
+    vec3 prevOffset = vec3(0.0); 
+    int segmentCount = 2;
+
+    for (int s = 0; s <= segmentCount; s++) {
+        
+        float t = s / segmentCount;
+        float y = (s / float(segmentCount)) * bladeHeight;
+        float width = bottomWidth * (1.0 - t) + topWidth * t;
+        prevOffset += bendDirection * t;
+        prevOffset += bendDirection * (1.0 / segmentCount);
+
+        uint vIdx = baseVertex + (s * 2);
+
+        vec3 leftPos = vec3(basePos.x - width, basePos.y + y, basePos.z) + prevOffset;
+        vec3 rightPos = vec3(basePos.x + width, basePos.y + y, basePos.z) + prevOffset;
+
+        leftPos.xz = rotationMatrix * (leftPos.xz - basePos.xz) + basePos.xz;
+        rightPos.xz = rotationMatrix * (rightPos.xz - basePos.xz) + basePos.xz;
+
+        // Store in buffers
+        OutputVertexBuffer[vIdx + 0].position[0] = leftPos.x;
+        OutputVertexBuffer[vIdx + 0].position[1] = leftPos.y;
+        OutputVertexBuffer[vIdx + 0].position[2] = leftPos.z;
+
+        OutputVertexBuffer[vIdx + 1].position[0] = rightPos.x;
+        OutputVertexBuffer[vIdx + 1].position[1] = rightPos.y;
+        OutputVertexBuffer[vIdx + 1].position[2] = rightPos.z;
+    }
+        
+    // Normals
+    for (int s = 0; s < segmentCount; s++) {
+        uint i0 = baseVertex + (s * 2);     // Left vertex (current row)
+        uint i1 = baseVertex + (s * 2) + 1; // Right vertex (current row)
+        uint i2 = baseVertex + (s * 2) + 2; // Left vertex (next row)
+        uint i3 = baseVertex + (s * 2) + 3; // Right vertex (next row)
+
+        vec3 edge1 = vec3(
+            OutputVertexBuffer[i2].position[0] - OutputVertexBuffer[i0].position[0],
+            OutputVertexBuffer[i2].position[1] - OutputVertexBuffer[i0].position[1],
+            OutputVertexBuffer[i2].position[2] - OutputVertexBuffer[i0].position[2]
         );
 
+        vec3 edge2 = vec3(
+            OutputVertexBuffer[i3].position[0] - OutputVertexBuffer[i2].position[0],
+            OutputVertexBuffer[i3].position[1] - OutputVertexBuffer[i2].position[1],
+            OutputVertexBuffer[i3].position[2] - OutputVertexBuffer[i2].position[2]
+        );
 
-        // Rotation matrix
-        float rotationAngle = Rand(vec2(basePos.x, basePos.z)) * 3.14159265 * 2.0;
-        mat2 rotationMatrix = mat2(cos(rotationAngle), -sin(rotationAngle), sin(rotationAngle), cos(rotationAngle));
+        vec3 normal = normalize(cross(edge1, edge2));
 
-        uint baseIndex = atomicAdd(drawCmd.count, 12);         
-        uint baseVertex = (baseIndex * 4) / 6;
+        OutputVertexBuffer[i0].normal[0] = normal.x;
+        OutputVertexBuffer[i0].normal[1] = normal.y;
+        OutputVertexBuffer[i0].normal[2] = normal.z;
 
-        vec3 prevOffset = vec3(0.0); 
-        int segmentCount = 2;
+        OutputVertexBuffer[i1].normal[0] = normal.x;
+        OutputVertexBuffer[i1].normal[1] = normal.y;
+        OutputVertexBuffer[i1].normal[2] = normal.z;
 
-        for (int s = 0; s <= segmentCount; s++) {
-        
-            float t = s / segmentCount;
-            float y = (s / float(segmentCount)) * bladeHeight;
-            float width = bottomWidth * (1.0 - t) + topWidth * t;
-            prevOffset += bendDirection * t;
-            prevOffset += bendDirection * (1.0 / segmentCount);
+        OutputVertexBuffer[i2].normal[0] = normal.x;
+        OutputVertexBuffer[i2].normal[1] = normal.y;
+        OutputVertexBuffer[i2].normal[2] = normal.z;
 
-            uint vIdx = baseVertex + (s * 2);
+        OutputVertexBuffer[i3].normal[0] = normal.x;
+        OutputVertexBuffer[i3].normal[1] = normal.y;
+        OutputVertexBuffer[i3].normal[2] = normal.z;
+    }
 
-            vec3 leftPos = vec3(basePos.x - width, basePos.y + y, basePos.z) + prevOffset;
-            vec3 rightPos = vec3(basePos.x + width, basePos.y + y, basePos.z) + prevOffset;
+    // Indices
+    OutputIndexBuffer[baseIndex + 0] = baseVertex + 0;
+    OutputIndexBuffer[baseIndex + 1] = baseVertex + 1;
+    OutputIndexBuffer[baseIndex + 2] = baseVertex + 2;
 
-            leftPos.xz = rotationMatrix * (leftPos.xz - basePos.xz) + basePos.xz;
-            rightPos.xz = rotationMatrix * (rightPos.xz - basePos.xz) + basePos.xz;
+    OutputIndexBuffer[baseIndex + 3] = baseVertex + 1;
+    OutputIndexBuffer[baseIndex + 4] = baseVertex + 3;
+    OutputIndexBuffer[baseIndex + 5] = baseVertex + 2;
 
-            // Store in buffers
-            OutputVertexBuffer[vIdx + 0].position[0] = leftPos.x;
-            OutputVertexBuffer[vIdx + 0].position[1] = leftPos.y;
-            OutputVertexBuffer[vIdx + 0].position[2] = leftPos.z;
-
-            OutputVertexBuffer[vIdx + 1].position[0] = rightPos.x;
-            OutputVertexBuffer[vIdx + 1].position[1] = rightPos.y;
-            OutputVertexBuffer[vIdx + 1].position[2] = rightPos.z;
-        }
-        
-        // Normals
-        for (int s = 0; s < segmentCount; s++) {
-            uint i0 = baseVertex + (s * 2);     // Left vertex (current row)
-            uint i1 = baseVertex + (s * 2) + 1; // Right vertex (current row)
-            uint i2 = baseVertex + (s * 2) + 2; // Left vertex (next row)
-            uint i3 = baseVertex + (s * 2) + 3; // Right vertex (next row)
-
-            vec3 edge1 = vec3(
-                OutputVertexBuffer[i2].position[0] - OutputVertexBuffer[i0].position[0],
-                OutputVertexBuffer[i2].position[1] - OutputVertexBuffer[i0].position[1],
-                OutputVertexBuffer[i2].position[2] - OutputVertexBuffer[i0].position[2]
-            );
-
-            vec3 edge2 = vec3(
-                OutputVertexBuffer[i3].position[0] - OutputVertexBuffer[i2].position[0],
-                OutputVertexBuffer[i3].position[1] - OutputVertexBuffer[i2].position[1],
-                OutputVertexBuffer[i3].position[2] - OutputVertexBuffer[i2].position[2]
-            );
-
-            vec3 normal = normalize(cross(edge1, edge2));
-
-            OutputVertexBuffer[i0].normal[0] = normal.x;
-            OutputVertexBuffer[i0].normal[1] = normal.y;
-            OutputVertexBuffer[i0].normal[2] = normal.z;
-
-            OutputVertexBuffer[i1].normal[0] = normal.x;
-            OutputVertexBuffer[i1].normal[1] = normal.y;
-            OutputVertexBuffer[i1].normal[2] = normal.z;
-
-            OutputVertexBuffer[i2].normal[0] = normal.x;
-            OutputVertexBuffer[i2].normal[1] = normal.y;
-            OutputVertexBuffer[i2].normal[2] = normal.z;
-
-            OutputVertexBuffer[i3].normal[0] = normal.x;
-            OutputVertexBuffer[i3].normal[1] = normal.y;
-            OutputVertexBuffer[i3].normal[2] = normal.z;
-        }
-
-        // Indices
-        OutputIndexBuffer[baseIndex + 0] = baseVertex + 0;
-        OutputIndexBuffer[baseIndex + 1] = baseVertex + 1;
-        OutputIndexBuffer[baseIndex + 2] = baseVertex + 2;
-
-        OutputIndexBuffer[baseIndex + 3] = baseVertex + 1;
-        OutputIndexBuffer[baseIndex + 4] = baseVertex + 3;
-        OutputIndexBuffer[baseIndex + 5] = baseVertex + 2;
-
-        OutputIndexBuffer[baseIndex + 0 + 6] = baseVertex + 2;
-        OutputIndexBuffer[baseIndex + 1 + 6] = baseVertex + 3;
-        OutputIndexBuffer[baseIndex + 2 + 6] = baseVertex + 4;
+    OutputIndexBuffer[baseIndex + 0 + 6] = baseVertex + 2;
+    OutputIndexBuffer[baseIndex + 1 + 6] = baseVertex + 3;
+    OutputIndexBuffer[baseIndex + 2 + 6] = baseVertex + 4;
             
-        OutputIndexBuffer[baseIndex + 3 + 6] = baseVertex + 3;
-        OutputIndexBuffer[baseIndex + 4 + 6] = baseVertex + 5;
-        OutputIndexBuffer[baseIndex + 5 + 6] = baseVertex + 4;
-    } 
+    OutputIndexBuffer[baseIndex + 3 + 6] = baseVertex + 3;
+    OutputIndexBuffer[baseIndex + 4 + 6] = baseVertex + 5;
+    OutputIndexBuffer[baseIndex + 5 + 6] = baseVertex + 4;
+    
 }

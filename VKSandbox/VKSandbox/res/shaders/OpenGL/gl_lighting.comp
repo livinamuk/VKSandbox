@@ -91,8 +91,19 @@ void main() {
    
 
         // Hack to render lighting for faces of grass blades facing away from light
-        if (worldSpacePosition.y < -4.8) {
-            directLighting += GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, -normal.xyz, worldSpacePosition.xyz, gammaBaseColor.rgb, roughness, metallic, viewPos) * 0.5;
+        if (worldSpacePosition.y < 4.8) {
+
+            vec3 radius = vec3(0.5); // 0 = 100% thick
+            vec3 subColor = Saturate(baseColor.rgb, 1.5);
+            vec3 L = normalize(lightPosition - worldSpacePosition.xyz);
+            float NdotL = max(dot(normal.xyz, L), 0.0);
+            vec3 sss = 0.2 * exp(-3.0 * abs(NdotL) / (radius + 0.001)); 
+            vec3 sssColor = subColor * radius * sss;
+            float lightAttenuation = smoothstep(lightRadius, 0, length(lightPosition - worldSpacePosition.xyz));
+            directLighting += sssColor * lightAttenuation;
+
+
+            //directLighting += GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, -normal.xyz, worldSpacePosition.xyz, gammaBaseColor.rgb, roughness, metallic, viewPos) * 0.5;
         }
     }
         

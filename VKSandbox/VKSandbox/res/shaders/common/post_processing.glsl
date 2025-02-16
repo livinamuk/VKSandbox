@@ -120,6 +120,12 @@ vec3 AdjustSaturation(vec3 color, float amount) {
     return mix(vec3(gray), color, 1.0 + amount);
 }
 
+vec3 Saturate(vec3 rgb, float adjustment) {
+    const vec3 W = vec3(0.2125, 0.7154, 0.0721);
+    vec3 intensity = vec3(dot(rgb, W));
+    return mix(intensity, rgb, adjustment);
+}
+
 vec3 AdjustHue(vec3 color, float hueShift) {
     const mat3 toYIQ = mat3(
         0.299,  0.587,  0.114,

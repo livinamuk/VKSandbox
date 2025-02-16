@@ -122,6 +122,7 @@ namespace OpenGLRenderer {
     }
 
     void GenerateGrass(float xOffset, float zOffset) {
+        OpenGLFrameBuffer* heightmapFBO = GetFrameBuffer("HeightMap");
 
         int gridSize = static_cast<int>(GRASS_TILE_WORLDSPACE_SIZE / GRASS_TILE_SPACING) + 1;
         int bladeCount = gridSize * gridSize;
@@ -157,6 +158,7 @@ namespace OpenGLRenderer {
 
         // Bind worldspace position texture (for occlusion culling)
         OpenGLFrameBuffer* wipBuffer = GetFrameBuffer("WIP");
+        glBindTextureUnit(0, heightmapFBO->GetColorAttachmentHandleByName("Color"));
         glBindTextureUnit(1, wipBuffer->GetColorAttachmentHandleByName("WorldSpacePosition"));
 
         // Uniforms
@@ -165,6 +167,10 @@ namespace OpenGLRenderer {
         generationShader->SetInt("gridSize", gridSize);
         generationShader->SetFloat("spacing", GRASS_TILE_SPACING);
         generationShader->SetVec3("offset", glm::vec3(xOffset, 0.0f, zOffset));
+        generationShader->SetFloat("u_heightMapWorldSpaceSize", HEIGHTMAP_SIZE * HEIGHTMAP_SCALE_XZ);
+        
+
+        
 
         // Dispatch compute shader
         const int workGroupSize = 16;
