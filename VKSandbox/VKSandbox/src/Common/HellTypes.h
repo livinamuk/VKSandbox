@@ -244,6 +244,16 @@ struct ViewportData {
     int yOffset;
     int width;
     int height;
+    float posX;  // 0 t0 1 range
+    float posY;  // 0 t0 1 range
+    float sizeX; // 0 t0 1 range
+    float sizeY; // 0 t0 1 range
+    glm::vec4 frustumPlane0;
+    glm::vec4 frustumPlane1;
+    glm::vec4 frustumPlane2;
+    glm::vec4 frustumPlane3;
+    glm::vec4 frustumPlane4;
+    glm::vec4 frustumPlane5;
 };
 
 struct RendererData {
@@ -265,11 +275,11 @@ struct Resolutions {
 };
 
 struct DrawIndexedIndirectCommand {
-    uint32_t indexCount;
-    uint32_t instanceCount;
-    uint32_t firstIndex;
-    int32_t  baseVertex;
-    uint32_t baseInstance;
+    uint32_t indexCount = 0;
+    uint32_t instanceCount = 0;
+    uint32_t firstIndex = 0;
+    int32_t  baseVertex = 0;
+    uint32_t baseInstance = 0;
 };
 
 struct DrawCommands {
@@ -412,4 +422,9 @@ struct ViewportSelectionRectangleState {
     int beginY = 0;
     int currentX = 0;
     int currentY = 0;
+};
+
+struct GrassAtomicCounters {
+    unsigned int vertexCount;
+    unsigned int indexCount;
 };

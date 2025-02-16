@@ -11,6 +11,16 @@ struct ViewportData {
     int yOffset;
     int width;
     int height;
+    float posX;  // 0 t0 1 range
+    float posY;  // 0 t0 1 range
+    float sizeX; // 0 t0 1 range
+    float sizeY; // 0 t0 1 range
+    vec4 frustumPlane0;
+    vec4 frustumPlane1;
+    vec4 frustumPlane2;
+    vec4 frustumPlane3;
+    vec4 frustumPlane4;
+    vec4 frustumPlane5;
 };
 
 struct RendererData {

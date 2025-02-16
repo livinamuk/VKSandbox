@@ -44,6 +44,23 @@ void Frustum::Update(const glm::mat4& projectionView) {
         m_planes[i].normal /= magnitude;
         m_planes[i].offset /= magnitude;
     }
+
+    m_corners[0] = IntersectPlanes(m_planes[0].normal, m_planes[0].offset, m_planes[2].normal, m_planes[2].offset, m_planes[4].normal, m_planes[4].offset); // Near bottom-left
+    m_corners[1] = IntersectPlanes(m_planes[1].normal, m_planes[1].offset, m_planes[2].normal, m_planes[2].offset, m_planes[4].normal, m_planes[4].offset); // Near bottom-right
+    m_corners[2] = IntersectPlanes(m_planes[0].normal, m_planes[0].offset, m_planes[3].normal, m_planes[3].offset, m_planes[4].normal, m_planes[4].offset); // Near top-left
+    m_corners[3] = IntersectPlanes(m_planes[1].normal, m_planes[1].offset, m_planes[3].normal, m_planes[3].offset, m_planes[4].normal, m_planes[4].offset); // Near top-right  
+    m_corners[4] = IntersectPlanes(m_planes[0].normal, m_planes[0].offset, m_planes[2].normal, m_planes[2].offset, m_planes[5].normal, m_planes[5].offset); // Far bottom-left
+    m_corners[5] = IntersectPlanes(m_planes[1].normal, m_planes[1].offset, m_planes[2].normal, m_planes[2].offset, m_planes[5].normal, m_planes[5].offset); // Far bottom-right
+    m_corners[6] = IntersectPlanes(m_planes[0].normal, m_planes[0].offset, m_planes[3].normal, m_planes[3].offset, m_planes[5].normal, m_planes[5].offset); // Far top-left
+    m_corners[7] = IntersectPlanes(m_planes[1].normal, m_planes[1].offset, m_planes[3].normal, m_planes[3].offset, m_planes[5].normal, m_planes[5].offset); // Far top-right
+
+    m_boundsMin = glm::vec3(FLT_MAX);
+    m_boundsMax = glm::vec3(-FLT_MAX);
+
+    for (int i = 0; i < 8; i++) {
+        m_boundsMin = glm::min(m_boundsMin, m_corners[i]);
+        m_boundsMax = glm::max(m_boundsMax, m_corners[i]);
+    }
 }
 
 bool Frustum::IntersectsAABB(const AABB& aabb) {
@@ -146,18 +163,10 @@ bool Frustum::IntersectsPoint(const glm::vec3 point) {
     return true;
 }
 
-std::vector<glm::vec3> Frustum::GetFrustumCorners() {
-    std::vector<glm::vec3> corners(8);
-    corners[0] = IntersectPlanes(m_planes[0].normal, m_planes[0].offset, m_planes[2].normal, m_planes[2].offset, m_planes[4].normal, m_planes[4].offset); // Near bottom-left
-    corners[1] = IntersectPlanes(m_planes[1].normal, m_planes[1].offset, m_planes[2].normal, m_planes[2].offset, m_planes[4].normal, m_planes[4].offset); // Near bottom-right
-    corners[2] = IntersectPlanes(m_planes[0].normal, m_planes[0].offset, m_planes[3].normal, m_planes[3].offset, m_planes[4].normal, m_planes[4].offset); // Near top-left
-    corners[3] = IntersectPlanes(m_planes[1].normal, m_planes[1].offset, m_planes[3].normal, m_planes[3].offset, m_planes[4].normal, m_planes[4].offset); // Near top-right  
-    corners[4] = IntersectPlanes(m_planes[0].normal, m_planes[0].offset, m_planes[2].normal, m_planes[2].offset, m_planes[5].normal, m_planes[5].offset); // Far bottom-left
-    corners[5] = IntersectPlanes(m_planes[1].normal, m_planes[1].offset, m_planes[2].normal, m_planes[2].offset, m_planes[5].normal, m_planes[5].offset); // Far bottom-right
-    corners[6] = IntersectPlanes(m_planes[0].normal, m_planes[0].offset, m_planes[3].normal, m_planes[3].offset, m_planes[5].normal, m_planes[5].offset); // Far top-left
-    corners[7] = IntersectPlanes(m_planes[1].normal, m_planes[1].offset, m_planes[3].normal, m_planes[3].offset, m_planes[5].normal, m_planes[5].offset); // Far top-right
-    return corners;
-}
+//std::vector<glm::vec3> Frustum::GetFrustumCorners() {
+//    
+//
+//}
 
 Plane Frustum::CreatePlane(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3) {
     Plane plane;
@@ -178,4 +187,8 @@ glm::vec3 Frustum::IntersectPlanes(const glm::vec3& n1, float d1, const glm::vec
     }
     glm::vec3 result = -(d1 * crossN2N3 + d2 * glm::cross(n3, n1) + d3 * glm::cross(n1, n2)) / denom;
     return result;
+}
+
+glm::vec4 Frustum::GetPlane(int index) { 
+    return glm::vec4(m_planes[index].normal, m_planes[index].offset);
 }

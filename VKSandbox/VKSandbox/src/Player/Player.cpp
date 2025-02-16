@@ -56,6 +56,7 @@ void Player::Update(float deltaTime) {
     UpdateWeaponLogic();       
     UpdateViewWeapon(deltaTime);
     UpdateSpriteSheets(deltaTime);
+    UpdateAudio();
     UpdateUI();
     if (Input::KeyPressed(HELL_KEY_K)) {
         m_awaitingSpawn = true;

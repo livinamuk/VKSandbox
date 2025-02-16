@@ -7,7 +7,8 @@ public:
 
     OpenGLSSBO() = default;
 
-    OpenGLSSBO(size_t size) {
+    OpenGLSSBO(size_t size, GLbitfield flags) {
+        m_flags = flags;
         PreAllocate(size);
     }
 
@@ -18,7 +19,7 @@ public:
     void PreAllocate(size_t size) {
         CleanUp();
         glCreateBuffers(1, &m_handle);
-        glNamedBufferStorage(m_handle, (GLsizeiptr)size, nullptr, GL_DYNAMIC_STORAGE_BIT);
+        glNamedBufferStorage(m_handle, (GLsizeiptr)size, nullptr, m_flags);
         m_bufferSize = size;
     }
 
@@ -30,7 +31,7 @@ public:
             // Destroy old buffer and allocate a new one
             CleanUp();
             glCreateBuffers(1, &m_handle);
-            glNamedBufferStorage(m_handle, (GLsizeiptr)size, nullptr, GL_DYNAMIC_STORAGE_BIT);
+            glNamedBufferStorage(m_handle, (GLsizeiptr)size, nullptr, m_flags);
             m_bufferSize = size;
         }
         // Upload data
@@ -50,6 +51,7 @@ public:
     }
 
 private:
+    GLbitfield m_flags = 0;
     uint32_t m_handle = 0;
     size_t m_bufferSize = 0;
 };

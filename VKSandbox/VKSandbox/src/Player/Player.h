@@ -38,6 +38,7 @@ struct Player {
     void UpdateSpriteSheets(float deltaTime);
     void UpdateHeadBob(float deltaTime);
     void UpdateBreatheBob(float deltaTime);
+    void UpdateAudio();
 
     // Weapon shit
     int GetCurrentWeaponMagAmmo();
@@ -134,18 +135,41 @@ struct Player {
 private:
     glm::vec3 m_position = glm::vec3(0.0f);
 
-    glm::vec3 m_headBob = glm::vec3(0.0f);
-    glm::vec3 m_breatheBob = glm::vec3(0.0f);
+    // Headbob 
+    float m_bobOffsetX = 0.0f;
+    float m_bobOffsetY = 0.0f;
     float m_headBobTime = 0.0f;
     float m_breatheBobTime = 0.0f;
+    glm::vec3 m_headBob = glm::vec3(0.0f);
+    glm::vec3 m_breatheBob = glm::vec3(0.0f);
+
+    // Audio
     bool m_footstepPlayed = false;
 
-    float m_currentSpeed = 0.0f;
-
-    int m_revolverReloadIterations = 0;
-    int m_currentWeaponIndex = 0;
+    // States
     bool m_moving = false;
     bool m_crouching = false;
+    bool m_grounded = true;
+    bool m_groundedLastFrame;
+
+    // Speed
+    float m_walkSpeed = 5.0f;
+    float m_currentSpeed = 0.0f;
+    float m_walkingSpeed = 4.85f;
+    float m_crouchingSpeed = 2.325f;
+    float m_swimmingSpeed = 3.25f;
+    float m_crouchDownSpeed = 17.5f;
+
+    // Heights
+    float m_realViewHeightStanding = 1.65f;  // are these used?
+    float m_realViewHeightCrouching = 1.15f; // are these used?
+    float m_viewHeightStanding = m_realViewHeightStanding;
+    float m_viewHeightCrouching = m_realViewHeightCrouching;
+    float m_currentViewHeight = m_viewHeightStanding;
+
+    // Misc
+    int m_revolverReloadIterations = 0;
+    int m_currentWeaponIndex = 0;
     bool m_controlEnabled = true;
     bool m_awaitingSpawn = true;
     bool m_firedThisFrame = false;
@@ -155,7 +179,6 @@ private:
     bool _needsShotgunFirstShellAdded = false;
     bool _needsShotgunSecondShellAdded = false;
     float m_mouseSensitivity = 0.002f;
-    float m_walkSpeed = 5.0f; 
     float m_cameraZoom = 1.0f; 
     float m_accuracyModifer = 0;
     int32_t m_characterModelAnimatedGameObjectIndex = 0;
@@ -171,15 +194,7 @@ private:
 
     float m_waterImpactVelocity = 0;
 
-    float m_realViewHeightStanding = 1.65f;
-    float m_realViewHeightCrouching = 1.15f;
-    float m_viewHeightStanding = m_realViewHeightStanding;
-    float m_viewHeightCrouching = m_realViewHeightCrouching;
-    float m_crouchDownSpeed = 17.5f;
-    float m_currentViewHeight = m_viewHeightStanding;
-    float m_walkingSpeed = 4.85f;
-    float m_crouchingSpeed = 2.325f;
-    float m_swimmingSpeed = 3.25f;
+
 
     float _muzzleFlashRotation = 0;
     glm::vec2 _weaponSwayFactor = glm::vec2(0);
@@ -249,7 +264,6 @@ private:
 
         glm::mat4 m_viewWeaponCameraMatrix;
 
-        bool m_grounded = true;
         float m_yVelocity = 0;
 
         float m_weaponSwayX = 0;

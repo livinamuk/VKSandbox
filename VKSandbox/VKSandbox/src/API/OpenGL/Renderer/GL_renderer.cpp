@@ -65,6 +65,9 @@ namespace OpenGLRenderer {
         g_frameBuffers["GBuffer"].CreateAttachment("Emissive", GL_RGBA8);
         g_frameBuffers["GBuffer"].CreateDepthAttachment(GL_DEPTH32F_STENCIL8);
 
+        g_frameBuffers["WIP"] = OpenGLFrameBuffer("WIP", resolutions.gBuffer);
+        g_frameBuffers["WIP"].CreateAttachment("WorldSpacePosition", GL_RGBA32F);
+
         g_frameBuffers["Hair"] = OpenGLFrameBuffer("Hair", resolutions.hair);
         g_frameBuffers["Hair"].CreateDepthAttachment(GL_DEPTH32F_STENCIL8);
         g_frameBuffers["Hair"].CreateAttachment("Lighting", GL_RGBA16F);
@@ -87,15 +90,15 @@ namespace OpenGLRenderer {
         OpenGLBackEnd::SetMousePickHandles(framebufferHandle, attachmentSlot);
 
         // Create ssbos
-        g_ssbos["Samplers"] = OpenGLSSBO(sizeof(glm::uvec2) * TEXTURE_ARRAY_SIZE);
-        g_ssbos["PlayerData"] = OpenGLSSBO(sizeof(ViewportData) * 4);
-        g_ssbos["RendererData"] = OpenGLSSBO(sizeof(RendererData));
-        g_ssbos["InstanceData"] = OpenGLSSBO(sizeof(RenderItem) * MAX_INSTANCE_DATA_COUNT);
-        g_ssbos["SkinningTransforms"] = OpenGLSSBO(sizeof(glm::mat4) * MAX_ANIMATED_TRANSFORMS);
-        g_ssbos["LightSpaceMatrices"] = OpenGLSSBO(sizeof(glm::mat4) * MAX_VIEWPORT_COUNT * SHADOW_CASCADE_COUNT);
+        g_ssbos["Samplers"] = OpenGLSSBO(sizeof(glm::uvec2), GL_DYNAMIC_STORAGE_BIT);
+        g_ssbos["ViewportData"] = OpenGLSSBO(sizeof(ViewportData) * 4, GL_DYNAMIC_STORAGE_BIT);
+        g_ssbos["RendererData"] = OpenGLSSBO(sizeof(RendererData), GL_DYNAMIC_STORAGE_BIT);
+        g_ssbos["InstanceData"] = OpenGLSSBO(sizeof(RenderItem) * MAX_INSTANCE_DATA_COUNT, GL_DYNAMIC_STORAGE_BIT);
+        g_ssbos["SkinningTransforms"] = OpenGLSSBO(sizeof(glm::mat4) * MAX_ANIMATED_TRANSFORMS, GL_DYNAMIC_STORAGE_BIT);
+        g_ssbos["LightSpaceMatrices"] = OpenGLSSBO(sizeof(glm::mat4) * MAX_VIEWPORT_COUNT * SHADOW_CASCADE_COUNT, GL_DYNAMIC_STORAGE_BIT);
+        g_ssbos["GrassAtomicCounters"] = OpenGLSSBO(sizeof(GrassAtomicCounters), GL_DYNAMIC_STORAGE_BIT | GL_MAP_READ_BIT);
 
-
-        g_ssbos["Lights"] = OpenGLSSBO(sizeof(GPULight) * MAX_GPU_LIGHTS);
+        g_ssbos["Lights"] = OpenGLSSBO(sizeof(GPULight) * MAX_GPU_LIGHTS, GL_DYNAMIC_STORAGE_BIT);
 
         // Preallocate the indirect command buffer
         g_indirectBuffer.PreAllocate(sizeof(DrawIndexedIndirectCommand) * MAX_INDIRECT_DRAW_COMMAND_COUNT);
@@ -108,6 +111,8 @@ namespace OpenGLRenderer {
         g_shaders["EmissiveComposite"] = OpenGLShader({ "GL_emissive_composite.comp" });
         g_shaders["Gizmo"] = OpenGLShader({ "GL_gizmo.vert", "GL_gizmo.frag" });
         g_shaders["Grass"] = OpenGLShader({ "GL_grass.vert", "GL_grass.frag" });
+        g_shaders["GrassToshima"] = OpenGLShader({ "GL_grass_toshima.vert", "GL_grass_toshima.frag" });
+        g_shaders["GrassGeneration"] = OpenGLShader({ "GL_grass_generation.comp" });
         g_shaders["HairDepthPeel"] = OpenGLShader({ "GL_hair_depth_peel.vert", "GL_hair_depth_peel.frag" });
         g_shaders["HairFinalComposite"] = OpenGLShader({ "GL_hair_final_composite.comp" });
         g_shaders["HairLayerComposite"] = OpenGLShader({ "GL_hair_layer_composite.comp" });
@@ -122,6 +127,7 @@ namespace OpenGLRenderer {
         g_shaders["SpriteSheet"] = OpenGLShader({ "GL_sprite_sheet.vert", "GL_sprite_sheet.frag" });
         g_shaders["UI"] = OpenGLShader({ "GL_ui.vert", "GL_ui.frag" });
         g_shaders["CSMDepth"] = OpenGLShader({ "GL_csm_depth.vert", "GL_csm_depth.frag", "GL_csm_depth.geom" });
+        g_shaders["ZeroOut"] = OpenGLShader({ "GL_zero_out.comp" });
     }
 
     void InitMain() {
@@ -189,8 +195,8 @@ namespace OpenGLRenderer {
         g_ssbos["RendererData"].Bind(1);
 
         const std::vector<ViewportData>& playerData = RenderDataManager::GetViewportData();
-        g_ssbos["PlayerData"].Update(playerData.size() * sizeof(ViewportData), (void*)&playerData[0]);
-        g_ssbos["PlayerData"].Bind(2);
+        g_ssbos["ViewportData"].Update(playerData.size() * sizeof(ViewportData), (void*)&playerData[0]);
+        g_ssbos["ViewportData"].Bind(2);
 
         const std::vector<RenderItem>& instanceData = RenderDataManager::GetInstanceData();
         g_ssbos["InstanceData"].Update(instanceData.size() * sizeof(RenderItem), (void*)&instanceData[0]);
@@ -225,8 +231,15 @@ namespace OpenGLRenderer {
 
         SkyBoxPass();
         HeightMapPass();
-        GeometryPass();
         GrassPass();
+        GeometryPass();
+
+        //g_ssbos["Samplers"].Bind(0);
+        //g_ssbos["RendererData"].Bind(1);
+        //g_ssbos["ViewportData"].Bind(2);
+        //g_ssbos["InstanceData"].Bind(3);
+        //g_ssbos["Lights"].Bind(4);
+
         LightingPass();
         EmissivePass();
         HairPass();

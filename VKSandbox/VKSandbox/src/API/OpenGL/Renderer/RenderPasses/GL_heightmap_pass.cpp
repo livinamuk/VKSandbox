@@ -48,8 +48,8 @@ namespace OpenGLRenderer {
         colorShader->Use();
 
         Transform transform;
-        transform.position = glm::vec3(0, -5, 0);
-        transform.scale = glm::vec3(0.25f, 5.0, 0.25f);
+        transform.position = glm::vec3(0, HEIGHTMAP_BEGIN_Y, 0);
+        transform.scale = glm::vec3(HEIGHTMAP_SCALE_XZ, HEIGHTMAP_SCALE_Y, HEIGHTMAP_SCALE_XZ);
         glm::mat4 modelMatrix = transform.to_mat4();
         glm::mat4 inverseModelMatrix = glm::inverse(modelMatrix);
 

@@ -18,23 +18,11 @@ void Player::UpdateHeadBob(float deltaTime) {
     float bobIntensity = 0.05f;
     float noiseIntensity = 0.02f;
     float frequency = 4.5f * walkSpeed;
-    float bobOffsetY = glm::sin(m_headBobTime * frequency) * bobIntensity;
-    float bobOffsetX = glm::sin(m_headBobTime * frequency * 0.5f) * (bobIntensity * 0.5f);
+    m_bobOffsetY = glm::sin(m_headBobTime * frequency) * bobIntensity;
+    m_bobOffsetX = glm::sin(m_headBobTime * frequency * 0.5f) * (bobIntensity * 0.5f);
     float noiseOffsetY = glm::perlin(glm::vec2(m_headBobTime * 0.1f, 0.0f)) * noiseIntensity;
     float noiseOffsetX = glm::perlin(glm::vec2(0.0f, m_headBobTime * 0.1f)) * noiseIntensity;
-    m_headBob = glm::vec3(bobOffsetX + noiseOffsetX, bobOffsetY + noiseOffsetY, 0.0f);
-
-
-    float bobValue = glm::sin(m_headBobTime * frequency) * bobIntensity;
-
-    if (bobValue < -0.04f && !m_footstepPlayed) {
-        Game::PlayFootstepOutdoorAudio();
-        m_footstepPlayed = true;
-    }
-
-    if (bobValue > 0.0f) {
-        m_footstepPlayed = false;
-    }
+    m_headBob = glm::vec3(m_bobOffsetX + noiseOffsetX, m_bobOffsetY + noiseOffsetY, 0.0f);
 }
 
 void Player::UpdateBreatheBob(float deltaTime) {
@@ -73,6 +61,8 @@ void Player::UpdateCamera(float deltaTime) {
     m_currentViewHeight = Util::FInterpTo(m_currentViewHeight, viewHeightTarget, deltaTime, crouchDownSpeed);
 
     // Position
+    m_headBob = glm::vec3(0);
+    m_breatheBob = glm::vec3(0);
     m_camera.SetPosition(m_position + glm::vec3(0, m_currentViewHeight, 0) + m_headBob + m_breatheBob);
 
     // Get view weapon camera matrix

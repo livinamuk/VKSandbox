@@ -7,6 +7,7 @@
 void Player::UpdateMovement(float deltaTime) {
     m_moving = false;
     m_crouching = PressingCrouch();
+    m_groundedLastFrame = m_grounded;
 
     if (!ViewportIsVisible()) {
         //return;
@@ -86,6 +87,7 @@ void Player::UpdateMovement(float deltaTime) {
         }
         Physics::ClearCharacterControllerCollsionReports();
     }
+
 }
 
 bool Player::IsMoving() {

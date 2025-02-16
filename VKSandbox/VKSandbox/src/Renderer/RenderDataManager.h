@@ -18,4 +18,5 @@ namespace RenderDataManager {
 
     int EncodeBaseInstance(int playerIndex, int instanceOffset);
     void DecodeBaseInstance(int baseInstance, int& playerIndex, int& instanceOffset);
+
 }

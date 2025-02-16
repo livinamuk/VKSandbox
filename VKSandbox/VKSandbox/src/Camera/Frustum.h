@@ -17,9 +17,12 @@ public:
     bool IntersectsAABB(const RenderItem& renderItem);
     bool IntersectsAABBFast(const AABB& aabb);
     bool IntersectsAABBFast(const RenderItem& renderItem);
-    //bool IntersectsSphere(const Sphere& sphere);
     bool IntersectsPoint(const glm::vec3 point);
-    std::vector<glm::vec3> GetFrustumCorners();
+
+    glm::vec3 GetBoundsMin() { return m_boundsMin; }
+    glm::vec3 GetBoundsMax() { return m_boundsMax; }
+    glm::vec3 GetCorner(int index) { return m_corners[index]; } // sketchy
+    glm::vec4 GetPlane(int index);
 
 private:
     Plane CreatePlane(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
@@ -27,5 +30,8 @@ private:
     static glm::vec3 IntersectPlanes(const glm::vec3& n1, float d1, const glm::vec3& n2, float d2, const glm::vec3& n3, float d3);
 
     Plane m_planes[6];
+    glm::vec3 m_corners[8];
+    glm::vec3 m_boundsMin = glm::vec3(0);
+    glm::vec3 m_boundsMax = glm::vec3(0);
 };
 

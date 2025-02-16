@@ -1,4 +1,4 @@
-
+﻿
 mat4 ToMat4(vec3 position, vec3 rotation, vec3 scale) {
     // Translation matrix
     mat4 translationMatrix = mat4(1.0);
@@ -43,6 +43,26 @@ mat4 ToMat4(vec3 position, vec3 rotation, vec3 scale) {
     return translationMatrix * rotationMatrix * scaleMatrix;
 }
 
-float Rand(vec2 co){
+float RandOLD(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+float Rand(vec2 seed) {
+    return fract(sin(dot(seed, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+vec2 WorldToScreen(vec3 worldPos, mat4 projView, vec2 viewportPosition, vec2 viewportSize) {
+    vec4 clipSpace = projView * vec4(worldPos, 1.0);
+    vec3 ndc = clipSpace.xyz / clipSpace.w; // Perspective divide
+
+    // Convert from NDC (-1 to 1) to normalized screen UVs (0 to 1)
+    vec2 screenUV = ndc.xy * 0.5 + 0.5;
+
+    // 🔥 Ensure precise viewport size scaling
+    return screenUV * viewportSize + viewportPosition;
+}
+
+float LinearizeDepth(float nonLinearDepth, float near, float far) {
+    float z = nonLinearDepth * 2.0 - 1.0;  // Convert [0,1] range to [-1,1] (NDC space)
+    return (2.0 * near * far) / (far + near - z * (far - near)); // Convert to linear depth
 }

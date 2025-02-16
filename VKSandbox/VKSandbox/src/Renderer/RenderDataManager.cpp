@@ -44,6 +44,7 @@ namespace RenderDataManager {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
             if (!viewport->IsVisible()) continue;
 
+
             glm::mat4 viewMatrix = glm::mat4(1);
             if (Editor::IsOpen()) {
                 viewMatrix = Editor::GetViewportViewMatrix(i);
@@ -63,6 +64,19 @@ namespace RenderDataManager {
             g_viewportData[i].height = resolutions.gBuffer.y * viewport->GetSize().y;
             g_viewportData[i].xOffset = resolutions.gBuffer.x * viewport->GetPosition().x;
             g_viewportData[i].yOffset = resolutions.gBuffer.y * viewport->GetPosition().y;
+            g_viewportData[i].posX = viewport->GetPosition().x;
+            g_viewportData[i].posY = viewport->GetPosition().y;
+            g_viewportData[i].sizeX = viewport->GetSize().x;
+            g_viewportData[i].sizeY = viewport->GetSize().y;
+
+            viewport->GetFrustum().Update(g_viewportData[i].projectionView);
+
+            g_viewportData[i].frustumPlane0 = viewport->GetFrustum().GetPlane(0);
+            g_viewportData[i].frustumPlane1 = viewport->GetFrustum().GetPlane(1);
+            g_viewportData[i].frustumPlane2 = viewport->GetFrustum().GetPlane(2);
+            g_viewportData[i].frustumPlane3 = viewport->GetFrustum().GetPlane(3);
+            g_viewportData[i].frustumPlane4 = viewport->GetFrustum().GetPlane(4);
+            g_viewportData[i].frustumPlane5 = viewport->GetFrustum().GetPlane(5);
         }
     }
 

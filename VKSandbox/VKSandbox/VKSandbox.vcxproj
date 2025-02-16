@@ -134,7 +134,8 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
   <ItemGroup>
     <ClCompile Include="src\API\OpenGL\GL_backend.cpp" />
     <ClCompile Include="src\API\OpenGL\GL_util.cpp" />
-    <ClCompile Include="src\API\OpenGL\Renderer\ComputePasses\GL_ComputeSkinningPass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\ComputePasses\GL_compute_skinning.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\ComputePasses\GL_generate_grass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer_util.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_debug_pass.cpp" />
@@ -187,6 +188,7 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\Core\Scene.cpp" />
     <ClCompile Include="src\Physics\Physics.cpp" />
     <ClCompile Include="src\Physics\Physics_create_destroy.cpp" />
+    <ClCompile Include="src\Player\Player_audio.cpp" />
     <ClCompile Include="src\Player\Player_character_controller.cpp" />
     <ClCompile Include="src\Player\Player_spritesheets.cpp" />
     <ClCompile Include="src\Player\Player_weapon_logic_gun.cpp" />
@@ -271,6 +273,9 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <None Include="res\shaders\OpenGL\GL_gizmo.vert" />
     <None Include="res\shaders\OpenGL\GL_grass.frag" />
     <None Include="res\shaders\OpenGL\GL_grass.vert" />
+    <None Include="res\shaders\OpenGL\GL_grass_generation.comp" />
+    <None Include="res\shaders\OpenGL\GL_grass_toshima.frag" />
+    <None Include="res\shaders\OpenGL\GL_grass_toshima.vert" />
     <None Include="res\shaders\OpenGL\GL_hair_final_composite.comp" />
     <None Include="res\shaders\OpenGL\GL_hair_depth_peel.frag" />
     <None Include="res\shaders\OpenGL\GL_hair_depth_peel.vert" />
@@ -290,6 +295,7 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <None Include="res\shaders\OpenGL\GL_ui.frag" />
     <None Include="res\shaders\OpenGL\GL_ui.vert" />
     <None Include="res\shaders\common\pbr_functions.glsl" />
+    <None Include="res\shaders\OpenGL\GL_zero_out.comp" />
     <None Include="res\shaders\terrain.frag" />
     <None Include="res\shaders\terrain.vert" />
     <None Include="res\shaders\skybox.frag" />
