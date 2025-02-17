@@ -96,8 +96,6 @@ namespace OpenGLRenderer {
         g_ssbos["InstanceData"] = OpenGLSSBO(sizeof(RenderItem) * MAX_INSTANCE_DATA_COUNT, GL_DYNAMIC_STORAGE_BIT);
         g_ssbos["SkinningTransforms"] = OpenGLSSBO(sizeof(glm::mat4) * MAX_ANIMATED_TRANSFORMS, GL_DYNAMIC_STORAGE_BIT);
         g_ssbos["LightSpaceMatrices"] = OpenGLSSBO(sizeof(glm::mat4) * MAX_VIEWPORT_COUNT * SHADOW_CASCADE_COUNT, GL_DYNAMIC_STORAGE_BIT);
-        g_ssbos["GrassAtomicCounters"] = OpenGLSSBO(sizeof(GrassAtomicCounters), GL_DYNAMIC_STORAGE_BIT | GL_MAP_READ_BIT);
-
         g_ssbos["Lights"] = OpenGLSSBO(sizeof(GPULight) * MAX_GPU_LIGHTS, GL_DYNAMIC_STORAGE_BIT);
 
         // Preallocate the indirect command buffer
@@ -113,6 +111,7 @@ namespace OpenGLRenderer {
         g_shaders["Grass"] = OpenGLShader({ "GL_grass.vert", "GL_grass.frag" });
         g_shaders["GrassToshima"] = OpenGLShader({ "GL_grass_toshima.vert", "GL_grass_toshima.frag" });
         g_shaders["GrassGeneration"] = OpenGLShader({ "GL_grass_generation.comp" });
+        g_shaders["GrassGeometryGeneration"] = OpenGLShader({ "GL_grass_geometry_generation.comp" });
         g_shaders["HairDepthPeel"] = OpenGLShader({ "GL_hair_depth_peel.vert", "GL_hair_depth_peel.frag" });
         g_shaders["HairFinalComposite"] = OpenGLShader({ "GL_hair_final_composite.comp" });
         g_shaders["HairLayerComposite"] = OpenGLShader({ "GL_hair_layer_composite.comp" });
@@ -208,6 +207,8 @@ namespace OpenGLRenderer {
     }
 
     void RenderGame() {
+
+        glDisable(GL_DITHER);
 
         ComputeSkinningPass();
         ClearRenderTargets();
@@ -384,6 +385,10 @@ namespace OpenGLRenderer {
                 height *= 0.5f;
             }
         }
+    }
+    
+    void CreateSSBO(const std::string& name, float size, GLbitfield flags) {
+        g_ssbos[name] = OpenGLSSBO(size, flags);
     }
 
     OpenGLShader* GetShader(const std::string& name) {

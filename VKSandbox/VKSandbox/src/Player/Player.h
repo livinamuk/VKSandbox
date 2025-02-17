@@ -132,8 +132,15 @@ struct Player {
     bool PressedThree();
     bool PressedFour();
 
+
+
 private:
     glm::vec3 m_position = glm::vec3(0.0f);
+
+    // Flashlight
+    glm::vec3 m_flashlightPosition;
+    glm::vec3 m_flashlightDirection;
+    glm::mat4 m_flashlightProjectionView;
 
     // Headbob 
     float m_bobOffsetX = 0.0f;
@@ -277,4 +284,7 @@ private:
 
     public:
         const std::vector<SpriteSheetRenderItem>& GetSpriteSheetRenderItems() { return m_spriteSheetRenderItems; }
+        const glm::vec3 GetFlashlightPosition()                               { return m_flashlightPosition; }
+        const glm::vec3 GetFlashlightDirection()                              { return m_flashlightDirection; };
+        const glm::mat4 GetFlashlightProjectionView()                         { return m_flashlightProjectionView; };
 };

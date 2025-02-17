@@ -25,5 +25,5 @@ void main() {
     RMAOut = vec4(rma, 1);
     NormalOut.rgb = normalize(Normal);
     MousePickOut = uvec2(0,0);
-    WorldPosOut = vec4(WorldPos, 1.0);
+    WorldPosOut = vec4(WorldPos, 0.0);
 }

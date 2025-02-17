@@ -63,7 +63,13 @@ namespace OpenGLRenderer {
     OpenGLFrameBuffer* GetFrameBuffer(const std::string& name);
     OpenGLFrameBuffer* GetBlurBuffer(int viewportIndex, int bufferIndex);
     OpenGLShader* GetShader(const std::string& name);
+
+    // SSBOs
+    void CreateSSBO(const std::string& name, float size, GLbitfield flags);
     OpenGLSSBO* GetSSBO(const std::string& name);
+
+    // Misc
+    void CreateGrassGeometry();
 
     // Rasterizer State
     void InitRasterizerStates();

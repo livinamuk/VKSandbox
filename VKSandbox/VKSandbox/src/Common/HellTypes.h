@@ -282,6 +282,13 @@ struct DrawIndexedIndirectCommand {
     uint32_t baseInstance = 0;
 };
 
+struct DrawArraysIndirectCommand {
+    uint32_t vertexCount = 0;
+    uint32_t instanceCount = 0;
+    uint32_t firstVertex = 0;
+    uint32_t baseInstance = 0;
+};
+
 struct DrawCommands {
     std::vector<DrawIndexedIndirectCommand> perViewport[4]; // One for each splitscreen player
 };
@@ -424,7 +431,13 @@ struct ViewportSelectionRectangleState {
     int currentY = 0;
 };
 
-struct GrassAtomicCounters {
-    unsigned int vertexCount;
-    unsigned int indexCount;
+struct PhysXRayResult {
+    std::string hitObjectName;
+    glm::vec3 hitPosition;
+    glm::vec3 surfaceNormal;
+    glm::vec3 rayDirection;
+    bool hitFound;
+    void* hitActor;
+    //void* parent;
+    //ObjectType objectType;
 };

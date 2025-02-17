@@ -135,7 +135,6 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\API\OpenGL\GL_backend.cpp" />
     <ClCompile Include="src\API\OpenGL\GL_util.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\ComputePasses\GL_compute_skinning.cpp" />
-    <ClCompile Include="src\API\OpenGL\Renderer\ComputePasses\GL_generate_grass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer_util.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_debug_pass.cpp" />
@@ -274,6 +273,7 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <None Include="res\shaders\OpenGL\GL_grass.frag" />
     <None Include="res\shaders\OpenGL\GL_grass.vert" />
     <None Include="res\shaders\OpenGL\GL_grass_generation.comp" />
+    <None Include="res\shaders\OpenGL\GL_grass_geometry_generation.comp" />
     <None Include="res\shaders\OpenGL\GL_grass_toshima.frag" />
     <None Include="res\shaders\OpenGL\GL_grass_toshima.vert" />
     <None Include="res\shaders\OpenGL\GL_hair_final_composite.comp" />

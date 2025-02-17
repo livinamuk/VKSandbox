@@ -69,6 +69,7 @@ namespace Physics {
     PxVec3 GlmVec3toPxVec3(glm::vec3 vec);
     PxQuat GlmQuatToPxQuat(glm::quat quat);
     PxMat44 GlmMat4ToPxMat44(glm::mat4 glmMatrix);
+    PhysXRayResult CastPhysXRay(glm::vec3 rayOrigin, glm::vec3 rayDirection, float rayLength, PxU32 collisionFlags, bool cullBackFacing = false);
 }
 
 class ContactReportCallback : public PxSimulationEventCallback {

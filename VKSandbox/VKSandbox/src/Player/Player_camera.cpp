@@ -5,6 +5,7 @@
 #include "Input/InputMulti.h"
 #include <glm/gtc/noise.hpp> 
 
+#include "Renderer/Renderer.h"
 
 void Player::UpdateHeadBob(float deltaTime) {
     if (IsMoving()) {
@@ -23,6 +24,45 @@ void Player::UpdateHeadBob(float deltaTime) {
     float noiseOffsetY = glm::perlin(glm::vec2(m_headBobTime * 0.1f, 0.0f)) * noiseIntensity;
     float noiseOffsetX = glm::perlin(glm::vec2(0.0f, m_headBobTime * 0.1f)) * noiseIntensity;
     m_headBob = glm::vec3(m_bobOffsetX + noiseOffsetX, m_bobOffsetY + noiseOffsetY, 0.0f);
+
+
+    //if (rayResult.hitFound && rayResult.objectType == ObjectType::HEIGHT_MAP) {
+    //    m_isOutside = true;
+    //}
+    //if (rayResult.hitFound && rayResult.objectType == ObjectType::CSG_OBJECT_ADDITIVE_CUBE ||
+    //    rayResult.hitFound && rayResult.objectType == ObjectType::CSG_OBJECT_ADDITIVE_FLOOR_PLANE) {
+    //    m_isOutside = false;
+    //}
+
+    // Flashlight
+    m_flashlightPosition = GetCameraPosition();
+    m_flashlightPosition += GetCameraRight() * glm::vec3(0.2f);
+    m_flashlightPosition += GetCameraUp() * glm::vec3(m_bobOffsetY * 2);
+    //m_flashlightDirection = GetCameraForward();
+    glm::vec3 flashlightTargetPosition = m_flashlightPosition + m_flashlightDirection;
+    glm::mat4 flashlightViewMatrix = glm::lookAt(m_flashlightPosition, flashlightTargetPosition, GetCameraUp());
+
+
+    float lightRadius = 10.0f;
+    float outerAngle = cos(glm::radians(25.0));
+    glm::mat4 spotlightProjection = glm::perspective(outerAngle, 1.0f, 0.1f, lightRadius);
+
+    m_flashlightProjectionView = spotlightProjection * flashlightViewMatrix;
+
+    if (!ViewportIsVisible()) {
+        return;
+    }
+
+    glm::vec3 rayOrigin = GetCameraPosition();
+    glm::vec3 rayDir = GetCameraForward();
+    PxU32 raycastFlags = RaycastGroup::RAYCAST_ENABLED;
+    PhysXRayResult rayResult = Physics::CastPhysXRay(rayOrigin, rayDir, 50, raycastFlags);
+
+    if (rayResult.hitFound) {
+        glm::vec3 hitPosition = rayResult.hitPosition;
+        //Renderer::DrawPoint(hitPosition, WHITE);
+        m_flashlightDirection = glm::normalize(hitPosition - m_flashlightPosition);
+    }
 }
 
 void Player::UpdateBreatheBob(float deltaTime) {
@@ -41,7 +81,6 @@ void Player::UpdateBreatheBob(float deltaTime) {
     float noiseOffsetX = glm::perlin(glm::vec2(m_breatheBobTime * 0.05f, 0.0f)) * noiseIntensity;
     float noiseOffsetY = glm::perlin(glm::vec2(0.0f, m_breatheBobTime * 0.05f)) * noiseIntensity;
 
-    m_breatheBob = glm::vec3(0);
     m_breatheBob = GetCameraUp() * (breathOffsetY + noiseOffsetY);
     m_breatheBob += GetCameraRight() * glm::vec3(breathOffsetX + noiseOffsetX);
 }
@@ -61,8 +100,6 @@ void Player::UpdateCamera(float deltaTime) {
     m_currentViewHeight = Util::FInterpTo(m_currentViewHeight, viewHeightTarget, deltaTime, crouchDownSpeed);
 
     // Position
-    m_headBob = glm::vec3(0);
-    m_breatheBob = glm::vec3(0);
     m_camera.SetPosition(m_position + glm::vec3(0, m_currentViewHeight, 0) + m_headBob + m_breatheBob);
 
     // Get view weapon camera matrix

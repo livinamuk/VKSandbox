@@ -51,8 +51,9 @@ void Player::UpdateUI() {
        //
        // text += "\n";
        // text += "Grounded: " + Util::BoolToString(m_grounded) + "\n";
-        text += "Grounded: " + Util::BoolToString(m_grounded) + "\n";
-        text += "GroundedLastFrame: " + Util::BoolToString(m_groundedLastFrame) + "\n";
+        //text += "Grounded: " + Util::BoolToString(m_grounded) + "\n";
+        //text += "GroundedLastFrame: " + Util::BoolToString(m_groundedLastFrame) + "\n";
+        
         
          
         UIBackEnd::BlitText(text, "StandardFont", xLeft, yTop, Alignment::TOP_LEFT, 2.0f);

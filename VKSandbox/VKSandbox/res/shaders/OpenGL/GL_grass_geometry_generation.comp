@@ -1,0 +1,221 @@
+﻿#version 460 core
+#include "../common/constants.glsl"
+#include "../common/types.glsl"
+#include "../common/util.glsl"
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+struct Vertex {
+    float posX;
+    float posY;
+    float posZ;
+    float normX;
+
+    float normY;
+    float normZ;
+};
+
+layout(std430, binding = 0) buffer outputVertexBuffer {
+    Vertex OutputVertexBuffer[];
+};
+
+layout(std430, binding = 1) buffer outputIndexBuffer {
+    uint OutputIndexBuffer[];
+};
+
+float HashFloat(uint seed) {
+    seed = (seed ^ 61u) ^ (seed >> 16);
+    seed *= 9u;
+    seed = seed ^ (seed >> 4);
+    seed *= 0x27d4eb2du;
+    seed = seed ^ (seed >> 15);
+    return float(seed & 0x7FFFFFFF) / float(0x7FFFFFFF); // Normalize to [0,1]
+}
+
+
+void main() {
+    
+    // tweakables
+    float bendStrength = 0.1;
+    float bladeHeight = 0.075;
+    float bottomWidth = 0.003;
+    float topWidth = 0.002;
+
+    ivec2 gid = ivec2(gl_GlobalInvocationID.xy);
+
+    uint invocationID = gl_GlobalInvocationID.x;
+    uint seed1 = invocationID * 2654435761u + 1013904223u;
+    uint seed2 = invocationID * 1664525u + 374761393u;
+    float rand1 = HashFloat(seed1);
+    float rand2 = HashFloat(seed2);
+
+    bladeHeight += (Rand(vec2(rand2, rand1))) * 0.025;
+    ///bladeHeight = 1;
+    //bladeHeight -= bladeHeight * 0.5;
+    
+    // Bend direction
+    float bendAmount = pow(Rand(vec2(rand1 * 1.5, rand2 * 1.7)), 1.5);
+    vec3 bendDirection = vec3(
+        (Rand(vec2(rand1, rand2)) * 2.0 - 1.0) * bendAmount * bendStrength, 
+        0.0, 
+        (Rand(vec2(rand1 * 1.5, rand2 * 0.8)) * 2.0 - 1.0) * bendAmount * bendStrength
+    );
+
+    // Broken hacked bend direction
+    vec3 bendDirection2 = vec3(
+        (Rand(vec2(rand2, rand1)) * 2.0 - 1.0) * bendStrength, 
+        0.0, 
+        (Rand(vec2(rand2, rand1)) * 2.0 - 1.0) * bendStrength
+    );
+
+    // Take a blend
+    bendDirection = mix(bendDirection, bendDirection2, 0.5);
+        
+    // Rotation matrix
+    float rotationAngle = Rand(vec2(rand1, rand2)) * 3.14159265 * 2.0;
+    mat2 rotationMatrix = mat2(cos(rotationAngle), -sin(rotationAngle), sin(rotationAngle), cos(rotationAngle));
+    
+
+    uint baseIndex = gl_GlobalInvocationID.x * 24;    
+    uint baseVertex = baseIndex / 2;
+
+    vec3 prevOffset = vec3(0.0); 
+    int segmentCount = 2;
+
+    vec3 basePos = vec3(0, 0, 0); 
+
+    float jitterX = (Rand(vec2(rand1, rand2)) - 0.5) * 0.0125;
+    float jitterZ = (Rand(vec2(rand2, rand1)) - 0.5) * 0.0125;
+    basePos.x += jitterX;
+    basePos.y += jitterZ * 2;
+    basePos.z += jitterZ;
+    
+    for (int s = 0; s <= segmentCount; s++) {
+        
+        float t = s / segmentCount;
+        float y = (s / float(segmentCount)) * bladeHeight;
+        float width = bottomWidth * (1.0 - t) + topWidth * t;
+        prevOffset += bendDirection * t;
+        prevOffset += bendDirection * (1.0 / segmentCount);
+    
+        uint vIdx = baseVertex + (s * 2);
+    
+        vec3 leftPos = vec3(basePos.x - width, basePos.y + y, basePos.z) + prevOffset;
+        vec3 rightPos = vec3(basePos.x + width, basePos.y + y, basePos.z) + prevOffset;
+    
+        leftPos.xz = rotationMatrix * (leftPos.xz - basePos.xz) + basePos.xz;
+        rightPos.xz = rotationMatrix * (rightPos.xz - basePos.xz) + basePos.xz;
+    
+        // Store in buffers
+        OutputVertexBuffer[vIdx + 0].posX = leftPos.x;
+        OutputVertexBuffer[vIdx + 0].posY = leftPos.y;
+        OutputVertexBuffer[vIdx + 0].posZ = leftPos.z;
+    
+        OutputVertexBuffer[vIdx + 1].posX = rightPos.x;
+        OutputVertexBuffer[vIdx + 1].posY = rightPos.y;
+        OutputVertexBuffer[vIdx + 1].posZ = rightPos.z;
+    }
+
+    // Normals
+    for (int s = 0; s < segmentCount; s++) {
+        uint i0 = baseVertex + (s * 2);     // Left vertex (current row)
+        uint i1 = baseVertex + (s * 2) + 1; // Right vertex (current row)
+        uint i2 = baseVertex + (s * 2) + 2; // Left vertex (next row)
+        uint i3 = baseVertex + (s * 2) + 3; // Right vertex (next row)
+    
+        vec3 edge1 = vec3(
+            OutputVertexBuffer[i2].posX - OutputVertexBuffer[i0].posX,
+            OutputVertexBuffer[i2].posY - OutputVertexBuffer[i0].posY,
+            OutputVertexBuffer[i2].posZ - OutputVertexBuffer[i0].posZ
+        );
+    
+        vec3 edge2 = vec3(
+            OutputVertexBuffer[i3].posX - OutputVertexBuffer[i2].posX,
+            OutputVertexBuffer[i3].posY - OutputVertexBuffer[i2].posY,
+            OutputVertexBuffer[i3].posZ - OutputVertexBuffer[i2].posZ
+        );
+    
+        vec3 normal = -normalize(cross(edge1, edge2));
+    
+        OutputVertexBuffer[i0].normX = normal.x;
+        OutputVertexBuffer[i0].normY = normal.y;
+        OutputVertexBuffer[i0].normZ = normal.z;
+    
+        OutputVertexBuffer[i1].normX = normal.x;
+        OutputVertexBuffer[i1].normY = normal.y;
+        OutputVertexBuffer[i1].normZ = normal.z;
+    
+        OutputVertexBuffer[i2].normX = normal.x;
+        OutputVertexBuffer[i2].normY = normal.y;
+        OutputVertexBuffer[i2].normZ = normal.z;
+    
+        OutputVertexBuffer[i3].normX = normal.x;
+        OutputVertexBuffer[i3].normY = normal.y;
+        OutputVertexBuffer[i3].normZ = normal.z;
+    }
+    
+    // Indices
+    OutputIndexBuffer[baseIndex + 0] = baseVertex + 0;
+    OutputIndexBuffer[baseIndex + 1] = baseVertex + 1;
+    OutputIndexBuffer[baseIndex + 2] = baseVertex + 2;
+    
+    OutputIndexBuffer[baseIndex + 3] = baseVertex + 1;
+    OutputIndexBuffer[baseIndex + 4] = baseVertex + 3;
+    OutputIndexBuffer[baseIndex + 5] = baseVertex + 2;
+    
+    OutputIndexBuffer[baseIndex + 0 + 6] = baseVertex + 2;
+    OutputIndexBuffer[baseIndex + 1 + 6] = baseVertex + 3;
+    OutputIndexBuffer[baseIndex + 2 + 6] = baseVertex + 4;
+            
+    OutputIndexBuffer[baseIndex + 3 + 6] = baseVertex + 3;
+    OutputIndexBuffer[baseIndex + 4 + 6] = baseVertex + 5;
+    OutputIndexBuffer[baseIndex + 5 + 6] = baseVertex + 4;
+    
+
+    // Back facing
+    for (int i = 0; i < 6; i++) {
+        OutputVertexBuffer[baseVertex + i + 6].posX = OutputVertexBuffer[baseVertex + i].posX;
+        OutputVertexBuffer[baseVertex + i + 6].posY = OutputVertexBuffer[baseVertex + i].posY;
+        OutputVertexBuffer[baseVertex + i + 6].posZ = OutputVertexBuffer[baseVertex + i].posZ;
+
+        OutputVertexBuffer[baseVertex + i + 6].normX = -OutputVertexBuffer[baseVertex + i].normX;
+        OutputVertexBuffer[baseVertex + i + 6].normY = -OutputVertexBuffer[baseVertex + i].normY;
+        OutputVertexBuffer[baseVertex + i + 6].normZ = -OutputVertexBuffer[baseVertex + i].normZ;
+    }
+
+        // Indices
+    OutputIndexBuffer[baseIndex + 0] = baseVertex + 0;
+    OutputIndexBuffer[baseIndex + 1] = baseVertex + 1;
+    OutputIndexBuffer[baseIndex + 2] = baseVertex + 2;
+    
+    OutputIndexBuffer[baseIndex + 3] = baseVertex + 1;
+    OutputIndexBuffer[baseIndex + 4] = baseVertex + 3;
+    OutputIndexBuffer[baseIndex + 5] = baseVertex + 2;
+    
+    OutputIndexBuffer[baseIndex + 6] = baseVertex + 2;
+    OutputIndexBuffer[baseIndex + 7] = baseVertex + 3;
+    OutputIndexBuffer[baseIndex + 8] = baseVertex + 4;
+            
+    OutputIndexBuffer[baseIndex + 9] = baseVertex + 3;
+    OutputIndexBuffer[baseIndex + 10] = baseVertex + 5;
+    OutputIndexBuffer[baseIndex + 12] = baseVertex + 4;
+    
+
+    // Back facing indices
+    OutputIndexBuffer[baseIndex + 12] = baseVertex + 2 + 6;
+    OutputIndexBuffer[baseIndex + 13] = baseVertex + 1 + 6;
+    OutputIndexBuffer[baseIndex + 14] = baseVertex + 0 + 6;
+    
+    OutputIndexBuffer[baseIndex + 15] = baseVertex + 2 + 6;
+    OutputIndexBuffer[baseIndex + 16] = baseVertex + 3 + 6;
+    OutputIndexBuffer[baseIndex + 17] = baseVertex + 1 + 6;
+    
+    OutputIndexBuffer[baseIndex + 18] = baseVertex + 4 + 6;
+    OutputIndexBuffer[baseIndex + 19] = baseVertex + 3 + 6;
+    OutputIndexBuffer[baseIndex + 20] = baseVertex + 2 + 6;
+
+    OutputIndexBuffer[baseIndex + 21] = baseVertex + 4 + 6;
+    OutputIndexBuffer[baseIndex + 22] = baseVertex + 5 + 6;
+    OutputIndexBuffer[baseIndex + 23] = baseVertex + 3 + 6;
+        
+}

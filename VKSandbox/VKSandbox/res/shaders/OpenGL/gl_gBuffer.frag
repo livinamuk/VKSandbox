@@ -62,5 +62,5 @@ void main() {
     MousePickOut.rg = uvec2(MousePickType, MousePickIndex);
     WorldPositionOut = vec4(WorldPos.rgb, 1.0);
 
-    EmissiveOut = vec4(EmissiveColor,1);
+    EmissiveOut = vec4(EmissiveColor, 0);
 }

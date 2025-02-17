@@ -27,20 +27,20 @@ namespace Scene {
         LightCreateInfo createInfo;
         createInfo.position = glm::vec3(16.0f, -5.0f + magic, 16.0f);
         createInfo.type = LightType::LAMP_POST;
-        createInfo.strength = 5.0f;
-        createInfo.radius = 7;
+        createInfo.strength = 5.0f * 0.85;
+        createInfo.radius = 7 * 0.8;
         AddLight(createInfo);
 
         createInfo.position = glm::vec3(22.87f, -5.0f + magic, 21.13f);
         createInfo.type = LightType::LAMP_POST;
-        createInfo.strength = 5.0f;
-        createInfo.radius = 7;
+        createInfo.strength = 5.0f * 0.85;
+        createInfo.radius = 7 * 0.8;
         AddLight(createInfo);
 
         createInfo.position = glm::vec3(6.2f, -5.0f + magic, 34.13f);
         createInfo.type = LightType::LAMP_POST;
-        createInfo.strength = 5.0f;
-        createInfo.radius = 7;
+        createInfo.strength = 5.0f * 0.85;
+        createInfo.radius = 7 * 0.8;
         AddLight(createInfo);
 
     }
@@ -162,7 +162,7 @@ namespace Scene {
 
         CreateGameObject();
         GameObject* mermaid = &g_gameObjects.back();
-        mermaid->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+        mermaid->SetPosition(glm::vec3(19.64f, -4.62f, 17.33f));
         mermaid->SetRotationY(0.0f);
         mermaid->SetModel("Mermaid");
         mermaid->SetMeshMaterialByMeshName("Rock", "Rock");

@@ -83,7 +83,7 @@ namespace Physics {
         g_scene->addActor(*groundPlane);
         groundPlane->getShapes(&groundShape, 1);
         PxFilterData filterData;
-        filterData.word0 = RaycastGroup::RAYCAST_DISABLED; // must be disabled or it causes crash in scene::update when it tries to retrieve rigid body flags from this actor
+        filterData.word0 = RaycastGroup::RAYCAST_ENABLED; // must be disabled or it causes crash in scene::update when it tries to retrieve rigid body flags from this actor
         filterData.word1 = CollisionGroup::ENVIROMENT_OBSTACLE;
         filterData.word2 = CollisionGroup::BULLET_CASING | CollisionGroup::GENERIC_BOUNCEABLE | CollisionGroup::PLAYER;
         groundShape->setQueryFilterData(filterData);
