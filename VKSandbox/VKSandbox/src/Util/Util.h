@@ -48,7 +48,7 @@ namespace Util {
     std::string Uppercase(std::string& str);
     std::string ViewportModeToString(const ShadingMode& viewportMode);
     std::string CameraViewToString(const CameraView& cameraView);
-    std::string ViewportResizeStateToString(const ViewportResizeState& viewportResizeState);
+    std::string EditorStateToString(const EditorState& g_editorState);
     std::string WeaponActionToString(const WeaponAction& weaponAction);
 
     // File
@@ -86,4 +86,8 @@ namespace Util {
     glm::mat4 aiMatrix3x3ToGlm(const aiMatrix3x3& from); 
     AnimatedTransform BlendTransforms(const AnimatedTransform& transformA, const AnimatedTransform& transformB, float blendFactor);
     AnimatedTransform BlendMultipleTransforms(const std::vector<AnimatedTransform>& transforms, const std::vector<float>& weights);
+
+    // Conversions
+    std::string LightTypeToString(LightType);
+    LightType StringToLightType(const std::string& str);
 }

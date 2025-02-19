@@ -23,6 +23,13 @@ struct GameObject {
     void PrintMeshNames();
     void UpdateRenderItems();
 
+    glm::vec3 GetPosition() const;
+    glm::vec3 GetEulerRotation() const;
+    glm::vec3 GetScale() const;
+    const glm::mat4 GetModelMatrix();
+    const glm::vec3 GetObjectCenter();
+    const glm::vec3 GetObjectCenterOffsetFromOrigin();
+
     std::vector<RenderItem>& GetRenderItems();
     std::vector<RenderItem>& GetRenderItemsBlended();
     std::vector<RenderItem>& GetRenderItemsAlphaDiscarded();

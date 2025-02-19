@@ -37,9 +37,13 @@ namespace OpenGLRenderer {
     void HairPass();
     void HeightMapPass();
     void LightingPass();
+    void NuklearPass();
     void SkyBoxPass();
     void SpriteSheetPass();
     void UIPass();
+
+    // Render tasks
+    void RenderShadowMaps();
 
     void RenderHairLayer(const DrawCommands& drawCommands, int peelCount);
 

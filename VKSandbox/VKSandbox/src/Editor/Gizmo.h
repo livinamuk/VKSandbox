@@ -38,11 +38,15 @@ namespace Gizmo {
     void Init();
     void Update();
     void SetPosition(glm::vec3 position);
+    void SetEuler(glm::vec3 euler);
 
     std::vector<GizmoRenderItem>& GetRenderItemsByViewportIndex(int index);
     DetachedMesh* GetDetachedMeshByIndex(int index);
     const std::string GizmoFlagToString(const GizmoFlag& flag);
     const glm::vec3 GetPosition();
+    const glm::vec3 GetEulerRotation();
     const bool HasHover();
     float GetGizmoScalingFactorByViewportIndex(int viewportIndex);
+    const GizmoAction GetAction();
+    const GizmoMode GetMode();
 }

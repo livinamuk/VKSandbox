@@ -39,6 +39,7 @@ struct Player {
     void UpdateHeadBob(float deltaTime);
     void UpdateBreatheBob(float deltaTime);
     void UpdateAudio();
+    void UpdateFlashlight(float deltaTime);
 
     // Weapon shit
     int GetCurrentWeaponMagAmmo();
@@ -141,6 +142,8 @@ private:
     glm::vec3 m_flashlightPosition;
     glm::vec3 m_flashlightDirection;
     glm::mat4 m_flashlightProjectionView;
+    bool m_flashlightOn = false;
+    float m_flashLightModifier = 0.0f;
 
     // Headbob 
     float m_bobOffsetX = 0.0f;
@@ -287,4 +290,5 @@ private:
         const glm::vec3 GetFlashlightPosition()                               { return m_flashlightPosition; }
         const glm::vec3 GetFlashlightDirection()                              { return m_flashlightDirection; };
         const glm::mat4 GetFlashlightProjectionView()                         { return m_flashlightProjectionView; };
+        const float GetFlashLightModifer()                                    { return m_flashLightModifier; }
 };

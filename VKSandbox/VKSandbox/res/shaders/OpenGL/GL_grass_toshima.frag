@@ -14,7 +14,7 @@ in vec3 WorldPos;
 
 void main() {
     vec2 noiseUV = WorldPos.xz * 0.25;
-    float noiseValue = 0.5;//texture(NoiseTexture, noiseUV).r;
+    float noiseValue = texture(NoiseTexture, noiseUV).r;
     
     float noiseSq = noiseValue * noiseValue;
 

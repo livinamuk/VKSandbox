@@ -51,7 +51,7 @@ void OpenGLFrameBuffer::CreateAttachment(const char* name, GLenum internalFormat
 }
 
 
-void OpenGLFrameBuffer::CreateDepthAttachment(GLenum internalFormat, GLenum minFilter, GLenum magFilter) {
+void OpenGLFrameBuffer::CreateDepthAttachment(GLenum internalFormat, GLenum minFilter, GLenum magFilter, GLint wrap, glm::vec4 borderColor) {
     m_depthAttachment.internalFormat = internalFormat;
     glCreateTextures(GL_TEXTURE_2D, 1, &m_depthAttachment.handle);
     glTextureStorage2D(m_depthAttachment.handle, 1, internalFormat, m_width, m_height);

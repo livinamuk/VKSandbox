@@ -28,7 +28,5 @@ namespace OpenGLRenderer {
                 glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), 1, mesh->baseVertex, i);
             }
         }
-        glEnable(GL_CULL_FACE);
-        glDepthMask(GL_TRUE);
     }
 }

@@ -1,4 +1,5 @@
 ﻿#version 460 core
+#include "../common/constants.glsl"
 #include "../common/util.glsl"
 #include "../common/types.glsl"
 
@@ -10,7 +11,7 @@ layout(binding = 1) uniform sampler2D WorldPositionTexture;
 uniform int gridSize;
 uniform vec3 offset;
 uniform float u_heightMapWorldSpaceSize;
-uniform float spacing;
+uniform float spacing2;
 
 struct Vertex {
     float position[3];
@@ -104,6 +105,9 @@ void main() {
     float bottomWidth = 0.005;
     float topWidth = 0.002;
 
+    float spacing = 0.05;
+    spacing = 0.0185185185185185;
+
     int viewportIndex = 0;
     vec2 viewportPos = vec2(viewportData[viewportIndex].posX, viewportData[viewportIndex].posY);
     vec2 viewportSize = vec2(viewportData[viewportIndex].sizeX, viewportData[viewportIndex].sizeY);
@@ -121,13 +125,11 @@ void main() {
     float posX = float(gl_GlobalInvocationID.x) * spacing + offset.x;       
     float posZ = float(gl_GlobalInvocationID.y) * spacing + offset.z;
 
-    float heightMapYHeight = -5;
-    float heightMapYScale = 5;
     vec2 normalizedCoords = vec2(posX / u_heightMapWorldSpaceSize, posZ / u_heightMapWorldSpaceSize);
     vec2 texelSize = 1.0 / textureSize(HeightMapTexture, 0);
     normalizedCoords += texelSize * 0.5;
     float height = texture(HeightMapTexture, normalizedCoords).r;
-    float posY = heightMapYHeight + (height * heightMapYScale);
+    float posY = HEIGHTMAP_BEGIN_Y + (height * HEIGHTMAP_SCALE_Y);
     
     float rr = Rand(vec2(gid.y, gid.x));
     float amt = 0.05;

@@ -28,7 +28,7 @@ namespace Editor {
     void SetSplitX(float value);
     void SetSplitY(float value);
     void SetViewportView(uint32_t viewportIndex, glm::vec3 viewportOrigin, CameraView targetView);
-    void SetViewportResizeState(ViewportResizeState viewportResizeState);
+    void SetEditorState(EditorState editorState);
     void SetViewportOrthographicState(uint32_t viewportIndex, bool state);
     //void SetCameraView(uint32_t cameraViewIndex, CameraView cameraView);
     void SetViewportOrthoSize(uint32_t viewportIndex, float size);
@@ -39,6 +39,8 @@ namespace Editor {
     int GetHoveredObjectIndex();
     bool IsOpen();
     bool IsViewportOrthographic(uint32_t viewportIndex);
+    bool EditorIsIdle();
+    bool EditorWasIdleLastFrame();
     float GetVerticalDividerXPos();
     float GetHorizontalDividerYPos();
     glm::vec3 GetMouseRayOriginByViewportIndex(int32_t viewportIndex);
@@ -51,8 +53,8 @@ namespace Editor {
     CameraView GetCameraViewByIndex(uint32_t index);
     EditorObjectType GetSelectedObjectType();
     EditorObjectType GetHoveredObjectType();
-    ViewportResizeState GetViewportResizeState();
-    ViewportSelectionRectangleState& GetViewportSelectionRectangleState();
+    EditorState GetEditorState();
+    SelectionRectangleState& GetSelectionRectangleState();
 
     EditorMesh& GetEditorMesh();
 

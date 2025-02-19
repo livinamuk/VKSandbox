@@ -71,13 +71,17 @@ namespace Util {
         }
     }
 
-    std::string ViewportResizeStateToString(const ViewportResizeState& viewportResizeState) {
-        switch (viewportResizeState) {
-        case ViewportResizeState::IDLE:                             return "IDLE";
-        case ViewportResizeState::RESIZING_HORIZONTAL:              return "RESIZING_HORIZONTAL";
-        case ViewportResizeState::RESIZING_VERTICAL:                return "RESIZING_VERTICAL";
-        case ViewportResizeState::RESIZING_HORIZONTAL_VERTICAL:     return "RESIZING_HORIZONTAL_VERTICAL";
-        default:                                                    return "UNDEFINED";
+    std::string EditorStateToString(const EditorState& editorState) {
+        switch (editorState) {
+        case EditorState::IDLE:                             return "IDLE";
+        case EditorState::RESIZING_HORIZONTAL:              return "RESIZING_HORIZONTAL";
+        case EditorState::RESIZING_VERTICAL:                return "RESIZING_VERTICAL";
+        case EditorState::RESIZING_HORIZONTAL_VERTICAL:     return "RESIZING_HORIZONTAL_VERTICAL";
+        case EditorState::GIZMO_TRANSLATING:                return "GIZMO_TRANSLATING";
+        case EditorState::GIZMO_SCALING:                    return "GIZMO_SCALING";
+        case EditorState::GIZMO_ROTATING:                   return "GIZMO_ROTATING";
+        case EditorState::DRAGGING_SELECT_RECT:             return "DRAGGING_SELECT_RECT";
+        default:                                            return "UNDEFINED";
         }
     }
 

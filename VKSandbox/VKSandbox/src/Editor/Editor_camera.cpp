@@ -64,21 +64,9 @@ namespace Editor {
 
     void UpdateCamera() {
         Viewport* viewport = ViewportManager::GetViewportByIndex(Editor::GetActiveViewportIndex());
-        //Camera* camera = Editor::GetCameraByIndex(Editor::GetActiveViewportIndex());
-
-        // Reset
-        if (Input::KeyPressed(HELL_KEY_R)) {
-            ResetViewports();
-        }
 
         // Pan
         if (Input::MiddleMouseDown() && Input::KeyDown(HELL_KEY_LEFT_SHIFT_GLFW)) {
-            //glm::vec3 offset = glm::vec3(0);
-            //offset += (-camera->GetRight() * g_panSpeed * Input::GetMouseOffsetX());
-            //offset += (camera->GetUp() * g_panSpeed * Input::GetMouseOffsetY());
-            //camera->SetPosition(camera->GetPosition() + offset);
-
-
             int i = Editor::GetActiveViewportIndex();
             glm::vec3 target = g_orbitPosition[i];
             glm::vec3 cameraPosition = g_cameraPositionCurrent[i];
@@ -87,17 +75,13 @@ namespace Editor {
             glm::vec3 right = glm::normalize(glm::cross(forward, up));
 
             float speed = g_panSpeed * 0.25f * viewport->GetOrthoSize();
-
             g_cameraPositionCurrent[i] -= (right * speed * Input::GetMouseOffsetX());
             g_cameraPositionCurrent[i] += (up * speed * Input::GetMouseOffsetY());
-
             g_orbitPosition[i] = g_cameraPositionCurrent[i] + forward * glm::vec3(ORTHO_CAMERA_DISTANCE_FROM_ORIGIN);
-
         }
 
         // Orbit
-        // TODO: Implement proper orbit. You just have mouselook atm!!!
-        if (Input::MiddleMouseDown() && !Input::KeyDown(HELL_KEY_LEFT_SHIFT_GLFW) || Input::KeyPressed(HELL_KEY_O)) {
+        if (Input::MiddleMouseDown() && !Input::KeyDown(HELL_KEY_LEFT_SHIFT_GLFW)) {
    
             int i = Editor::GetActiveViewportIndex();
 

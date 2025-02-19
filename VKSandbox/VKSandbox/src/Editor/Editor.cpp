@@ -16,6 +16,7 @@ namespace Editor {
     int g_activeViewportIndex = 3;
     bool g_isOpen = false;
     bool g_isOrthographic[4];
+    bool g_editorStateWasIdleLastFrame = true;
     float g_OrthographicSizes[4];
     float g_verticalDividerXPos = 0.0f;
     float g_splitY = 0.0f;
@@ -27,8 +28,8 @@ namespace Editor {
     //CameraView g_cameraViews[4];
     
     float g_orthoCameraDistances[4];
-    ViewportResizeState g_viewportResizeState;
-    ViewportSelectionRectangleState g_viewportSelectionRectangleState;
+    EditorState g_editorState;
+    SelectionRectangleState g_viewportSelectionRectangleState;
 
     void Init() {
         if (BackEnd::GetAPI() == API::OPENGL) {
@@ -77,15 +78,14 @@ namespace Editor {
     void Update(float deltaTime) {
         if (!IsOpen()) return;
 
+        g_editorStateWasIdleLastFrame = g_editorState == EditorState::IDLE;
+
         UpdateMouseRays();
         UpdateCamera();
         UpdateDividers();
         UpdateInput();
         UpdateUI();
-        // Translate the selected object
-        if (g_selectedObjectType == EditorObjectType::GAME_OBJECT) {
-            Scene::GetGameObjects()[g_selectedObjectIndex].m_transform.position = Gizmo::GetPosition();
-        }
+
         UpdateCursor();
         UpdateDebug();
         UpdateCameraInterpolation(deltaTime);
@@ -133,6 +133,14 @@ namespace Editor {
 
     bool IsOpen() {
         return g_isOpen;
+    }
+
+    bool EditorIsIdle() {
+        return g_editorState == EditorState::IDLE;
+    }
+
+    bool EditorWasIdleLastFrame() {
+        return g_editorStateWasIdleLastFrame;
     }
 
     void SetSelectedObjectIndex(int index) {
@@ -246,11 +254,11 @@ namespace Editor {
         }
     }    
 
-    ViewportResizeState GetViewportResizeState() {
-        return g_viewportResizeState;
+    EditorState GetEditorState() {
+        return g_editorState;
     }
 
-    ViewportSelectionRectangleState& GetViewportSelectionRectangleState() {
+    SelectionRectangleState& GetSelectionRectangleState() {
         return g_viewportSelectionRectangleState;
     }
 
@@ -266,8 +274,8 @@ namespace Editor {
         return g_editorMesh;
     }
 
-    void SetViewportResizeState(ViewportResizeState viewportResizeState) {
-        g_viewportResizeState = viewportResizeState;
+    void SetEditorState(EditorState editorState) {
+        g_editorState = editorState;
     }
 
     void SetViewportOrthographicState(uint32_t index, bool state) {

@@ -1,12 +1,13 @@
 #include "Light.h"
 #include "AssetManagement/AssetManager.h"
+#include "Util.h"
 
 Light::Light(LightCreateInfo createInfo) {   
     m_position = createInfo.position;
     m_color = createInfo.color;
     m_radius = createInfo.radius;
     m_strength = createInfo.strength;
-    m_type = createInfo.type;
+    m_type = Util::StringToLightType(createInfo.type);
 
     if (m_type == LightType::LAMP_POST) {
         uint32_t modelIndex = AssetManager::GetModelIndexByName("LampPost");
@@ -51,6 +52,10 @@ void Light::SetMousePickIndex(int index) {
     m_mousePickIndex = index;
 }
 
+void Light::SetPosition(glm::vec3 position) {
+    m_position = position;
+}
+
 glm::vec3 Light::GetPosition() {
     return m_position;
 }
@@ -65,4 +70,14 @@ float Light::GetStrength() {
 
 float Light::GetRadius() {
     return m_radius;
+}
+
+LightCreateInfo Light::GetCreateInfo() {
+    LightCreateInfo createInfo;
+    createInfo.position = m_position;
+    createInfo.color = m_color;
+    createInfo.strength = m_strength;
+    createInfo.radius = m_radius;
+    createInfo.type = Util::LightTypeToString(m_type);
+    return createInfo;
 }

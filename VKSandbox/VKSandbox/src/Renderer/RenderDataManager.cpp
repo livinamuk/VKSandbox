@@ -167,7 +167,7 @@ namespace RenderDataManager {
 
                 // Frustum cull it
                 AABB aabb(renderItem.aabbMin, renderItem.aabbMax);
-                if (viewport->GetFrustum().IntersectsAABB(aabb) || true) {
+                if (viewport->GetFrustum().IntersectsAABB(aabb)) {
                     g_instanceData.push_back(renderItem);
                 }
             }

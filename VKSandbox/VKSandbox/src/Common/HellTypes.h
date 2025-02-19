@@ -423,8 +423,7 @@ struct GPULight {
     float radius;
 };
 
-struct ViewportSelectionRectangleState {
-    bool dragging = false;
+struct SelectionRectangleState {
     int beginX = 0;
     int beginY = 0;
     int currentX = 0;

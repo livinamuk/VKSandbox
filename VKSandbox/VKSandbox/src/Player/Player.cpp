@@ -47,12 +47,14 @@ void Player::Update(float deltaTime) {
     }
 
     if (IsAwaitingSpawn()) Respawn();
+
     
     UpdateMovement(deltaTime);
     UpdateCharacterController();
     UpdateHeadBob(deltaTime);
     UpdateBreatheBob(deltaTime);
     UpdateCamera(deltaTime);
+    UpdateFlashlight(deltaTime);
     UpdateWeaponLogic();       
     UpdateViewWeapon(deltaTime);
     UpdateSpriteSheets(deltaTime);
@@ -133,7 +135,8 @@ void Player::Respawn() {
     if (Game::GetTotalTime() > 1.0) {
         Audio::PlayAudio("Glock_Equip.wav", 0.5f);
     }
-    m_awaitingSpawn = false;
+    m_flashlightOn = false;
+    m_awaitingSpawn = false; 
 }
 
 

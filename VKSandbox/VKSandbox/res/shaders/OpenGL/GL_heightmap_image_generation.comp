@@ -1,7 +1,7 @@
 #version 430 core
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
-layout(rgba8, binding = 0) uniform image2D outputImage;
+layout(r8, binding = 0) uniform image2D outputImage;
 
 // 2D Random Gradient Function
 vec2 randomGradient(vec2 p) {
@@ -65,7 +65,11 @@ void main() {
     uv += vec2(2.0, 0);
     float height = fbm(uv);
 
-    outputColor = vec4(vec3(height * 5), 1.0); // Grayscale output
+    // hack
+    //height *= 5;
+    //height /= 5;
+
+    outputColor = vec4(height, 0.0, 0.0, 0.0); // Grayscale output
 
     imageStore(outputImage, pixelCoords, outputColor);
 }

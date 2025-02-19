@@ -21,20 +21,29 @@ namespace Gizmo {
 
     float g_gizmoSize = 1.0f;
     float g_armLength = 1.0f;
-    glm::vec3 g_gizmoPosition = glm::vec3(0.0, 0.0f, 0.0f);// glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 g_gizmoPosition = glm::vec3(0.0, 0.0f, 0.0f);
+    glm::vec3 g_eulerRotation = glm::vec3(0.0f, 0.0f, 0.0f);
     std::vector<GizmoRenderItem> g_renderItems[4];
     std::vector<DetachedMesh> g_meshes;
     GizmoFlag g_hoverFlag = GizmoFlag::NONE;
     GizmoFlag g_actionFlag = GizmoFlag::NONE;
-    GizmoAction g_gizmoAction = GizmoAction::IDLE;
+    GizmoAction g_action = GizmoAction::IDLE;
     GizmoMode g_mode = GizmoMode::TRANSLATE;
     bool g_offsetNeedsUpdate = false;
     bool g_gizmoHasHover = false;
     glm::vec3 g_translateOffset = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::ivec2 g_scaleOffset = glm::ivec2(0, 0);
+
+    glm::vec3 g_localUpAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 g_localRightAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+    glm::vec3 g_localForwardAxis = glm::vec3(0.0f, 0.0f, 1.0f);
+
+    glm::vec3 g_rotationRayHitPosPreviousFrame = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 g_rotationRayHitPosThisFrame = glm::vec3(0.0f, 0.0f, 0.0f);
     
     void UpdateRenderItems();
     void UpdateInput();
+    void UpdateLocalAxes();
 
     void Init() {        
         g_meshes.resize(MESH_COUNT);
@@ -87,8 +96,24 @@ namespace Gizmo {
 
     void Update() {
         if (!Editor::IsOpen()) return;
+        UpdateLocalAxes();
         UpdateInput();
         UpdateRenderItems();
+    }
+
+    void UpdateLocalAxes() {
+        if (GetMode() == GizmoMode::ROTATE) {
+            Transform transform;
+            transform.rotation = g_eulerRotation;
+            g_localUpAxis = transform.to_mat4() * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+            g_localRightAxis = transform.to_mat4() * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+            g_localForwardAxis = transform.to_mat4() * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+        }
+        else {
+            g_localUpAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+            g_localRightAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+            g_localForwardAxis = glm::vec3(0.0f, 0.0f, 1.0f);
+        }
     }
 
     void UpdateInput() {
@@ -160,24 +185,13 @@ namespace Gizmo {
             }
         }
 
-        // Gizmo selection
-        if (Input::LeftMousePressed() && g_hoverFlag != GizmoFlag::NONE) {
-            g_gizmoAction = GizmoAction::DRAGGING;
-            g_actionFlag = g_hoverFlag;
-            g_offsetNeedsUpdate = true;
-        }
-
-        // User ended drag
-        if (!Input::LeftMouseDown()) {
-            if (g_gizmoAction != GizmoAction::IDLE) {
-                g_gizmoAction = GizmoAction::IDLE;
-                g_actionFlag = GizmoFlag::NONE;
-            }
-        }
 
         // Translating
-        if (g_actionFlag == GizmoFlag::TRANSLATE_X || g_actionFlag == GizmoFlag::TRANSLATE_Y || g_actionFlag == GizmoFlag::TRANSLATE_Z) {
-            if (g_gizmoAction == GizmoAction::DRAGGING) {
+        if (g_actionFlag == GizmoFlag::TRANSLATE_X || 
+            g_actionFlag == GizmoFlag::TRANSLATE_Y || 
+            g_actionFlag == GizmoFlag::TRANSLATE_Z) 
+        {
+            if (g_action == GizmoAction::DRAGGING) {
                 glm::vec3 planeNormal = -rayDir;
                 glm::vec3 planeOrigin = glm::vec3(g_gizmoPosition);
                 float distanceToHit = 0;
@@ -197,8 +211,11 @@ namespace Gizmo {
             }
         }
 
-        if (g_actionFlag == GizmoFlag::SCALE_X || g_actionFlag == GizmoFlag::SCALE_Y || g_actionFlag == GizmoFlag::SCALE_Z) {
-            if (g_gizmoAction == GizmoAction::DRAGGING) {
+        if (g_actionFlag == GizmoFlag::SCALE_X ||
+            g_actionFlag == GizmoFlag::SCALE_Y ||
+            g_actionFlag == GizmoFlag::SCALE_Z)
+        {
+            if (g_action == GizmoAction::DRAGGING) {
 
                 if (g_offsetNeedsUpdate) {
                     glm::vec3 armOffset = glm::vec3(
@@ -218,15 +235,102 @@ namespace Gizmo {
                     std::cout << "Arm: " << armScreenCoords.x << " " << armScreenCoords.y << "\n";
                     std::cout << "Offset: " << g_scaleOffset.x << " " << g_scaleOffset.y << "\n";
                 }
+            }            
+        }
 
+        // Begin rotate
+        if (g_hoverFlag == GizmoFlag::ROTATE_X ||
+            g_hoverFlag == GizmoFlag::ROTATE_Y ||
+            g_hoverFlag == GizmoFlag::ROTATE_Z)
+        {
+            if (Input::LeftMousePressed() && g_action == GizmoAction::IDLE) {
+                glm::vec3 planeOrigin = glm::vec3(g_gizmoPosition);
+                glm::vec3 planeNormal;
+                switch (g_hoverFlag) {
+                case GizmoFlag::ROTATE_X: planeNormal = g_localRightAxis; break;
+                case GizmoFlag::ROTATE_Y: planeNormal = g_localUpAxis; break;
+                case GizmoFlag::ROTATE_Z: planeNormal = g_localForwardAxis; break;
+                }
+                float distanceToHit = 0;
+                bool hitFound = glm::intersectRayPlane(rayOrigin, rayDir, planeOrigin, planeNormal, distanceToHit);
+                if (hitFound) {
+                    g_rotationRayHitPosPreviousFrame = rayOrigin + (rayDir * distanceToHit);
+                    g_rotationRayHitPosThisFrame = rayOrigin + (rayDir * distanceToHit);
+                }
             }
         }
 
-        if (Input::LeftMouseDown()) {
+        // Rotate
+        if (g_actionFlag == GizmoFlag::ROTATE_X ||
+            g_actionFlag == GizmoFlag::ROTATE_Y ||
+            g_actionFlag == GizmoFlag::ROTATE_Z)
+        {
+            if (g_action == GizmoAction::DRAGGING) {
+                glm::vec3 planeOrigin = glm::vec3(g_gizmoPosition);
+                glm::vec3 planeNormal;
+                switch (g_actionFlag) {
+                case GizmoFlag::ROTATE_X: planeNormal = g_localRightAxis; break;
+                case GizmoFlag::ROTATE_Y: planeNormal = g_localUpAxis; break;
+                case GizmoFlag::ROTATE_Z: planeNormal = g_localForwardAxis; break;
+                }
+                float distanceToHit = 0;
+                bool hitFound = glm::intersectRayPlane(rayOrigin, rayDir, planeOrigin, planeNormal, distanceToHit);
+                if (hitFound) {
+                    g_rotationRayHitPosPreviousFrame = g_rotationRayHitPosThisFrame;
+                    g_rotationRayHitPosThisFrame = rayOrigin + (rayDir * distanceToHit);
+                    //std::cout << "g_rotationRayHitPosThisFrame: " << Util::Vec3ToString(g_rotationRayHitPosThisFrame) << "\n";
+                    //std::cout << "g_rotationRayHitPosPreviousFrame: " << Util::Vec3ToString(g_rotationRayHitPosPreviousFrame) << "\n";
+                }
+            }
+        }
 
-            
+        // Use it to calculate rotation offset
+        if (g_actionFlag == GizmoFlag::ROTATE_X && g_action == GizmoAction::DRAGGING) {
+            glm::vec3 initalV = g_gizmoPosition - g_rotationRayHitPosPreviousFrame;
+            glm::vec3 currentV = g_gizmoPosition - g_rotationRayHitPosThisFrame;
+            glm::vec3 initialDir = glm::normalize(initalV);
+            glm::vec3 currentDir = glm::normalize(currentV);
+            glm::vec3 crossVal = glm::cross(initialDir, currentDir);
+            float sign = glm::sign(glm::dot(g_localRightAxis, crossVal));
+            float angleDelta = acos(glm::clamp(glm::dot(initialDir, currentDir), -1.0f, 1.0f)) * sign;
+            g_eulerRotation.x += angleDelta;
+        }
+        if (g_actionFlag == GizmoFlag::ROTATE_Y && g_action == GizmoAction::DRAGGING) {
+            glm::vec3 initalV = g_gizmoPosition - g_rotationRayHitPosPreviousFrame;
+            glm::vec3 currentV = g_gizmoPosition - g_rotationRayHitPosThisFrame;
+            glm::vec3 initialDir = glm::normalize(initalV);
+            glm::vec3 currentDir = glm::normalize(currentV);
+            glm::vec3 crossVal = glm::cross(initialDir, currentDir);
+            float sign = glm::sign(glm::dot(g_localUpAxis, crossVal));
+            float angleDelta = acos(glm::clamp(glm::dot(initialDir, currentDir), -1.0f, 1.0f)) * sign;
+            g_eulerRotation.y += angleDelta;
+        }
+        if (g_actionFlag == GizmoFlag::ROTATE_Z && g_action == GizmoAction::DRAGGING) {
+            glm::vec3 initalV = g_gizmoPosition - g_rotationRayHitPosPreviousFrame;
+            glm::vec3 currentV = g_gizmoPosition - g_rotationRayHitPosThisFrame;
+            glm::vec3 initialDir = glm::normalize(initalV);
+            glm::vec3 currentDir = glm::normalize(currentV);
+            glm::vec3 crossVal = glm::cross(initialDir, currentDir);
+            float sign = glm::sign(glm::dot(g_localForwardAxis, crossVal));
+            float angleDelta = acos(glm::clamp(glm::dot(initialDir, currentDir), -1.0f, 1.0f)) * sign;
+            g_eulerRotation.z += angleDelta;
+        }
 
 
+        // Gizmo selection
+        if (Input::LeftMousePressed() && g_hoverFlag != GizmoFlag::NONE) {
+            g_action = GizmoAction::DRAGGING;
+            g_actionFlag = g_hoverFlag;
+            g_offsetNeedsUpdate = true;
+        }
+
+        // User ended drag
+        if (!Input::LeftMouseDown()) {
+            if (g_action != GizmoAction::IDLE) {
+                g_action = GizmoAction::IDLE;
+                g_actionFlag = GizmoFlag::NONE;
+                SetEuler(glm::vec3(0.0f, 0.0f, 0.0f));
+            }
         }
     }
 
@@ -262,7 +366,7 @@ namespace Gizmo {
 
             if (g_mode == GizmoMode::TRANSLATE) {
                 GizmoRenderItem& centerCube = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition;
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor * 0.2f);
                 centerCube.modelMatrix = transform.to_mat4();
@@ -271,7 +375,7 @@ namespace Gizmo {
                 centerCube.color = YELLOW;
 
                 GizmoRenderItem& cylinderX = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition;
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, HELL_PI * -0.5f);
                 transform.scale = glm::vec3(scalingFactor);
                 cylinderX.modelMatrix = transform.to_mat4();
@@ -280,7 +384,7 @@ namespace Gizmo {
                 cylinderX.color = RED;
 
                 GizmoRenderItem& cylinderY = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition;
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor);
                 cylinderY.modelMatrix = transform.to_mat4();
@@ -289,7 +393,7 @@ namespace Gizmo {
                 cylinderY.color = GREEN;
 
                 GizmoRenderItem& cylinderZ = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition;
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor);
                 cylinderZ.modelMatrix = transform.to_mat4();
@@ -298,7 +402,7 @@ namespace Gizmo {
                 cylinderZ.color = BLUE;
 
                 GizmoRenderItem& coneX = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition + glm::vec3(coneOffset * scalingFactor, 0.0f, 0.0f);
+                transform.position = glm::vec3(coneOffset * scalingFactor, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, HELL_PI * -0.5f);
                 transform.scale = glm::vec3(scalingFactor);
                 coneX.modelMatrix = transform.to_mat4();
@@ -307,7 +411,7 @@ namespace Gizmo {
                 coneX.color = RED;
 
                 GizmoRenderItem& coneY = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition + glm::vec3(0.0f, coneOffset * scalingFactor, 0.0f);
+                transform.position = glm::vec3(0.0f, coneOffset * scalingFactor, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor);
                 coneY.modelMatrix = transform.to_mat4();
@@ -316,7 +420,7 @@ namespace Gizmo {
                 coneY.color = GREEN;
 
                 GizmoRenderItem& coneZ = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition + glm::vec3(0.0f, 0.0f, coneOffset * scalingFactor);
+                transform.position = glm::vec3(0.0f, 0.0f, coneOffset * scalingFactor);
                 transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor);
                 coneZ.modelMatrix = transform.to_mat4();
@@ -327,7 +431,7 @@ namespace Gizmo {
 
             if (g_mode == GizmoMode::SCALE) {
                 GizmoRenderItem& centerCube = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition;
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor * 0.2f);
                 centerCube.modelMatrix = transform.to_mat4();
@@ -336,7 +440,7 @@ namespace Gizmo {
                 centerCube.color = YELLOW;
 
                 GizmoRenderItem& cylinderX = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition;
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, HELL_PI * -0.5f);
                 transform.scale = glm::vec3(scalingFactor);
                 cylinderX.modelMatrix = transform.to_mat4();
@@ -345,7 +449,7 @@ namespace Gizmo {
                 cylinderX.color = RED;
 
                 GizmoRenderItem& cylinderY = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition;
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor);
                 cylinderY.modelMatrix = transform.to_mat4();
@@ -354,7 +458,7 @@ namespace Gizmo {
                 cylinderY.color = GREEN;
 
                 GizmoRenderItem& cylinderZ = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition;
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor);
                 cylinderZ.modelMatrix = transform.to_mat4();
@@ -363,7 +467,7 @@ namespace Gizmo {
                 cylinderZ.color = BLUE;
 
                 GizmoRenderItem& coneX = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition + glm::vec3(g_armLength * scalingFactor, 0.0f, 0.0f);
+                transform.position = glm::vec3(g_armLength * scalingFactor, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor * scaleCubeSize);
                 coneX.modelMatrix = transform.to_mat4();
@@ -372,7 +476,7 @@ namespace Gizmo {
                 coneX.color = RED;
 
                 GizmoRenderItem& coneY = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition + glm::vec3(0.0f, g_armLength * scalingFactor, 0.0f);
+                transform.position = glm::vec3(0.0f, g_armLength * scalingFactor, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor * scaleCubeSize);
                 coneY.modelMatrix = transform.to_mat4();
@@ -381,7 +485,7 @@ namespace Gizmo {
                 coneY.color = GREEN;
 
                 GizmoRenderItem& coneZ = g_renderItems[i].emplace_back();
-                transform.position = g_gizmoPosition + glm::vec3(0.0f, 0.0f, g_armLength * scalingFactor);
+                transform.position = glm::vec3(0.0f, 0.0f, g_armLength * scalingFactor);
                 transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.scale = glm::vec3(scalingFactor * scaleCubeSize);
                 coneZ.modelMatrix = transform.to_mat4();
@@ -391,31 +495,40 @@ namespace Gizmo {
             }
 
             if (g_mode == GizmoMode::ROTATE) {
-                // Sphere 
+                // Rotate 
                 GizmoRenderItem& sphere = g_renderItems[i].emplace_back();
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor);
                 sphere.modelMatrix = transform.to_mat4();
                 sphere.meshIndex = SPHERE;
                 sphere.color = TRANSPARENT;
 
-                // Scale X
+                // Rotate X
                 GizmoRenderItem& scaleX = g_renderItems[i].emplace_back();
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(0.0f, HELL_PI * 0.5f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor);
                 scaleX.modelMatrix = transform.to_mat4();
                 scaleX.meshIndex = RING;
                 scaleX.flag = GizmoFlag::ROTATE_X;
                 scaleX.color = RED;
 
-                // Scale Y
+                // Rotate Y
                 GizmoRenderItem& scaleY = g_renderItems[i].emplace_back();
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(HELL_PI * 0.5f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor);
                 scaleY.modelMatrix = transform.to_mat4();
                 scaleY.meshIndex = RING;
                 scaleY.flag = GizmoFlag::ROTATE_Y;
                 scaleY.color = GREEN;
 
-                // Scale Z
+                // Rotate Z
                 GizmoRenderItem& scaleZ = g_renderItems[i].emplace_back();
+                transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
                 transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+                transform.scale = glm::vec3(scalingFactor);
                 scaleZ.modelMatrix = transform.to_mat4();
                 scaleZ.meshIndex = RING;
                 scaleZ.flag = GizmoFlag::ROTATE_Z;
@@ -428,6 +541,18 @@ namespace Gizmo {
                 }
             }
         }
+
+        // Final transform
+        Transform transform;
+        transform.position = g_gizmoPosition;
+        if (GetMode() == GizmoMode::ROTATE) {
+            transform.rotation = g_eulerRotation;
+        }
+        for (int i = 0; i < 4; i++) {
+            for (GizmoRenderItem& renderItem : g_renderItems[i]) {
+                renderItem.modelMatrix = transform.to_mat4() * renderItem.modelMatrix;
+            }
+        }
     }
 
     std::vector<GizmoRenderItem>& GetRenderItemsByViewportIndex(int index) {
@@ -436,6 +561,10 @@ namespace Gizmo {
 
     void SetPosition(glm::vec3 position) {
         g_gizmoPosition = position;
+    }
+
+    void SetEuler(glm::vec3 euler) {
+        g_eulerRotation = euler;
     }
 
     const std::string GizmoFlagToString(const GizmoFlag& flag) {
@@ -496,7 +625,19 @@ namespace Gizmo {
         return g_gizmoPosition;
     }
 
+    const glm::vec3 GetEulerRotation() {
+        return g_eulerRotation;;
+    }
+
     const bool HasHover() {
         return g_gizmoHasHover;
+    }
+
+    const GizmoAction GetAction() {
+        return g_action;
+    }
+
+    const GizmoMode GetMode() {
+        return g_mode;
     }
 }

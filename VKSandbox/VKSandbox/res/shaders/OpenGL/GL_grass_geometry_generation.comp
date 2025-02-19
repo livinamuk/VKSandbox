@@ -41,6 +41,11 @@ void main() {
     float bottomWidth = 0.003;
     float topWidth = 0.002;
 
+    //bendStrength = 0.3;
+    //bladeHeight = 0.65;
+    //bottomWidth = 0.02;
+    //topWidth = 0.005;
+
     ivec2 gid = ivec2(gl_GlobalInvocationID.xy);
 
     uint invocationID = gl_GlobalInvocationID.x;

@@ -17,7 +17,7 @@ namespace Debug {
     void Update() {
         if (!g_showDebugText) return;
 
-        AddText("Viewport Resize State: " + Util::ViewportResizeStateToString(Editor::GetViewportResizeState()));
+        AddText("Editor State: " + Util::EditorStateToString(Editor::GetEditorState()));
 
         return;
 

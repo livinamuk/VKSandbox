@@ -27,6 +27,10 @@
 #include "../Renderer/RenderDataManager.h"
 #include "../Viewport/ViewportManager.h"
 
+#include "Input/Input.h"
+#include "API/OpenGL/Types/GL_texture_readback.h"
+#include "Tools/ImageTools.h"
+
 namespace OpenGLRenderer {
 
     std::unordered_map<std::string, OpenGLShader> g_shaders;
@@ -83,7 +87,10 @@ namespace OpenGLRenderer {
         g_frameBuffers["UI"].CreateAttachment("Color", GL_RGBA8, GL_NEAREST, GL_NEAREST);
 
         g_frameBuffers["HeightMap"] = OpenGLFrameBuffer("HeightMap", HEIGHTMAP_SIZE, HEIGHTMAP_SIZE);
-        g_frameBuffers["HeightMap"].CreateAttachment("Color", GL_RGBA8);
+        g_frameBuffers["HeightMap"].CreateAttachment("Color", GL_R8);
+
+        g_frameBuffers["FlashlightShadowMap"] = OpenGLFrameBuffer("Flashlight", FLASHLIGHT_SHADOWMAP_SIZE, FLASHLIGHT_SHADOWMAP_SIZE);
+        g_frameBuffers["FlashlightShadowMap"].CreateDepthAttachment(GL_DEPTH32F_STENCIL8, GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_BORDER, glm::vec4(1.0f));
 
         int framebufferHandle = g_frameBuffers["GBuffer"].GetHandle();
         int attachmentSlot = g_frameBuffers["GBuffer"].GetColorAttachmentSlotByName("MousePick");
@@ -121,6 +128,8 @@ namespace OpenGLRenderer {
         g_shaders["HeightMapVertexGeneration"] = OpenGLShader({ "GL_heightmap_vertex_generation.comp" });
         g_shaders["Lighting"] = OpenGLShader({ "GL_lighting.comp" });
         g_shaders["GBuffer"] = OpenGLShader({ "GL_GBuffer.vert", "GL_gBuffer.frag" });
+        g_shaders["ShadowMapGeometry"] = OpenGLShader({ "GL_shadow_map_geometry.vert", "GL_shadow_map.frag" });
+        g_shaders["ShadowMapHeightMap"] = OpenGLShader({ "GL_shadow_map_heightmap.vert", "GL_shadow_map.frag" });
         g_shaders["SolidColor"] = OpenGLShader({ "GL_solid_color.vert", "GL_solid_color.frag" });
         g_shaders["Skybox"] = OpenGLShader({ "GL_skybox.vert", "GL_skybox.frag" });
         g_shaders["SpriteSheet"] = OpenGLShader({ "GL_sprite_sheet.vert", "GL_sprite_sheet.frag" });
@@ -232,6 +241,7 @@ namespace OpenGLRenderer {
 
         SkyBoxPass();
         HeightMapPass();
+        RenderShadowMaps();
         GrassPass();
         GeometryPass();
 
@@ -272,6 +282,7 @@ namespace OpenGLRenderer {
         //OpenGLRenderer::BlitToDefaultFrameBuffer(&heightmapFramebuffer, "Color", srcRect, dstRect, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
         UIPass();
+        NuklearPass();
     }
 
     void ClearRenderTargets() {

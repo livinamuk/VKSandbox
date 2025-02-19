@@ -16,6 +16,7 @@
 #include <fstream>
 #include "DDS.h"
 #include <stb_image.h>
+#include <unordered_map>
 
 namespace ImageTools {
 
@@ -282,6 +283,70 @@ namespace ImageTools {
         }
         else {
             std::cout << "Failed to save " << filename << "\n";
+        }
+    }
+
+    void SaveFloatArrayTextureAsBitmap(const std::vector<float>& data, int width, int height, int format, const std::string& filename) {
+        if (data.empty()) {
+            std::cout << "SaveTextureAsBitmap() failed: data was empty\n";
+            return;
+        }
+
+        // Infer channel count from OpenGL format
+        std::unordered_map<GLenum, int> formatChannelMap = {
+            {GL_R8, 1}, {GL_RG8, 2}, {GL_RGB8, 3}, {GL_RGBA8, 4},
+            {GL_R16F, 1}, {GL_RG16F, 2}, {GL_RGB16F, 3}, {GL_RGBA16F, 4},
+            {GL_R32F, 1}, {GL_RG32F, 2}, {GL_RGB32F, 3}, {GL_RGBA32F, 4}
+        };
+
+        if (formatChannelMap.find(format) == formatChannelMap.end()) {
+            std::cout << "SaveTextureAsBitmap() failed: Unsupported format " << format << "\n";
+            return;
+        }
+
+        int channelCount = formatChannelMap[format];
+
+        // Ensure data size matches
+        size_t expectedSize = static_cast<size_t>(width) * height * channelCount;
+        if (data.size() != expectedSize) {
+            std::cout << "SaveTextureAsBitmap() failed: Data size mismatch. Expected " << expectedSize << ", got " << data.size() << "\n";
+            return;
+        }
+
+        // Allocate RGB buffer (BMP requires 3 channels)
+        std::vector<uint8_t> outputData(width * height * 3);
+
+        for (int i = 0; i < width * height; ++i) {
+            float r, g, b;
+
+            if (channelCount == 1) { // R8 or R32F
+                r = g = b = data[i];  // Convert grayscale to RGB
+            }
+            else {
+                r = (channelCount > 0) ? data[i * channelCount + 0] : 0.0f;
+                g = (channelCount > 1) ? data[i * channelCount + 1] : 0.0f;
+                b = (channelCount > 2) ? data[i * channelCount + 2] : 0.0f;
+            }
+
+            // If using R8, scale from [0,255] to [0,1] before saving
+            if (format == GL_R8 || format == GL_RG8) {
+                r /= 255.0f;
+                g /= 255.0f;
+                b /= 255.0f;
+            }
+
+            // Convert to 8-bit
+            outputData[i * 3 + 0] = static_cast<uint8_t>(std::clamp(r * 255.0f, 0.0f, 255.0f));
+            outputData[i * 3 + 1] = static_cast<uint8_t>(std::clamp(g * 255.0f, 0.0f, 255.0f));
+            outputData[i * 3 + 2] = static_cast<uint8_t>(std::clamp(b * 255.0f, 0.0f, 255.0f));
+        }
+
+        // Save as BMP
+        if (!stbi_write_bmp(filename.c_str(), width, height, 3, outputData.data())) {
+            std::cout << "Error: Failed to save BMP file!\n";
+        }
+        else {
+            std::cout << "Saved BMP successfully: " << filename << "\n";
         }
     }
 

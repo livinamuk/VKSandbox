@@ -16,13 +16,13 @@ namespace Editor {
             BackEnd::SetCursor(HELL_CURSOR_VRESIZE);
         }        
         // Hovering dividers
-        else if (GetViewportResizeState() == ViewportResizeState::RESIZING_HORIZONTAL_VERTICAL) {
+        else if (GetEditorState() == EditorState::RESIZING_HORIZONTAL_VERTICAL) {
             BackEnd::SetCursor(HELL_CURSOR_CROSSHAIR);
         }
-        else if (GetViewportResizeState() == ViewportResizeState::RESIZING_HORIZONTAL) {
+        else if (GetEditorState() == EditorState::RESIZING_HORIZONTAL) {
             BackEnd::SetCursor(HELL_CURSOR_HRESIZE);
         }
-        else if (GetViewportResizeState() == ViewportResizeState::RESIZING_VERTICAL) {
+        else if (GetEditorState() == EditorState::RESIZING_VERTICAL) {
             BackEnd::SetCursor(HELL_CURSOR_VRESIZE);
         }
         // Nothing? Then the arrow

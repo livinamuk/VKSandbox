@@ -16,7 +16,16 @@ namespace OpenGLRenderer {
         if (!Editor::IsOpen()) return;
 
         gBuffer->Bind();
-        gBuffer->DrawBuffers({ "FinalLighting", "MousePick" });
+        gBuffer->DrawBuffers({ "FinalLighting" });
+
+        gBuffer->Bind();
+        gBuffer->SetViewport();
+
+        // rewrite this to use your Rasterizer state thing so there is no more funny business!
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_BLEND);
 
         for (int i = 0; i < 4; i++) {
             Viewport* viewport = ViewportManager::GetViewportByIndex(i);
@@ -24,19 +33,10 @@ namespace OpenGLRenderer {
 
                 OpenGLRenderer::SetViewport(gBuffer, viewport);
 
-
-                glEnable(GL_DEPTH_TEST);
-                gBuffer->ClearDepthAttachment();
-
-
-                glEnable(GL_BLEND);
-
-
                 shader->Use();
                 shader->SetMat4("projection", viewportData[i].projection);
                 shader->SetMat4("view", viewportData[i].view);
                 shader->SetBool("useUniformColor", true);
-
 
                 if (Editor::GetSelectedObjectType() != EditorObjectType::NONE) {
                     for (GizmoRenderItem& renderItem : Gizmo::GetRenderItemsByViewportIndex(i)) {

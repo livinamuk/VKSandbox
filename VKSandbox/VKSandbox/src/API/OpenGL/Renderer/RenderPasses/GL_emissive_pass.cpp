@@ -12,7 +12,6 @@ namespace OpenGLRenderer {
         OpenGLShader* compositeShader = GetShader("EmissiveComposite");
 
         glBindVertexArray(OpenGLBackEnd::GetVertexDataVAO());
-        glFinish();
         glDisable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
 

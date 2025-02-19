@@ -8,9 +8,11 @@ struct Light {
     Light(LightCreateInfo createInfo);
     glm::vec3 GetPosition();
     glm::vec3 GetColor();
+    LightCreateInfo GetCreateInfo();
     float GetStrength();
     float GetRadius();
     void SetMousePickIndex(int index);
+    void SetPosition(glm::vec3 position);
     void UpdateRenderItems();
     std::vector<RenderItem>& GetRenderItems();
 

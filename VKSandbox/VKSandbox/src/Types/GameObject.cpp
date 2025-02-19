@@ -124,7 +124,7 @@ void GameObject::UpdateRenderItems() {
                 RenderItem renderItem;
                 renderItem.mousePickType = (int)EditorObjectType::GAME_OBJECT;
                 renderItem.mousePickIndex = m_mousePickIndex;
-                renderItem.modelMatrix = m_transform.to_mat4();
+                renderItem.modelMatrix = GetModelMatrix();
                 renderItem.inverseModelMatrix = glm::inverse(renderItem.modelMatrix);
                 renderItem.meshIndex = m_model->GetMeshIndices()[i];
                 Material* material = AssetManager::GetMaterialByIndex(m_meshMaterialIndices[i]);
@@ -145,6 +145,31 @@ void GameObject::UpdateRenderItems() {
             }
         }
     }
+}
+
+glm::vec3 GameObject::GetPosition() const {
+    return m_transform.position;
+}
+
+glm::vec3 GameObject::GetEulerRotation() const {
+    return m_transform.rotation;
+}
+
+glm::vec3 GameObject::GetScale() const {
+    return m_transform.scale;
+}
+
+const glm::mat4 GameObject::GetModelMatrix() {
+    return m_transform.to_mat4();
+}
+
+const glm::vec3 GameObject::GetObjectCenter() {
+    glm::vec3 aabbCenter = (m_model->m_aabbMin + m_model->m_aabbMax) * 0.5f;
+    return GetModelMatrix() * glm::vec4(aabbCenter, 1.0f);
+}
+
+const glm::vec3 GameObject::GetObjectCenterOffsetFromOrigin() {
+    return GetObjectCenter() - glm::vec3(GetModelMatrix()[3]);
 }
 
 std::vector<RenderItem>& GameObject::GetRenderItems() {

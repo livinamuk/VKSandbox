@@ -237,10 +237,10 @@ namespace OpenGLRenderer {
                 RenderGrass();
             }
         }
-        if (Input::KeyPressed(HELL_KEY_O)) {
-            optimized = !optimized;
-            std::cout << "optimized: " << Util::BoolToString(optimized) << "\n";
-        }
+        //if (Input::KeyPressed(HELL_KEY_O)) {
+        //    optimized = !optimized;
+        //    std::cout << "optimized: " << Util::BoolToString(optimized) << "\n";
+        //}
     }
 
     void GenerateBladePositions(float xOffset, float zOffset) {

@@ -25,28 +25,35 @@ namespace Editor {
         // Start drag
         if (Input::LeftMousePressed()) {
             if (IsHorizontalDividerHovered() && IsVerticalDividerHovered()) {
-                SetViewportResizeState(ViewportResizeState::RESIZING_HORIZONTAL_VERTICAL);
+                SetEditorState(EditorState::RESIZING_HORIZONTAL_VERTICAL);
             }
             else if (IsHorizontalDividerHovered()) {
-                SetViewportResizeState(ViewportResizeState::RESIZING_HORIZONTAL);
+                SetEditorState(EditorState::RESIZING_HORIZONTAL);
             }
             else if (IsVerticalDividerHovered()) {
-                SetViewportResizeState(ViewportResizeState::RESIZING_VERTICAL);
+                SetEditorState(EditorState::RESIZING_VERTICAL);
             }
         }
         // End drag
-        if (!Input::LeftMouseDown() && GetViewportResizeState() != ViewportResizeState::IDLE) {
-            SetViewportResizeState(ViewportResizeState::IDLE);
+        if (!Input::LeftMouseDown()) {
+            if (GetEditorState() == EditorState::RESIZING_HORIZONTAL_VERTICAL ||
+                GetEditorState() == EditorState::RESIZING_HORIZONTAL ||
+                GetEditorState() == EditorState::RESIZING_VERTICAL) {
+                SetEditorState(EditorState::IDLE);
+            }
         }
-        if (GetViewportResizeState() == ViewportResizeState::RESIZING_HORIZONTAL ||
-            GetViewportResizeState() == ViewportResizeState::RESIZING_HORIZONTAL_VERTICAL) {
+
+        // Update horizontal divider
+        if (GetEditorState() == EditorState::RESIZING_HORIZONTAL ||
+            GetEditorState() == EditorState::RESIZING_HORIZONTAL_VERTICAL) {
             float xPos = Util::MapRange(mouseX, 0.0f, windowWidth, 0.0f, 1.0f);
             xPos = glm::clamp(xPos, 0.0f, 1.0f);
             Editor::SetSplitX(xPos);
         }
-        // Update drag
-        if (GetViewportResizeState() == ViewportResizeState::RESIZING_VERTICAL ||
-            GetViewportResizeState() == ViewportResizeState::RESIZING_HORIZONTAL_VERTICAL) {
+
+        // Update vertical divider
+        if (GetEditorState() == EditorState::RESIZING_VERTICAL ||
+            GetEditorState() == EditorState::RESIZING_HORIZONTAL_VERTICAL) {
             float yPos = Util::MapRange(mouseY, 0.0f, windowHeight, 0.0f, 1.0f);
             yPos = glm::clamp(yPos, 0.0f, 1.0f);
             Editor::SetSplitY(yPos);

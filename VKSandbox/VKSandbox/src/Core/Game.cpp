@@ -104,12 +104,8 @@ namespace Game {
     }
 
     void UpdateLazyKeypresses() {
-
         if (Input::KeyPressed(HELL_KEY_ESCAPE)) {
             BackEnd::ForceCloseWindow();
-        }
-        if (Input::KeyPressed(HELL_KEY_F)) {
-            BackEnd::ToggleFullscreen();
         }
         if (Input::KeyPressed(HELL_KEY_H)) {
             Renderer::HotloadShaders();

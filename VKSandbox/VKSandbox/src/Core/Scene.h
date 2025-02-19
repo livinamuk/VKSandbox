@@ -17,15 +17,19 @@ namespace Scene {
     void CreateGameObject();
     void SetMaterials();
     void CreateGameObjects();
+    void SaveMap(const std::string& filepath);
 
-    GameObject* GetGameObjectByName(const std::string& name);
     AnimatedGameObject* GetAnimatedGameObjectByIndex(int32_t index);
+    GameObject* GetGameObjectByIndex(int32_t index);
+    GameObject* GetGameObjectByName(const std::string& name);
+    Light* GetLightByIndex(int32_t index);
 
     std::vector<AnimatedGameObject>& GetAnimatedGameObjects();
     std::vector<GameObject>& GetGameObjects();
 
     std::vector<BulletCasing>& GetBulletCasings();
     std::vector<Light>& GetLights();
+
 
     std::vector<RenderItem>& GetRenderItems();
     std::vector<RenderItem>& GetRenderItemsBlended();

@@ -1,6 +1,8 @@
 #include "Scene.h"
 #include "HellDefines.h"
 #include "Core/Game.h"
+#include "Core/Map.h"
+#include "Input/Input.h"
 #include "Renderer/RenderDataManager.h"
 
 namespace Scene {
@@ -26,28 +28,39 @@ namespace Scene {
         // Hardcode some test lights
         LightCreateInfo createInfo;
         createInfo.position = glm::vec3(16.0f, -5.0f + magic, 16.0f);
-        createInfo.type = LightType::LAMP_POST;
+        createInfo.type = Util::LightTypeToString(LightType::LAMP_POST);
         createInfo.strength = 5.0f * 0.85;
         createInfo.radius = 7 * 0.8;
         AddLight(createInfo);
 
         createInfo.position = glm::vec3(22.87f, -5.0f + magic, 21.13f);
-        createInfo.type = LightType::LAMP_POST;
+        createInfo.type = Util::LightTypeToString(LightType::LAMP_POST);
         createInfo.strength = 5.0f * 0.85;
         createInfo.radius = 7 * 0.8;
         AddLight(createInfo);
 
         createInfo.position = glm::vec3(6.2f, -5.0f + magic, 34.13f);
-        createInfo.type = LightType::LAMP_POST;
+        createInfo.type = Util::LightTypeToString(LightType::LAMP_POST);
         createInfo.strength = 5.0f * 0.85;
         createInfo.radius = 7 * 0.8;
         AddLight(createInfo);
 
     }
 
+    void LoadHeightMap() {
+
+    }
+
     void Update(float deltaTime) {
         UpdateObjects();
         UpdateRenderItems();
+
+        if (Input::KeyPressed(HELL_KEY_O)) {
+            //SaveMap("res/maps/house0.json");
+        }
+        if (Input::KeyPressed(HELL_KEY_O)) {
+            LoadHeightMap();
+        }
     }
 
     void UpdateObjects() {
@@ -119,6 +132,15 @@ namespace Scene {
         g_animatedGameObjects.emplace_back();
     }
 
+    AnimatedGameObject* GetAnimatedGameObjectByIndex(int32_t index) {
+        if (index >= 0 && index < g_animatedGameObjects.size()) {
+            return &g_animatedGameObjects[index];
+        }
+        else {
+            return nullptr;
+        }
+    }
+
     GameObject* GetGameObjectByName(const std::string& name) {
         for (GameObject& gameObject : g_gameObjects) {
             if (gameObject.m_name == name) {
@@ -128,9 +150,18 @@ namespace Scene {
         return nullptr;
     }
 
-    AnimatedGameObject* GetAnimatedGameObjectByIndex(int32_t index) {
-        if (index >= 0 && index < g_animatedGameObjects.size()) {
-            return &g_animatedGameObjects[index];
+    GameObject* GetGameObjectByIndex(int32_t index) {
+        if (index >= 0 && index < g_gameObjects.size()) {
+            return &g_gameObjects[index];
+        }
+        else {
+            return nullptr;
+        }
+    }
+
+    Light* GetLightByIndex(int32_t index) {
+        if (index >= 0 && index < g_lights.size()) {
+            return &g_lights[index];
         }
         else {
             return nullptr;
@@ -208,6 +239,26 @@ namespace Scene {
         bench->SetModel("Bench");
         bench->SetMeshMaterials("LampPost");
 
+        CreateGameObject();
+        GameObject* tree = &g_gameObjects.back();
+        tree->SetPosition(glm::vec3(29.31f, -4.87f, 28.86f));
+        tree->SetRotationY(-0.4f);
+        tree->SetModel("TreeLarge_0");
+        tree->SetMeshMaterials("TreeLarge_0");
+
+        CreateGameObject();
+        GameObject* tree2 = &g_gameObjects.back();
+        tree2->SetPosition(glm::vec3(29.31f, -4.87f, 27.86f));
+        tree2->SetRotationY(-0.4f);
+        tree2->SetModel("TreeLarge_1");
+        tree2->SetMeshMaterials("TreeLarge_0");
+
+        CreateGameObject();
+        GameObject* tree3 = &g_gameObjects.back();
+        tree3->SetPosition(glm::vec3(29.31f, -4.87f, 25.86f));
+        tree3->SetRotationY(-0.4f);
+        tree3->SetModel("TreeLarge_2");
+        tree3->SetMeshMaterials("TreeLarge_0");
 
      //  CreateGameObject();
      //  GameObject* bench2 = &g_gameObjects.back();
@@ -262,6 +313,15 @@ namespace Scene {
 
     void AddBulletCasing(BulletCasingCreateInfo createInfo) {
         g_bulletCasings.push_back(BulletCasing(createInfo));
+    }
+
+    void SaveMap(const std::string& filepath) {
+        MapData mapData;
+        for (Light& light : g_lights) {
+            mapData.lights.push_back(light.GetCreateInfo());
+;       }
+        Map::Save(filepath, mapData);
+        std::cout << "Saved: " << filepath << "\n";
     }
 
     std::vector<AnimatedGameObject>& GetAnimatedGameObjects()   { return g_animatedGameObjects; }

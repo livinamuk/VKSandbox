@@ -28,13 +28,13 @@ namespace OpenGLRenderer {
 
         // Create height map data
         imageDataShader->Use();
-        glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
+        glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_R8);
         glDispatchCompute((heightmapFBO->GetWidth() + 7) / 8, (heightmapFBO->GetHeight() + 7) / 8, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
         // Write the data to a vertex buffer buffer
         vertexBufferShader->Use();
-        glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
+        glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_ONLY, GL_R8);
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, heightMapMesh.GetVBO());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, heightMapMesh.GetEBO());

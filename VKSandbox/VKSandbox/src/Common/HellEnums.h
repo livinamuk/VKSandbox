@@ -108,11 +108,15 @@ enum class CameraView {
     UNDEFINED
 };
 
-enum struct ViewportResizeState {
+enum struct EditorState {
     IDLE,
     RESIZING_HORIZONTAL,
     RESIZING_VERTICAL,
     RESIZING_HORIZONTAL_VERTICAL,
+    GIZMO_TRANSLATING,
+    GIZMO_SCALING,
+    GIZMO_ROTATING,
+    DRAGGING_SELECT_RECT
 };
 
 enum WeaponAction {
@@ -164,8 +168,6 @@ enum CollisionGroup : uint64_t {
     SHARK = 512,
     LADDER = 1024,
 };
-
-
 
 // Re-evaluate how this works, coz it alway fucks you up, 
 // and PhysX this group bitmask is used for more than just raycasts, pretty sure

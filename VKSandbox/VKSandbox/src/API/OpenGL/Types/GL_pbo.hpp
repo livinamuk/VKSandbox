@@ -52,6 +52,7 @@ public:
 
     bool UpdateState() {
         if (m_syncObj) {
+            //GLenum result = glClientWaitSync(m_syncObj, 0, 0);
             GLenum result = glClientWaitSync(m_syncObj, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
             if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
                 glDeleteSync(m_syncObj);
@@ -99,6 +100,10 @@ public:
 
     int16_t GetCustomValue() {
         return m_customValue;
+    }
+
+    size_t GetAllocatedBufferSize() {
+        return m_size;
     }
 
 private:

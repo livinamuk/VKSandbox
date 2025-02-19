@@ -2,7 +2,7 @@
 
 layout (local_size_x = 16, local_size_y = 16) in;
 
-layout (rgba8, binding = 0) uniform readonly image2D heightmap;
+layout (r8, binding = 0) uniform readonly image2D heightmap;
 
 struct Vertex {
     float position[3];

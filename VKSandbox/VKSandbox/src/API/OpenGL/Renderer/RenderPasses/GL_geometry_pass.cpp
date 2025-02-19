@@ -8,6 +8,7 @@
 
 #include "Core/Scene.h"
 
+
 namespace OpenGLRenderer {
 
     void GeometryPass() {
@@ -110,7 +111,7 @@ namespace OpenGLRenderer {
         }
         
         glBindVertexArray(0);
-
+               
 
        // glBindVertexArray(OpenGLBackEnd::GetWeightedVertexDataVAO());
        // glBindBuffer(GL_ARRAY_BUFFER, OpenGLBackEnd::GetWeightedVertexDataVBO());
