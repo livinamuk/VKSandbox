@@ -91,8 +91,8 @@ namespace OpenGLBackEnd {
         g_mousePickPBO.Init(2 * sizeof(uint16_t));
 
         // Height map init shit (ABSTRACT ME BETTER!!!!!)
-        int vertexBufferSize = HEIGHTMAP_SIZE * HEIGHTMAP_SIZE * sizeof(Vertex);
-        int indexBufferSize = (HEIGHTMAP_SIZE - 1) * (HEIGHTMAP_SIZE - 1) * 6 * sizeof(uint32_t);
+        int vertexBufferSize = HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE * sizeof(Vertex);
+        int indexBufferSize = (HEIGHT_MAP_SIZE - 1) * (HEIGHT_MAP_SIZE - 1) * 6 * sizeof(uint32_t);
         g_heightMapVerticesReadBackPBO.Init(vertexBufferSize);
         g_heightMapIndicesReadBackPBO.Init(indexBufferSize);
     }
@@ -499,10 +499,10 @@ namespace OpenGLBackEnd {
     }
 
     void ReadBackHeightmapMeshData() {
-        int indexCount = (HEIGHTMAP_SIZE - 1) * (HEIGHTMAP_SIZE - 1) * 6;
-        int vertexCount = HEIGHTMAP_SIZE * HEIGHTMAP_SIZE;
-        int vertexBufferSize = HEIGHTMAP_SIZE * HEIGHTMAP_SIZE * sizeof(Vertex);
-        int indexBufferSize = (HEIGHTMAP_SIZE - 1) * (HEIGHTMAP_SIZE - 1) * 6 * sizeof(uint32_t);
+        int indexCount = (HEIGHT_MAP_SIZE - 1) * (HEIGHT_MAP_SIZE - 1) * 6;
+        int vertexCount = HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE;
+        int vertexBufferSize = HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE * sizeof(Vertex);
+        int indexBufferSize = (HEIGHT_MAP_SIZE - 1) * (HEIGHT_MAP_SIZE - 1) * 6 * sizeof(uint32_t);
 
         g_heightMapVerticesReadBackPBO.UpdateState();
 

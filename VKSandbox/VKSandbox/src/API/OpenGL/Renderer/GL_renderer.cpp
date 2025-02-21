@@ -46,6 +46,7 @@ namespace OpenGLRenderer {
     unsigned int g_lightDepthMaps;
     constexpr unsigned int g_depthMapResolution = 4096;
 
+    void LoadShaders();
     void CascadedShadowMappingPass();
 
     IndirectBuffer g_indirectBuffer;
@@ -86,8 +87,8 @@ namespace OpenGLRenderer {
         g_frameBuffers["UI"] = OpenGLFrameBuffer("UI", resolutions.ui);
         g_frameBuffers["UI"].CreateAttachment("Color", GL_RGBA8, GL_NEAREST, GL_NEAREST);
 
-        g_frameBuffers["HeightMap"] = OpenGLFrameBuffer("HeightMap", HEIGHTMAP_SIZE, HEIGHTMAP_SIZE);
-        g_frameBuffers["HeightMap"].CreateAttachment("Color", GL_R8);
+        g_frameBuffers["HeightMap"] = OpenGLFrameBuffer("HeightMap", HEIGHT_MAP_SIZE, HEIGHT_MAP_SIZE);
+        g_frameBuffers["HeightMap"].CreateAttachment("Color", GL_R16F);
 
         g_frameBuffers["FlashlightShadowMap"] = OpenGLFrameBuffer("Flashlight", FLASHLIGHT_SHADOWMAP_SIZE, FLASHLIGHT_SHADOWMAP_SIZE);
         g_frameBuffers["FlashlightShadowMap"].CreateDepthAttachment(GL_DEPTH32F_STENCIL8, GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_BORDER, glm::vec4(1.0f));
@@ -108,34 +109,7 @@ namespace OpenGLRenderer {
         // Preallocate the indirect command buffer
         g_indirectBuffer.PreAllocate(sizeof(DrawIndexedIndirectCommand) * MAX_INDIRECT_DRAW_COMMAND_COUNT);
 
-        // Load shaders
-        g_shaders["BlurHorizontal"] = OpenGLShader({ "GL_blur_horizontal.vert", "GL_blur.frag" });
-        g_shaders["BlurVertical"] = OpenGLShader({ "GL_blur_vertical.vert", "GL_blur.frag" });
-        g_shaders["ComputeSkinning"] = OpenGLShader({ "GL_compute_skinning.comp" });
-        g_shaders["EditorMesh"] = OpenGLShader({ "GL_editor_mesh.vert", "GL_editor_mesh.frag" });
-        g_shaders["EmissiveComposite"] = OpenGLShader({ "GL_emissive_composite.comp" });
-        g_shaders["Gizmo"] = OpenGLShader({ "GL_gizmo.vert", "GL_gizmo.frag" });
-        g_shaders["Grass"] = OpenGLShader({ "GL_grass.vert", "GL_grass.frag" });
-        g_shaders["GrassToshima"] = OpenGLShader({ "GL_grass_toshima.vert", "GL_grass_toshima.frag" });
-        g_shaders["GrassGeneration"] = OpenGLShader({ "GL_grass_generation.comp" });
-        g_shaders["GrassGeometryGeneration"] = OpenGLShader({ "GL_grass_geometry_generation.comp" });
-        g_shaders["HairDepthPeel"] = OpenGLShader({ "GL_hair_depth_peel.vert", "GL_hair_depth_peel.frag" });
-        g_shaders["HairFinalComposite"] = OpenGLShader({ "GL_hair_final_composite.comp" });
-        g_shaders["HairLayerComposite"] = OpenGLShader({ "GL_hair_layer_composite.comp" });
-        g_shaders["HairLighting"] = OpenGLShader({ "GL_hair_lighting.vert", "GL_hair_lighting.frag" });
-        g_shaders["HeightMapColor"] = OpenGLShader({ "GL_heightmap_color.vert", "GL_heightmap_color.frag" });
-        g_shaders["HeightMapImageGeneration"] = OpenGLShader({ "GL_heightmap_image_generation.comp" });
-        g_shaders["HeightMapVertexGeneration"] = OpenGLShader({ "GL_heightmap_vertex_generation.comp" });
-        g_shaders["Lighting"] = OpenGLShader({ "GL_lighting.comp" });
-        g_shaders["GBuffer"] = OpenGLShader({ "GL_GBuffer.vert", "GL_gBuffer.frag" });
-        g_shaders["ShadowMapGeometry"] = OpenGLShader({ "GL_shadow_map_geometry.vert", "GL_shadow_map.frag" });
-        g_shaders["ShadowMapHeightMap"] = OpenGLShader({ "GL_shadow_map_heightmap.vert", "GL_shadow_map.frag" });
-        g_shaders["SolidColor"] = OpenGLShader({ "GL_solid_color.vert", "GL_solid_color.frag" });
-        g_shaders["Skybox"] = OpenGLShader({ "GL_skybox.vert", "GL_skybox.frag" });
-        g_shaders["SpriteSheet"] = OpenGLShader({ "GL_sprite_sheet.vert", "GL_sprite_sheet.frag" });
-        g_shaders["UI"] = OpenGLShader({ "GL_ui.vert", "GL_ui.frag" });
-        g_shaders["CSMDepth"] = OpenGLShader({ "GL_csm_depth.vert", "GL_csm_depth.frag", "GL_csm_depth.geom" });
-        g_shaders["ZeroOut"] = OpenGLShader({ "GL_zero_out.comp" });
+        LoadShaders();
     }
 
     void InitMain() {
@@ -160,7 +134,6 @@ namespace OpenGLRenderer {
         }
 
         CreateBlurBuffers();
-
 
         // glGenFramebuffers(1, &g_lightFBO);
         //
@@ -193,6 +166,36 @@ namespace OpenGLRenderer {
         // glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    void LoadShaders() {
+        g_shaders["BlurHorizontal"] = OpenGLShader({ "GL_blur_horizontal.vert", "GL_blur.frag" });
+        g_shaders["BlurVertical"] = OpenGLShader({ "GL_blur_vertical.vert", "GL_blur.frag" });
+        g_shaders["ComputeSkinning"] = OpenGLShader({ "GL_compute_skinning.comp" });
+        g_shaders["EditorMesh"] = OpenGLShader({ "GL_editor_mesh.vert", "GL_editor_mesh.frag" });
+        g_shaders["EmissiveComposite"] = OpenGLShader({ "GL_emissive_composite.comp" });
+        g_shaders["Gizmo"] = OpenGLShader({ "GL_gizmo.vert", "GL_gizmo.frag" });
+        g_shaders["Grass"] = OpenGLShader({ "GL_grass.vert", "GL_grass.frag" });
+        g_shaders["GrassGeometryGeneration"] = OpenGLShader({ "GL_grass_geometry_generation.comp" });
+        g_shaders["GrassPositionGeneration"] = OpenGLShader({ "GL_grass_position_generation.comp" });
+        g_shaders["HairDepthPeel"] = OpenGLShader({ "GL_hair_depth_peel.vert", "GL_hair_depth_peel.frag" });
+        g_shaders["HairFinalComposite"] = OpenGLShader({ "GL_hair_final_composite.comp" });
+        g_shaders["HairLayerComposite"] = OpenGLShader({ "GL_hair_layer_composite.comp" });
+        g_shaders["HairLighting"] = OpenGLShader({ "GL_hair_lighting.vert", "GL_hair_lighting.frag" });
+        g_shaders["HeightMapColor"] = OpenGLShader({ "GL_heightmap_color.vert", "GL_heightmap_color.frag" });
+        g_shaders["HeightMapVertexGeneration"] = OpenGLShader({ "GL_heightmap_vertex_generation.comp" });
+        g_shaders["HeightMapImageGeneration"] = OpenGLShader({ "GL_heightmap_image_generation.comp" });
+        g_shaders["HeightMapPaint"] = OpenGLShader({ "GL_heightmap_paint.comp" });
+        g_shaders["Lighting"] = OpenGLShader({ "GL_lighting.comp" });
+        g_shaders["GBuffer"] = OpenGLShader({ "GL_GBuffer.vert", "GL_gBuffer.frag" });
+        g_shaders["ShadowMapGeometry"] = OpenGLShader({ "GL_shadow_map_geometry.vert", "GL_shadow_map.frag" });
+        g_shaders["ShadowMapHeightMap"] = OpenGLShader({ "GL_shadow_map_heightmap.vert", "GL_shadow_map.frag" });
+        g_shaders["SolidColor"] = OpenGLShader({ "GL_solid_color.vert", "GL_solid_color.frag" });
+        g_shaders["Skybox"] = OpenGLShader({ "GL_skybox.vert", "GL_skybox.frag" });
+        g_shaders["SpriteSheet"] = OpenGLShader({ "GL_sprite_sheet.vert", "GL_sprite_sheet.frag" });
+        g_shaders["UI"] = OpenGLShader({ "GL_ui.vert", "GL_ui.frag" });
+        g_shaders["CSMDepth"] = OpenGLShader({ "GL_csm_depth.vert", "GL_csm_depth.frag", "GL_csm_depth.geom" });
+        g_shaders["ZeroOut"] = OpenGLShader({ "GL_zero_out.comp" });
+    }
+
     void UpdateSSBOS() {
         const std::vector<GLuint64>& bindlessTextureIDs = OpenGLBackEnd::GetBindlessTextureIDs();
         g_ssbos["Samplers"].Update(bindlessTextureIDs.size() * sizeof(GLuint64), (void*)&bindlessTextureIDs[0]);
@@ -221,29 +224,13 @@ namespace OpenGLRenderer {
 
         ComputeSkinningPass();
         ClearRenderTargets();
-
-        //CascadedShadowMappingPass();
-
         UpdateSSBOS();
-
-        const RendererSettings& renderSettings = Config::GetRendererSettings();
-        int peelCount = renderSettings.depthPeelCount;
-        if (Input::KeyPressed(HELL_KEY_8) && peelCount < 7) {
-            Audio::PlayAudio("UI_Select.wav", 1.0f);
-            Config::SetDepthPeelCount(peelCount + 1);
-            std::cout << "Depth peel layer count: " << peelCount << "\n";
-        }
-        if (Input::KeyPressed(HELL_KEY_9) && peelCount > 0) {
-            Audio::PlayAudio("UI_Select.wav", 1.0f);
-            Config::SetDepthPeelCount(peelCount - 1);
-            std::cout << "Depth peel layer count: " << peelCount << "\n";
-        }
-
         SkyBoxPass();
         HeightMapPass();
         RenderShadowMaps();
         GrassPass();
         GeometryPass();
+        TextureReadBackPass();
 
         //g_ssbos["Samplers"].Bind(0);
         //g_ssbos["RendererData"].Bind(1);
@@ -276,13 +263,13 @@ namespace OpenGLRenderer {
         srcRect.y1 = heightmapFramebuffer.GetHeight();
 
         BlitRect dstRect = srcRect;
-        dstRect.x1 = heightmapFramebuffer.GetWidth() * 2;
-        dstRect.y1 = heightmapFramebuffer.GetHeight() * 2;
-           
-        //OpenGLRenderer::BlitToDefaultFrameBuffer(&heightmapFramebuffer, "Color", srcRect, dstRect, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
+        dstRect.x1 = heightmapFramebuffer.GetWidth() * 3;
+        dstRect.y1 = heightmapFramebuffer.GetHeight() * 3;
+                 
         UIPass();
-        NuklearPass();
+        ImGuiPass();  
+        
+        //OpenGLRenderer::BlitToDefaultFrameBuffer(&heightmapFramebuffer, "Color", srcRect, dstRect, GL_COLOR_BUFFER_BIT, GL_LINEAR);
     }
 
     void ClearRenderTargets() {
@@ -357,15 +344,6 @@ namespace OpenGLRenderer {
         }
     }
 
-    // struct OpenGLBlurFrameBuffers {
-    //     std::vector<OpenGLFrameBuffer> p1;
-    //     std::vector<OpenGLFrameBuffer> p2;
-    //     std::vector<OpenGLFrameBuffer> p3;
-    //     std::vector<OpenGLFrameBuffer> p4;
-    // };
-    //
-
-
     void DrawQuad() {
         Mesh* mesh = AssetManager::GetMeshByModelNameMeshIndex("Quad", 0);
         glDrawElementsBaseVertex(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), mesh->baseVertex);
@@ -384,11 +362,9 @@ namespace OpenGLRenderer {
             float height = resolutions.gBuffer.y;
 
             // Create framebuffers, downscale by 50% each time
-            std::cout << "Created blur buffer: " << x << "\n";
             for (int y = 0; y < 4; y++) {
 
                 // Clean up existing framebuffer
-                std::cout << "-" << y << ": " << width << ", " << height << "\n";
                 g_blurBuffers[x][y].Create("BlurBuffer", width, height);
                 g_blurBuffers[x][y].CreateAttachment("ColorA", GL_RGBA8);
                 g_blurBuffers[x][y].CreateAttachment("ColorB", GL_RGBA8);

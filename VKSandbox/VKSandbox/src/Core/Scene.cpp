@@ -267,7 +267,10 @@ namespace Scene {
      //  bench2->SetModel("LampPost");
      //  bench2->SetMeshMaterials("LampPost");
 
-    
+
+
+        return;
+
         CreateAnimatedGameObject();
         AnimatedGameObject& object = g_animatedGameObjects.back();
         object.SetPlayerIndex(1);
@@ -279,8 +282,6 @@ namespace Scene {
         object.SetScale(0.01);
         object.PlayAndLoopAnimation("Shark_Attack_Left_Quick");
 
-
-        return;
       
 
         CreateAnimatedGameObject();

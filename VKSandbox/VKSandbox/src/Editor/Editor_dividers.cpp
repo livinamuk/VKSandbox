@@ -10,6 +10,8 @@ namespace Editor {
     int g_dividerHoverThreshold = 10;
 
     void UpdateDividers() {
+        if (Editor::GetEditorViewportSplitMode() == EditorViewportSplitMode::SINGLE) return;
+
         // const Resolutions& resolutions = Config::GetResolutions();
         int mouseX = Input::GetMouseX();
         int mouseY = Input::GetMouseY();

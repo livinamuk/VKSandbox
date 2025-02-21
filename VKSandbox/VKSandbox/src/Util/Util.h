@@ -50,6 +50,7 @@ namespace Util {
     std::string CameraViewToString(const CameraView& cameraView);
     std::string EditorStateToString(const EditorState& g_editorState);
     std::string WeaponActionToString(const WeaponAction& weaponAction);
+    std::string ImageDataTypeToString(const ImageDataType& imageDataType);
 
     // File
     const char* CopyConstChar(const char* text);
@@ -63,6 +64,7 @@ namespace Util {
     std::string GetFileExtension(const std::filesystem::directory_entry& entry);
     std::vector<FileInfo> IterateDirectory(const std::string& directory, std::vector<std::string> extensions = {});
     bool FileExists(const std::string_view name);
+    bool RenameFile(const std::string& oldFilePath, const std::string& newFilePath);
     FileInfo GetFileInfoFromPath(const std::string& filepath);
 
     // Rendering
@@ -90,4 +92,7 @@ namespace Util {
     // Conversions
     std::string LightTypeToString(LightType);
     LightType StringToLightType(const std::string& str);
+    
+    // Debug Info
+    void PrintDebugInfo(TextureData& textureData);
 }

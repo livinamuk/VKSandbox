@@ -116,14 +116,14 @@ void Player::Respawn() {
     }
 
     GiveDefaultLoadout();
-    //SwitchWeapon("Knife", WeaponAction::DRAW_BEGIN);
+    SwitchWeapon("Knife", WeaponAction::DRAW_BEGIN);
 
-    if (m_viewportIndex == 0) {
-        SwitchWeapon("SPAS", WeaponAction::DRAW_BEGIN);
-    }
-    else {
-        SwitchWeapon("Knife", WeaponAction::DRAW_BEGIN);
-    }
+    //if (m_viewportIndex == 0) {
+    //    SwitchWeapon("SPAS", WeaponAction::DRAW_BEGIN);
+    //}
+    //else {
+    //    SwitchWeapon("Knife", WeaponAction::DRAW_BEGIN);
+    //}
         
     //if (_characterController) {
     //    PxExtendedVec3 globalPose = PxExtendedVec3(spawnPoint.position.x, spawnPoint.position.y, spawnPoint.position.z);
@@ -133,7 +133,7 @@ void Player::Respawn() {
     //_rotation = spawnPoint.rotation;
 
     if (Game::GetTotalTime() > 1.0) {
-        Audio::PlayAudio("Glock_Equip.wav", 0.5f);
+        //Audio::PlayAudio("Glock_Equip.wav", 0.5f);
     }
     m_flashlightOn = false;
     m_awaitingSpawn = false; 

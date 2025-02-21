@@ -95,10 +95,8 @@ uint RandomUInt(vec2 seedVec, uint max) {
 }
 
 
-
-
 void main() {
-    
+
     // tweakables
     float bendStrength = 0.1;
     float bladeHeight = 0.075;

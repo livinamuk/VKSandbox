@@ -3,6 +3,7 @@
 #include "Gizmo.h"
 #include "BackEnd/BackEnd.h"
 #include "Camera/Camera.h"
+#include "Config/Config.h"
 #include "Core/Audio.h"
 #include "Core/Debug.h"
 #include "Core/Scene.h"
@@ -18,13 +19,14 @@ namespace Editor {
     bool g_isOrthographic[4];
     bool g_editorStateWasIdleLastFrame = true;
     float g_OrthographicSizes[4];
-    float g_verticalDividerXPos = 0.0f;
-    float g_splitY = 0.0f;
+    float g_verticalDividerXPos = 0.2f;
+    float g_horizontalDividerYPos = 0.2f;
     uint16_t g_selectedObjectIndex = 0;
     uint16_t g_hoveredObjectIndex = 0;
     EditorObjectType g_selectedObjectType = EditorObjectType::NONE;
     EditorObjectType g_hoveredObjectType = EditorObjectType::NONE;
     ShadingMode g_shadingModes[4];
+    EditorViewportSplitMode g_editorViewportSplitMode = EditorViewportSplitMode::SINGLE;
     //CameraView g_cameraViews[4];
     
     float g_orthoCameraDistances[4];
@@ -37,9 +39,23 @@ namespace Editor {
             g_editorMesh.RecalculateMesh();
         }
         ResetViewports();
+        ResetCameras();
     }
 
     void ResetViewports() {
+
+        const Resolutions& resolutions = Config::GetResolutions();
+
+        // Center the viewport splits
+        float editorWidth = resolutions.ui.x - EDITOR_LEFT_PANEL_WIDTH;
+        float editorHeight = resolutions.ui.y - EDITOR_FILE_MENU_HEIGHT;
+        float editorWidthNormalized = editorWidth / resolutions.ui.x;
+        float editorHeightNormalized = editorHeight / resolutions.ui.y;
+        float panelRightEdgeNormalized = EDITOR_LEFT_PANEL_WIDTH / resolutions.ui.x;
+        float fileMenuHeightNormalized = EDITOR_FILE_MENU_HEIGHT / resolutions.ui.y;
+        g_verticalDividerXPos = panelRightEdgeNormalized + (editorWidthNormalized * 0.5f);
+        g_horizontalDividerYPos = fileMenuHeightNormalized + (editorHeightNormalized * 0.5f);
+
         float ORTHO_CAMERA_DISTANCE_FROM_ORIGIN = 250.0f;
         g_orthoCameraDistances[0] = ORTHO_CAMERA_DISTANCE_FROM_ORIGIN;
         g_orthoCameraDistances[1] = ORTHO_CAMERA_DISTANCE_FROM_ORIGIN;
@@ -47,36 +63,37 @@ namespace Editor {
         g_orthoCameraDistances[3] = ORTHO_CAMERA_DISTANCE_FROM_ORIGIN;
 
         // Top left
-        SetViewportView(0, Gizmo::GetPosition(), CameraView::TOP);
-        //g_cameras[0].SetPosition(glm::vec3(0, g_orthoCameraDistances[0], 0.0f));
-        //g_cameras[0].SetEulerRotation(glm::vec3(HELL_PI * -0.5f, HELL_PI * -0.5f, 0.0f));
-
-        //g_shadingModes[0] = ShadingMode::WIREFRAME;
-        //g_cameraViews[0] = CameraView::TOP;
-        //g_isOrthographic[0] = true;
+        SetViewportView(0, Gizmo::GetPosition(), CameraView::RIGHT);
+        ViewportManager::GetViewportByIndex(0)->SetOrthoSize(1.14594f);
 
         // Top right
-        SetViewportView(1, Gizmo::GetPosition(), CameraView::FRONT);
+        SetViewportView(1, Gizmo::GetPosition(), CameraView::LEFT);
+        ViewportManager::GetViewportByIndex(1)->SetOrthoSize(1.1958f);
 
         // Bottom left
-        SetViewportView(2, Gizmo::GetPosition(), CameraView::LEFT);
-        //g_cameras[2].SetPosition(glm::vec3(-g_orthoCameraDistances[2], 0.8f, 0.0f));
-        //g_cameras[2].SetEulerRotation(glm::vec3(0.0f, HELL_PI * -0.5f, 0.0f));
-      //g_shadingModes[2] = ShadingMode::WIREFRAME;
-      //g_cameraViews[2] = CameraView::LEFT;
-      //g_isOrthographic[2] = true;
+        SetViewportView(2, Gizmo::GetPosition(), CameraView::TOP);
+        ViewportManager::GetViewportByIndex(2)->SetOrthoSize(1.19627f);
 
         // Bottom right
-        SetViewportView(3, Gizmo::GetPosition(), CameraView::RIGHT);
-        //g_cameras[3].SetPosition(glm::vec3(-2.09f, 1.45f, 0.68f));
-        //g_cameras[3].SetEulerRotation(glm::vec3(-0.30f, -1.32f, 0.0f));
-        //g_shadingModes[3] = ShadingMode::SHADED;
-        //g_cameraViews[3] = CameraView::PERSPECTIVE;
-        //g_isOrthographic[3] = false;
+        SetViewportView(3, Gizmo::GetPosition(), CameraView::FRONT);
+        ViewportManager::GetViewportByIndex(3)->SetOrthoSize(1.1958f);
     }
 
     void Update(float deltaTime) {
         if (!IsOpen()) return;
+
+        static bool runOnce = true;
+        if (runOnce) {
+            glm::vec3 gizmoPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+            GameObject* mermaid = Scene::GetGameObjectByName("Mermaid");
+            if (mermaid) {
+                gizmoPosition = mermaid->GetPosition();
+                Gizmo::SetPosition(gizmoPosition);
+                SetSelectedObjectType(EditorObjectType::GAME_OBJECT);
+                SetHoveredObjectType(EditorObjectType::GAME_OBJECT);
+            }
+            runOnce = false;
+        }
 
         g_editorStateWasIdleLastFrame = g_editorState == EditorState::IDLE;
 
@@ -85,11 +102,21 @@ namespace Editor {
         UpdateDividers();
         UpdateInput();
         UpdateUI();
-
         UpdateCursor();
         UpdateDebug();
         UpdateCameraInterpolation(deltaTime);
         Gizmo::Update();
+
+        if (Input::KeyPressed(HELL_KEY_Q)) {
+            if (GetEditorViewportSplitMode() == EditorViewportSplitMode::SINGLE) {
+                SetEditorViewportSplitMode(EditorViewportSplitMode::FOUR_WAY_SPLIT);
+                std::cout << "four way\n";
+            }
+            else {
+                SetEditorViewportSplitMode(EditorViewportSplitMode::SINGLE);
+                std::cout << "single\n";
+            }
+        }
     }
 
     void Open() {
@@ -165,7 +192,7 @@ namespace Editor {
     }
 
     void SetSplitY(float value) {
-        g_splitY = value;
+        g_horizontalDividerYPos = value;
         //ViewportManager::UpdateViewports();
     }
 
@@ -245,6 +272,10 @@ namespace Editor {
     //    }
     //}
 
+    void SetEditorViewportSplitMode(EditorViewportSplitMode mode) {
+        g_editorViewportSplitMode = mode;
+    }
+
     void SetViewportOrthoSize(uint32_t viewportIndex, float size) {
         if (viewportIndex >= 0 && viewportIndex < 4) {
             g_OrthographicSizes[viewportIndex] = size;
@@ -267,7 +298,11 @@ namespace Editor {
     }
 
     float GetHorizontalDividerYPos() {
-        return g_splitY;
+        return g_horizontalDividerYPos;
+    }
+
+    EditorViewportSplitMode GetEditorViewportSplitMode() {
+        return g_editorViewportSplitMode;
     }
 
     EditorMesh& GetEditorMesh() {

@@ -39,6 +39,7 @@ namespace Gizmo {
     void Update();
     void SetPosition(glm::vec3 position);
     void SetEuler(glm::vec3 euler);
+    void UpdateRenderItems();
 
     std::vector<GizmoRenderItem>& GetRenderItemsByViewportIndex(int index);
     DetachedMesh* GetDetachedMeshByIndex(int index);

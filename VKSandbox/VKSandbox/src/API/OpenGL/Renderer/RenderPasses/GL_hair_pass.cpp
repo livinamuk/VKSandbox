@@ -5,9 +5,29 @@
 #include "Viewport/ViewportManager.h"
 #include "Renderer/RenderDataManager.h"
 
+#include "Core/Audio.h"
+#include "Input/Input.h"
+
 namespace OpenGLRenderer {
 
+    void UpdateHairDebugInput() {
+        const RendererSettings& renderSettings = Config::GetRendererSettings();
+        int peelCount = renderSettings.depthPeelCount;
+        if (Input::KeyPressed(HELL_KEY_8) && peelCount < 7) {
+            Audio::PlayAudio("UI_Select.wav", 1.0f);
+            Config::SetDepthPeelCount(peelCount + 1);
+            std::cout << "Depth peel layer count: " << peelCount << "\n";
+        }
+        if (Input::KeyPressed(HELL_KEY_9) && peelCount > 0) {
+            Audio::PlayAudio("UI_Select.wav", 1.0f);
+            Config::SetDepthPeelCount(peelCount - 1);
+            std::cout << "Depth peel layer count: " << peelCount << "\n";
+        }
+    }
+
     void HairPass() {
+        UpdateHairDebugInput();
+
         OpenGLShader* shader = GetShader("HairFinalComposite");
         OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
         OpenGLFrameBuffer* hairFrameBuffer = GetFrameBuffer("Hair");
@@ -37,10 +57,6 @@ namespace OpenGLRenderer {
         glBindTexture(GL_TEXTURE_2D, gBuffer->GetColorAttachmentHandleByName("FinalLighting"));
         glBindImageTexture(0, gBuffer->GetColorAttachmentHandleByName("FinalLighting"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
         glDispatchCompute((gBuffer->GetWidth() + 7) / 8, (gBuffer->GetHeight() + 7) / 8, 1);
-
-        // Cleanup
-        //gBuffer->SetViewport(); // NOTE!~!! suspect, not necessary if you do shit properly in the next pass
-        //glDepthFunc(GL_LESS);
     }
 
     void RenderHairLayer(const DrawCommands& drawCommands, int peelCount) {

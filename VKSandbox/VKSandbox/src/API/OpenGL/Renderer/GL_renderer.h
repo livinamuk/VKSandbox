@@ -36,10 +36,11 @@ namespace OpenGLRenderer {
     void GrassPass();
     void HairPass();
     void HeightMapPass();
+    void ImGuiPass();
     void LightingPass();
-    void NuklearPass();
     void SkyBoxPass();
     void SpriteSheetPass();
+    void TextureReadBackPass();
     void UIPass();
 
     // Render tasks
@@ -74,6 +75,10 @@ namespace OpenGLRenderer {
 
     // Misc
     void CreateGrassGeometry();
+
+    // Texture readback
+    bool IsMouseRayWorldPositionReadBackReady();
+    glm::vec3 GetMouseRayWorldPostion();
 
     // Rasterizer State
     void InitRasterizerStates();

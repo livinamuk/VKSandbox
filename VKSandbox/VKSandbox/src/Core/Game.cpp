@@ -58,7 +58,7 @@ namespace Game {
         SetPlayerKeyboardAndMouseIndex(3, 1, 1);
 
         SetSplitscreenMode(SplitscreenMode::FULLSCREEN);
-        SetSplitscreenMode(SplitscreenMode::TWO_PLAYER);
+        //SetSplitscreenMode(SplitscreenMode::TWO_PLAYER);
 
         std::cout << "Created players\n";
         Audio::PlayAudio("Glock_Equip.wav", 0.5f);
@@ -100,56 +100,6 @@ namespace Game {
 
         for (Player& player : g_localPlayers) {
             player.Update(g_deltaTime);
-        }
-    }
-
-    void UpdateLazyKeypresses() {
-        if (Input::KeyPressed(HELL_KEY_ESCAPE)) {
-            BackEnd::ForceCloseWindow();
-        }
-        if (Input::KeyPressed(HELL_KEY_H)) {
-            Renderer::HotloadShaders();
-        }
-        if (Input::KeyPressed(HELL_KEY_TAB)) {
-            Editor::ToggleOpenState();
-            //ViewportManager::UpdateViewports();
-        }
-        if (Input::KeyPressed(HELL_KEY_GRAVE_ACCENT)) {
-            Audio::PlayAudio(AUDIO_SELECT, 1.00f);
-            Debug::ToggleDebugText();
-        }
-        if (!Editor::IsOpen()) {
-            if (Input::KeyPressed(HELL_KEY_V)) {
-                NextSplitScreenMode();
-            }
-            if (Input::KeyPressed(HELL_KEY_1) && GetLocalPlayerCount() >= 1) {
-                SetPlayerKeyboardAndMouseIndex(0, 0, 0);
-                SetPlayerKeyboardAndMouseIndex(1, 1, 1);
-                SetPlayerKeyboardAndMouseIndex(2, 1, 1);
-                SetPlayerKeyboardAndMouseIndex(3, 1, 1);
-            }
-            if (Input::KeyPressed(HELL_KEY_2) && GetLocalPlayerCount() >= 2) {
-                SetPlayerKeyboardAndMouseIndex(0, 1, 1);
-                SetPlayerKeyboardAndMouseIndex(1, 0, 0);
-                SetPlayerKeyboardAndMouseIndex(2, 1, 1);
-                SetPlayerKeyboardAndMouseIndex(3, 1, 1);
-            }
-            if (Input::KeyPressed(HELL_KEY_3) && GetLocalPlayerCount() >= 3) {
-                SetPlayerKeyboardAndMouseIndex(0, 1, 1);
-                SetPlayerKeyboardAndMouseIndex(1, 1, 1);
-                SetPlayerKeyboardAndMouseIndex(2, 0, 0);
-                SetPlayerKeyboardAndMouseIndex(3, 1, 1);
-            }
-            if (Input::KeyPressed(HELL_KEY_4) && GetLocalPlayerCount() >= 4) {
-                SetPlayerKeyboardAndMouseIndex(0, 1, 1);
-                SetPlayerKeyboardAndMouseIndex(1, 1, 1);
-                SetPlayerKeyboardAndMouseIndex(2, 1, 1);
-                SetPlayerKeyboardAndMouseIndex(3, 0, 0);
-            }
-            if (Input::KeyPressed(HELL_KEY_B)) {
-                Audio::PlayAudio(AUDIO_SELECT, 1.00f);
-                Renderer::NextDebugLineRenderMode();
-            }
         }
     }
 

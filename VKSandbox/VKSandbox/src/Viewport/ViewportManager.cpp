@@ -22,27 +22,46 @@ namespace ViewportManager {
     }
 
     void Update() {
-        for (Viewport& viewport : g_viewports) {
-            viewport.Update();
-        }
+        const Resolutions& resolutions = Config::GetResolutions();
 
         // Set state / recreate matrices based on editor/splitscreen mode
         // Clean this up when you have a moment.
         if (Editor::IsOpen()) {
             float splitX = Editor::GetVerticalDividerXPos();
             float splitY = Editor::GetHorizontalDividerYPos();
-            g_viewports[0].SetPosition(glm::vec2(0.0f, 1.0f - splitY));     // Top-left
-            g_viewports[1].SetPosition(glm::vec2(splitX, 1.0f - splitY));   // Top-right
-            g_viewports[2].SetPosition(glm::vec2(0.0f, 0.0f));              // Bottom-left
-            g_viewports[3].SetPosition(glm::vec2(splitX, 0.0f));            // Bottom-right
-            g_viewports[0].SetSize(glm::vec2(splitX, splitY));
-            g_viewports[1].SetSize(glm::vec2(1.0f - splitX, splitY));
-            g_viewports[2].SetSize(glm::vec2(splitX, 1.0f - splitY));
-            g_viewports[3].SetSize(glm::vec2(1.0f - splitX, 1.0f - splitY));
-            g_viewports[0].Show();
-            g_viewports[1].Show();
-            g_viewports[2].Show();
-            g_viewports[3].Show();
+
+            float beginX = EDITOR_LEFT_PANEL_WIDTH / resolutions.ui.x;
+            float beginY = EDITOR_FILE_MENU_HEIGHT / resolutions.ui.y;
+
+            // 4 way split
+            if (Editor::GetEditorViewportSplitMode() == EditorViewportSplitMode::FOUR_WAY_SPLIT) {
+                g_viewports[0].SetPosition(glm::vec2(beginX, 1.0f - splitY));  // Top-left
+                g_viewports[1].SetPosition(glm::vec2(splitX, 1.0f - splitY));  // Top-right
+                g_viewports[2].SetPosition(glm::vec2(beginX + 0.0f, 0.0f));             // Bottom-left
+                g_viewports[3].SetPosition(glm::vec2(splitX, 0.0f));                    // Bottom-right
+                g_viewports[0].SetSize(glm::vec2(splitX - beginX, splitY - beginY));
+                g_viewports[1].SetSize(glm::vec2(1.0f - splitX, splitY - beginY));
+                g_viewports[2].SetSize(glm::vec2(splitX - beginX, 1.0f - splitY));
+                g_viewports[3].SetSize(glm::vec2(1.0f - splitX, 1.0f - splitY));
+                g_viewports[0].Show();
+                g_viewports[1].Show();
+                g_viewports[2].Show();
+                g_viewports[3].Show();
+            }
+            else if (Editor::GetEditorViewportSplitMode() == EditorViewportSplitMode::SINGLE) {
+                g_viewports[0].SetPosition(glm::vec2(beginX, 0.0f));  // Top-left
+                g_viewports[1].SetPosition(glm::vec2(beginX, 0.0f));  // Top-right
+                g_viewports[2].SetPosition(glm::vec2(beginX, 0.0f));  // Bottom-left
+                g_viewports[3].SetPosition(glm::vec2(beginX, 0.0f));  // Bottom-right
+                g_viewports[0].SetSize(glm::vec2(1.0f - beginX, 1.0f - beginY));
+                g_viewports[1].SetSize(glm::vec2(1.0f - beginX, 1.0f - beginY));
+                g_viewports[2].SetSize(glm::vec2(1.0f - beginX, 1.0f - beginY));
+                g_viewports[3].SetSize(glm::vec2(1.0f - beginX, 1.0f - beginY));
+                g_viewports[0].Show();
+                g_viewports[1].Hide();
+                g_viewports[2].Hide();
+                g_viewports[3].Hide();
+            }
             for (int i = 0; i < 4; i++) {
                 g_viewports[i].SetViewportMode(Editor::GetViewportModeByIndex(i));
                 Editor::IsViewportOrthographic(i)
@@ -95,6 +114,11 @@ namespace ViewportManager {
                 g_viewports[3].Show();
             }
         }
+
+        for (Viewport& viewport : g_viewports) {
+            viewport.Update();
+        }
+
     }
 
     Viewport* GetViewportByIndex(int32_t viewportIndex) {

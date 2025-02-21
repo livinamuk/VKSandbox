@@ -48,8 +48,8 @@ namespace OpenGLRenderer {
         glm::mat4 modelMatrix = transform.to_mat4();
         glm::mat4 inverseModelMatrix = glm::inverse(modelMatrix);
         shader->SetMat4("u_modelMatrix", modelMatrix);
-        int indexCount = (HEIGHTMAP_SIZE - 1) * (HEIGHTMAP_SIZE - 1) * 6;
-        int vertexCount = HEIGHTMAP_SIZE * HEIGHTMAP_SIZE;
+        int indexCount = (HEIGHT_MAP_SIZE - 1) * (HEIGHT_MAP_SIZE - 1) * 6;
+        int vertexCount = HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE;
         int i = 0; // viewport index !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         glBindVertexArray(heightMapMesh.GetVAO());
         glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * 0), 1, 0, i);

@@ -62,7 +62,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;vendor\physx\include;vendor\nlohmann_json\include;vendor\nuklear\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;vendor\physx\include;vendor\nlohmann_json\include;vendor\imgui\include;vendor\lodepng\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -98,7 +98,7 @@ copy /Y "$(ProjectDir)vendor\dll_debug\PVDRuntime_64.dll" "$(TargetDir)PVDRuntim
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;TRACY_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>src;vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;vendor\physx\include;vendor\nlohmann_json\include;vendor\nuklear\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\compressonator\include\;vendor\gli\include;src\Util;src\Common;vendor\glad\include;vendor\GLFW\include;vendor\glm;vendor\stb_image;vendor\assimp\include;vendor;vendor\fmod\include;vendor\tinyexr;vendor\VkBootstrap;vendor\Vulkan\include;vendor\VulkanMemoryAllocator\include;vendor\physx\include;vendor\nlohmann_json\include;vendor\imgui\include;vendor\lodepng\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -140,7 +140,7 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_debug_pass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_editor_pass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_emissive_pass.cpp" />
-    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_nuklear_pass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_imgui_pass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_geometry_pass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_grass_pass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_hair_pass.cpp" />
@@ -151,12 +151,14 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_shadow_maps.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_skybox_pass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_spritesheet_pass.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_texture_reaback_pass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_UI_pass.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_cubemapView.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_framebuffer.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_heightmapMesh.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_shader.cpp" />
     <ClCompile Include="src\API\OpenGL\Types\GL_texture.cpp" />
+    <ClCompile Include="src\API\OpenGL\Types\GL_texture_array.cpp" />
     <ClCompile Include="src\API\Vulkan\Managers\vk_command_manager.cpp" />
     <ClCompile Include="src\API\Vulkan\Managers\vk_device_manager.cpp" />
     <ClCompile Include="src\API\Vulkan\Managers\vk_frame_manager.cpp" />
@@ -190,6 +192,8 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\Core\Nuklear.cpp" />
     <ClCompile Include="src\Core\Scene.cpp" />
     <ClCompile Include="src\Core\Map.cpp" />
+    <ClCompile Include="src\Renderer\Types\TextureArray.cpp" />
+    <ClCompile Include="src\Util\Util_debug_info.cpp" />
     <ClCompile Include="src\World\HeightMapManager.cpp" />
     <ClCompile Include="src\World\HeightMap.cpp" />
     <ClCompile Include="src\Physics\Physics.cpp" />
@@ -262,6 +266,14 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\World\Sector.cpp" />
     <ClCompile Include="src\World\World.cpp" />
     <ClCompile Include="vendor\glad\src\glad.c" />
+    <ClCompile Include="vendor\imgui\include\imgui\imgui.cpp" />
+    <ClCompile Include="vendor\imgui\include\imgui\imgui_demo.cpp" />
+    <ClCompile Include="vendor\imgui\include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="vendor\imgui\include\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="vendor\imgui\include\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="vendor\imgui\include\imgui\imgui_tables.cpp" />
+    <ClCompile Include="vendor\imgui\include\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="vendor\lodepng\include\lodepng\lodepng.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
     <ClCompile Include="vendor\tinyexr\tinyexr.cpp" />
     <ClCompile Include="vendor\VkBootstrap\VkBootstrap.cpp" />
@@ -282,12 +294,10 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <None Include="res\shaders\OpenGL\GL_emissive_composite.comp" />
     <None Include="res\shaders\OpenGL\GL_gizmo.frag" />
     <None Include="res\shaders\OpenGL\GL_gizmo.vert" />
+    <None Include="res\shaders\OpenGL\GL_grass_position_generation.comp" />
+    <None Include="res\shaders\OpenGL\GL_grass_geometry_generation.comp" />
     <None Include="res\shaders\OpenGL\GL_grass.frag" />
     <None Include="res\shaders\OpenGL\GL_grass.vert" />
-    <None Include="res\shaders\OpenGL\GL_grass_generation.comp" />
-    <None Include="res\shaders\OpenGL\GL_grass_geometry_generation.comp" />
-    <None Include="res\shaders\OpenGL\GL_grass_toshima.frag" />
-    <None Include="res\shaders\OpenGL\GL_grass_toshima.vert" />
     <None Include="res\shaders\OpenGL\GL_hair_final_composite.comp" />
     <None Include="res\shaders\OpenGL\GL_hair_depth_peel.frag" />
     <None Include="res\shaders\OpenGL\GL_hair_depth_peel.vert" />
@@ -332,6 +342,7 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClInclude Include="src\API\OpenGL\Types\GL_shader.h" />
     <ClInclude Include="src\API\OpenGL\Types\GL_ssbo.hpp" />
     <ClInclude Include="src\API\OpenGL\Types\GL_texture.h" />
+    <ClInclude Include="src\API\OpenGL\Types\GL_texture_array.h" />
     <ClInclude Include="src\API\Vulkan\Managers\vk_command_manager.h" />
     <ClInclude Include="src\API\Vulkan\Managers\vk_device_manager.h" />
     <ClInclude Include="src\API\Vulkan\Managers\vk_frame_manager.h" />
@@ -358,6 +369,7 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClInclude Include="src\Core\JSON.h" />
     <ClInclude Include="src\Core\Map.h" />
     <ClInclude Include="src\Core\Nuklear.h" />
+    <ClInclude Include="src\Renderer\Types\TextureArray.h" />
     <ClInclude Include="src\World\HeightMapManager.h" />
     <ClInclude Include="src\World\HeightMap.h" />
     <ClInclude Include="src\Physics\Physics.h" />
@@ -424,6 +436,7 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClInclude Include="src\Viewport\ViewportManager.h" />
     <ClInclude Include="src\World\Sector.h" />
     <ClInclude Include="src\World\World.h" />
+    <ClInclude Include="src\World\WorldCommon.h" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
     <ClInclude Include="vendor\stb_image\stb_image_write.h" />
     <ClInclude Include="vendor\VkBootstrap\VkBootstrap.h" />

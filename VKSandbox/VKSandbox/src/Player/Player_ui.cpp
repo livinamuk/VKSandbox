@@ -36,7 +36,7 @@ void Player::UpdateUI() {
     if (!Debug::IsDebugTextVisible()) {
         std::string text = "";
         text += "Cam Pos: " + Util::Vec3ToString(GetCameraPosition()) + "\n";
-        text += "Cam Euler: " + Util::Vec3ToString(GetCameraRotation()) + "\n";
+        //text += "Cam Euler: " + Util::Vec3ToString(GetCameraRotation()) + "\n";
         text += "Weapon Action: " + Util::WeaponActionToString(GetCurrentWeaponAction()) + "\n";
         
         //text += "CanReloadShotgun: " + Util::BoolToString(CanReloadShotgun()) + "\n";
@@ -51,7 +51,7 @@ void Player::UpdateUI() {
        //
        // text += "\n";
        // text += "Grounded: " + Util::BoolToString(m_grounded) + "\n";
-        //text += "Grounded: " + Util::BoolToString(m_grounded) + "\n";
+        //text += "Grounded: " + Util::BoolToString(m_grounded) +  "\n";
         //text += "GroundedLastFrame: " + Util::BoolToString(m_groundedLastFrame) + "\n";
         
         

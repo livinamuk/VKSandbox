@@ -119,4 +119,13 @@ namespace Util {
         default:                                          return "UNDEFINED";
         }
     }
+
+    std::string ImageDataTypeToString(const ImageDataType& imageDataType) {
+        switch (imageDataType) {
+        case ImageDataType::UNCOMPRESSED: return "UNCOMPRESSED";
+        case ImageDataType::COMPRESSED:   return "COMPRESSED";
+        case ImageDataType::EXR:          return "EXR";
+        default:                          return "UNDEFINED";
+        }
+    }
 }

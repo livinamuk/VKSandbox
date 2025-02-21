@@ -44,6 +44,7 @@ namespace BackEnd {
     bool g_renderDocFound = false;
 
     void CheckForRenderDoc();
+    void UpdateLazyKeypresses();
 
     bool Init(API api, int windowWidth, int windowHeight, WindowedMode windowMode) {
         g_api = api;
@@ -93,6 +94,7 @@ namespace BackEnd {
 
         const Resolutions& resolutions = Config::GetResolutions();
 
+        ViewportManager::Update();
         Editor::Update(Game::GetDeltaTime());
         Game::Update();
         Scene::SetMaterials();
@@ -108,9 +110,8 @@ namespace BackEnd {
         BackEnd::UpdateMousePicking(x, y);
 
         Debug::Update();
-        RenderDataManager::Update();
-        ViewportManager::Update();
         UIBackEnd::Update();
+        RenderDataManager::Update();
     }
 
     void EndFrame() {
@@ -121,19 +122,10 @@ namespace BackEnd {
     }
 
     void UpdateSubSystems() {
-        Game::UpdateLazyKeypresses();
         Input::Update();
         InputMulti::Update();
         Audio::Update();
-        if (Input::KeyPressed(HELL_KEY_ESCAPE)) {
-            BackEnd::ForceCloseWindow();
-        }
-        if (Input::KeyPressed(HELL_KEY_G)) {
-            BackEnd::ToggleFullscreen();
-        }
-        if (Input::KeyPressed(HELL_KEY_H)) {
-            Renderer::HotloadShaders();
-        }
+        UpdateLazyKeypresses();
     }
 
     void CleanUp() {
@@ -282,6 +274,58 @@ namespace BackEnd {
 
     bool RenderDocFound() {
         return g_renderDocFound;
+    }
+
+    void UpdateLazyKeypresses() {
+        if (Input::KeyPressed(HELL_KEY_ESCAPE)) {
+            BackEnd::ForceCloseWindow();
+        }
+        if (Input::KeyPressed(HELL_KEY_G)) {
+            BackEnd::ToggleFullscreen();
+        }
+        if (Input::KeyPressed(HELL_KEY_H)) {
+            Renderer::HotloadShaders();
+        }
+        if (Input::KeyPressed(HELL_KEY_TAB)) {
+            Editor::ToggleOpenState();
+        }
+        if (Input::KeyPressed(HELL_KEY_GRAVE_ACCENT)) {
+            Audio::PlayAudio(AUDIO_SELECT, 1.00f);
+            Debug::ToggleDebugText();
+        }
+        if (!Editor::IsOpen()) {
+            if (Input::KeyPressed(HELL_KEY_V)) {
+                Game::NextSplitScreenMode();
+            }
+            if (Input::KeyPressed(HELL_KEY_1) && Game::GetLocalPlayerCount() >= 1) {
+                Game::SetPlayerKeyboardAndMouseIndex(0, 0, 0);
+                Game::SetPlayerKeyboardAndMouseIndex(1, 1, 1);
+                Game::SetPlayerKeyboardAndMouseIndex(2, 1, 1);
+                Game::SetPlayerKeyboardAndMouseIndex(3, 1, 1);
+            }
+            if (Input::KeyPressed(HELL_KEY_2) && Game::GetLocalPlayerCount() >= 2) {
+                Game::SetPlayerKeyboardAndMouseIndex(0, 1, 1);
+                Game::SetPlayerKeyboardAndMouseIndex(1, 0, 0);
+                Game::SetPlayerKeyboardAndMouseIndex(2, 1, 1);
+                Game::SetPlayerKeyboardAndMouseIndex(3, 1, 1);
+            }
+            if (Input::KeyPressed(HELL_KEY_3) && Game::GetLocalPlayerCount() >= 3) {
+                Game::SetPlayerKeyboardAndMouseIndex(0, 1, 1);
+                Game::SetPlayerKeyboardAndMouseIndex(1, 1, 1);
+                Game::SetPlayerKeyboardAndMouseIndex(2, 0, 0);
+                Game::SetPlayerKeyboardAndMouseIndex(3, 1, 1);
+            }
+            if (Input::KeyPressed(HELL_KEY_4) && Game::GetLocalPlayerCount() >= 4) {
+                Game::SetPlayerKeyboardAndMouseIndex(0, 1, 1);
+                Game::SetPlayerKeyboardAndMouseIndex(1, 1, 1);
+                Game::SetPlayerKeyboardAndMouseIndex(2, 1, 1);
+                Game::SetPlayerKeyboardAndMouseIndex(3, 0, 0);
+            }
+            if (Input::KeyPressed(HELL_KEY_B)) {
+                Audio::PlayAudio(AUDIO_SELECT, 1.00f);
+                Renderer::NextDebugLineRenderMode();
+            }
+        }
     }
 }
 

@@ -9,6 +9,7 @@
 #include "Renderer/Renderer.h"
 #include "UI/UIBackEnd.h"
 #include "Util/Util.h"
+#include "World/HeightMapManager.h"
 #include <unordered_map>
 #include <future>
 #include <mutex>
@@ -112,6 +113,7 @@ namespace AssetManager {
             BuildMaterials();
             BuildIndexMaps(); // but also required after BuildMaterials()... FIX! maybe just add to the index map when you create these objects.
             BuildSpriteSheetTextures();
+            HeightMapManager::Init();
             if (BackEnd::GetAPI() == API::OPENGL) {
                 OpenGLBackEnd::CleanUpBakingPBOs();
                 OpenGLBackEnd::UploadVertexData(g_vertices, g_indices);

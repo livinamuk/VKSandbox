@@ -230,18 +230,18 @@ namespace AssetManager {
 
 
 
-            std::cout << "Loaded " << skinnedModel->GetFileInfo().name << "\n";
-            std::cout << " skinnedModel->m_BoneInfo.size(): " << skinnedModel->m_BoneInfo.size() << "\n";
-            std::cout << " skinnedModel->m_joints.size(): " << skinnedModel->m_nodes.size() << "\n";
-
-            std::cout << "\n";
-            for (int i = 0; i < skinnedModel->m_BoneInfo.size(); i++) {
-                std::cout << " " << i << ": " << skinnedModel->m_BoneInfo[i].BoneName << "\n";
-            }
-            std::cout << "\n";
-            for (int i = 0; i < skinnedModel->m_nodes.size(); i++) {
-                std::cout << " " << i << ": " << skinnedModel->m_nodes[i].m_name << "\n";
-            }
+            //std::cout << "Loaded " << skinnedModel->GetFileInfo().name << "\n";
+            //std::cout << " skinnedModel->m_BoneInfo.size(): " << skinnedModel->m_BoneInfo.size() << "\n";
+            //std::cout << " skinnedModel->m_joints.size(): " << skinnedModel->m_nodes.size() << "\n";
+            //
+            //std::cout << "\n";
+            //for (int i = 0; i < skinnedModel->m_BoneInfo.size(); i++) {
+            //    std::cout << " " << i << ": " << skinnedModel->m_BoneInfo[i].BoneName << "\n";
+            //}
+            //std::cout << "\n";
+            //for (int i = 0; i < skinnedModel->m_nodes.size(); i++) {
+            //    std::cout << " " << i << ": " << skinnedModel->m_nodes[i].m_name << "\n";
+            //}
         
         }
     }

@@ -6,6 +6,16 @@ namespace Util {
         return (stat(name.data(), &buffer) == 0);
     }
 
+    bool RenameFile(const std::string& oldFilePath, const std::string& newFilePath) {
+        if (!FileExists(oldFilePath)) {
+            std::cout << "Util::RenameFile() failed because old path '" << oldFilePath << "' does not exist!\n";
+            return false;
+        }
+        std::filesystem::path oldPath = oldFilePath;
+        std::filesystem::path newPath = newFilePath;
+        return std::filesystem::rename(oldPath, newPath), true;
+    }
+
     std::string GetFileName(const std::string& filepath) {
         size_t pos = filepath.find_last_of("/\\");
         std::string filename = (pos == std::string::npos) ? filepath : filepath.substr(pos + 1);
@@ -58,14 +68,14 @@ namespace Util {
     FileInfo GetFileInfoFromPath(const std::string& filepath) {
         FileInfo fileInfo;
         std::filesystem::path path(filepath);
-        if (!std::filesystem::exists(path) || !std::filesystem::is_regular_file(path)) {
-            throw std::runtime_error("Invalid file path or not a regular file: " + filepath);
+        if (!FileExists(filepath)) {
+            std::cout << "Util::GetFileInfoFromPath() Failed: path does not exist: " << filepath << ", warning returning an empty FileInfo\n";
+            return fileInfo;
         }
         fileInfo.path = path.string();
         fileInfo.name = path.stem().string();
         fileInfo.ext = path.has_extension() ? path.extension().string().substr(1) : "";
         fileInfo.dir = path.parent_path().string();
-
         return fileInfo;
     }
 }

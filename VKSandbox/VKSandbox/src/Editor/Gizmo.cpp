@@ -41,7 +41,6 @@ namespace Gizmo {
     glm::vec3 g_rotationRayHitPosPreviousFrame = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 g_rotationRayHitPosThisFrame = glm::vec3(0.0f, 0.0f, 0.0f);
     
-    void UpdateRenderItems();
     void UpdateInput();
     void UpdateLocalAxes();
 
@@ -337,6 +336,9 @@ namespace Gizmo {
     
 
     void UpdateRenderItems() {
+
+        if (!Editor::IsOpen()) return;
+
         for (int i = 0; i < 4; i++) {
             g_renderItems[i].clear();
 

@@ -68,7 +68,7 @@ namespace OpenGLRenderer {
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glBindSampler(0, g_linearSampler);
+        glBindSampler(0, g_nearestSampler);
         glViewport(0, 0, BackEnd::GetCurrentWindowWidth(), BackEnd::GetCurrentWindowHeight());
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, uiFrameBuffer->GetColorAttachmentHandleByName("Color"));

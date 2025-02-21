@@ -16,8 +16,10 @@ namespace Editor {
         int gBufferHeight = resolutions.gBuffer.y;
 
         // Dividers
-        UIBackEnd::BlitTexture("Black", glm::ivec2(GetVerticalDividerXPos() * gBufferWidth, 0), Alignment::CENTERED_HORIZONTAL, WHITE, glm::ivec2(g_dividerThickness, gBufferHeight));
-        UIBackEnd::BlitTexture("Black", glm::ivec2(0, GetHorizontalDividerYPos() * gBufferHeight), Alignment::CENTERED_VERTICAL, WHITE, glm::ivec2(gBufferWidth, g_dividerThickness));
+        if (Editor::GetEditorViewportSplitMode() != EditorViewportSplitMode::SINGLE) {
+            UIBackEnd::BlitTexture("Black", glm::ivec2(GetVerticalDividerXPos() * gBufferWidth, 0), Alignment::CENTERED_HORIZONTAL, WHITE, glm::ivec2(g_dividerThickness, gBufferHeight));
+            UIBackEnd::BlitTexture("Black", glm::ivec2(0, GetHorizontalDividerYPos() * gBufferHeight), Alignment::CENTERED_VERTICAL, WHITE, glm::ivec2(gBufferWidth, g_dividerThickness));
+        }
 
         // Resize rectangle
         SelectionRectangleState& rectangleState = GetSelectionRectangleState();

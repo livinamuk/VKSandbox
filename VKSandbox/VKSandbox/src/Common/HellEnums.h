@@ -201,3 +201,8 @@ enum DebugLineRenderMode {
 enum struct LightType {
     LAMP_POST = 0
 };
+
+enum struct EditorViewportSplitMode {
+    SINGLE,
+    FOUR_WAY_SPLIT
+};

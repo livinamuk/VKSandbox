@@ -150,7 +150,7 @@ struct TextureData {
     int m_format = 0;
     int m_internalFormat = 0;
     void* m_data = nullptr;
-    ImageDataType m_imadeDataType;
+    ImageDataType m_imageDataType;
 };
 
 struct FileInfo {

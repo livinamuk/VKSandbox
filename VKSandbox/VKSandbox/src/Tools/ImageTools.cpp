@@ -1,4 +1,4 @@
-#include "ImageTools.h"
+﻿#include "ImageTools.h"
 #include "HellTypes.h"
 #include "HellEnums.h"
 #include <stdio.h>
@@ -17,6 +17,11 @@
 #include "DDS.h"
 #include <stb_image.h>
 #include <unordered_map>
+#include <cstdint>
+#include <cmath>
+#include <iostream>
+#include <bitset>  // For binary debugging
+#include <lodepng/lodepng.h>
 
 namespace ImageTools {
 
@@ -190,7 +195,7 @@ namespace ImageTools {
         stbi_set_flip_vertically_on_load(false);
         TextureData textureData;
         uint8_t* imageData = stbi_load(filepath.data(), &textureData.m_width, &textureData.m_height, &textureData.m_channelCount, 0);
-        textureData.m_imadeDataType = ImageDataType::UNCOMPRESSED;
+        textureData.m_imageDataType = ImageDataType::UNCOMPRESSED;
 
         if (textureData.m_channelCount == 3) {
             size_t newSize = textureData.m_width * textureData.m_height * 4;
@@ -226,7 +231,7 @@ namespace ImageTools {
 
     TextureData LoadEXRData(const std::string& filepath) {
         TextureData textureData;
-        textureData.m_imadeDataType = ImageDataType::EXR;
+        textureData.m_imageDataType = ImageDataType::EXR;
         const char* err = nullptr;
         const char** layer_names = nullptr;
         int num_layers = 0;
@@ -240,6 +245,104 @@ namespace ImageTools {
         textureData.m_dataSize = -1; // TODO
         textureData.m_format = -1; // TODO
         textureData.m_internalFormat = -1; // TODO
+        return textureData;
+    }
+
+    float HalfToFloat(uint16_t h) {
+        uint32_t sign = (h & 0x8000) << 16;      // Extract sign bit
+        uint32_t exponent = (h & 0x7C00) >> 10;  // Extract exponent
+        uint32_t mantissa = (h & 0x03FF);        // Extract mantissa
+
+        if (exponent == 0) {
+            if (mantissa == 0) {
+                float zero = (sign != 0) ? -0.0f : 0.0f;
+                return zero;
+            }
+            float subnormal = std::ldexp(static_cast<float>(mantissa), -24);
+            return subnormal;
+        }
+
+        if (exponent == 31) {
+            float special = (mantissa == 0) ? std::copysign(INFINITY, sign) : NAN;
+            return special;
+        }
+
+        exponent = exponent - 15 + 127;  // Convert exponent from half-float to full-float
+        uint32_t floatBits = sign | (exponent << 23) | (mantissa << 13);
+
+        float result;
+        std::memcpy(&result, &floatBits, sizeof(result));  // Bitcast to float
+
+        return result;
+    }
+
+    uint16_t FloatToHalf(float value) {
+        uint32_t f = *(uint32_t*)&value; // Interpret float as uint32_t
+        uint32_t sign = (f >> 16) & 0x8000; // Extract sign bit
+        uint32_t exponent = (f >> 23) & 0xFF; // Extract exponent
+        uint32_t mantissa = f & 0x7FFFFF; // Extract mantissa
+
+        if (exponent == 255) { // Inf or NaN
+            if (mantissa) return sign | 0x7E00; // NaN
+            return sign | 0x7C00; // Infinity
+        }
+
+        if (exponent > 142) { // Too large, return infinity
+            return sign | 0x7C00;
+        }
+
+        if (exponent < 113) { // Too small, round to zero or denormalized
+            if (exponent < 103) return sign; // Underflow to zero
+            mantissa |= 0x800000; // Set implicit leading 1
+            mantissa >>= (113 - exponent); // Shift to denormalized range
+            return sign | (mantissa >> 13);
+        }
+
+        return sign | ((exponent - 112) << 10) | (mantissa >> 13);
+    }
+
+    TextureData LoadR16FTextureData(const std::string& filepath) {
+        stbi_set_flip_vertically_on_load(false);
+        TextureData textureData;
+
+        int width, height, channels;
+        uint16_t* imageData = stbi_load_16(filepath.c_str(), &width, &height, &channels, 1); // Force single-channel
+
+        if (!imageData) {
+            std::cout << "[LoadR16FTextureData] Failed to load R16F texture: " << filepath << "\n";
+            return textureData;
+        }
+
+        size_t pixelCount = width * height;
+        std::vector<uint16_t> halfFloatData(imageData, imageData + pixelCount); // Store raw uint16_t
+
+        // Print min/max values for debugging
+        uint16_t minVal = *std::min_element(halfFloatData.begin(), halfFloatData.end());
+        uint16_t maxVal = *std::max_element(halfFloatData.begin(), halfFloatData.end());
+        std::cout << "[LoadR16FTextureData] Min: " << minVal << ", Max: " << maxVal << "\n";
+
+        // Print first 10 pixel values for debugging
+        std::cout << "[LoadR16FTextureData] First 10 pixel values after loading:\n";
+        for (int i = 0; i < 10; ++i) {
+            std::cout << "Pixel[" << i << "]: Raw=" << halfFloatData[i] << "\n";
+        }
+
+        stbi_image_free(imageData);
+
+        // Assign values to TextureData
+        textureData.m_width = width;
+        textureData.m_height = height;
+        textureData.m_channelCount = 1;
+        textureData.m_internalFormat = GL_R16F;
+        textureData.m_format = GL_RED;
+        textureData.m_dataSize = pixelCount * sizeof(uint16_t);
+        textureData.m_imageDataType = ImageDataType::UNCOMPRESSED;
+        textureData.m_data = new uint16_t[pixelCount];  // Allocate persistent memory
+        std::memcpy(textureData.m_data, halfFloatData.data(), textureData.m_dataSize);
+
+        std::cout << "[LoadR16FTextureData] Loaded R16F texture: " << filepath
+            << " (" << width << "x" << height << ")\n";
+
         return textureData;
     }
 
@@ -284,6 +387,122 @@ namespace ImageTools {
         else {
             std::cout << "Failed to save " << filename << "\n";
         }
+    }
+
+  
+
+    void SaveBitmap(const std::string& filename, void* data, int width, int height, int format) {
+        std::vector<float> floatData;
+
+        // Infer channel count from OpenGL format
+        std::unordered_map<GLenum, int> formatChannelMap = {
+            {GL_R8, 1}, {GL_RG8, 2}, {GL_RGB8, 3}, {GL_RGBA8, 4},
+            {GL_R16F, 1}, {GL_RG16F, 2}, {GL_RGB16F, 3}, {GL_RGBA16F, 4},
+            {GL_R32F, 1}, {GL_RG32F, 2}, {GL_RGB32F, 3}, {GL_RGBA32F, 4}
+        };
+
+        if (formatChannelMap.find(format) == formatChannelMap.end()) {
+            std::cout << "SaveTextureAsBitmap() failed: Unsupported format " << format << "\n";
+            return;
+        }
+        
+        int channelCount = formatChannelMap[format];
+        size_t pixelCount = width * height * formatChannelMap[format];
+
+
+        if (format == GL_RGBA32F || format == GL_RGB32F || format == GL_RG32F || format == GL_R32F) {
+            // Data is already float, just copy it
+            float* floatPtr = static_cast<float*>(data);
+            floatData.assign(floatPtr, floatPtr + pixelCount);
+        }
+        else if (format == GL_RGBA16F || format == GL_RGB16F || format == GL_RG16F || format == GL_R16F) {
+            // Convert half-floats (uint16_t) to full floats
+            uint16_t* halfPtr = static_cast<uint16_t*>(data);
+            floatData.resize(pixelCount);
+            for (size_t i = 0; i < pixelCount; ++i) {
+                floatData[i] = HalfToFloat(halfPtr[i]);
+            }
+        }
+
+
+        // Allocate RGB buffer (BMP requires 3 channels)
+        std::vector<uint8_t> outputData(width * height * 3);
+
+        for (int i = 0; i < width * height; ++i) {
+            float r, g, b;
+            size_t index = i * channelCount; 
+
+            if (channelCount == 1) {
+                r = g = b = floatData[i];
+            }
+            else {
+                r = (channelCount > 0) ? floatData[index + 0] : 0.0f;
+                g = (channelCount > 1) ? floatData[index + 1] : 0.0f;
+                b = (channelCount > 2) ? floatData[index + 2] : 0.0f;
+            }
+
+            // Convert to 8-bit
+            outputData[i * 3 + 0] = static_cast<uint8_t>(std::clamp(r * 255.0f, 0.0f, 255.0f));
+            outputData[i * 3 + 1] = static_cast<uint8_t>(std::clamp(g * 255.0f, 0.0f, 255.0f));
+            outputData[i * 3 + 2] = static_cast<uint8_t>(std::clamp(b * 255.0f, 0.0f, 255.0f));
+        }
+
+        // Save as BMP
+        if (!stbi_write_bmp(filename.c_str(), width, height, 3, outputData.data())) {
+            std::cout << "Error: Failed to save BMP file!\n";
+        }
+        else {
+            std::cout << "Saved BMP successfully: " << filename << "\n";
+        }
+    }
+
+    void SaveHeightMapR16F(const std::string& filename, void* data, int width, int height) {
+        if (!data) {
+            std::cerr << "Error: Data pointer is null, cannot save PNG.\n";
+            return;
+        }
+
+        uint16_t* rawData = static_cast<uint16_t*>(data);
+        size_t pixelCount = width * height;
+        std::vector<uint16_t> outputData(pixelCount);
+
+        // Find min/max values
+        uint16_t minVal = 65535, maxVal = 0;
+        for (size_t i = 0; i < pixelCount; ++i) {
+            minVal = std::min(minVal, rawData[i]);
+            maxVal = std::max(maxVal, rawData[i]);
+        }
+
+        std::cout << "[SaveHeightMapR16F] Min: " << minVal << ", Max: " << maxVal << "\n";
+
+        // Avoid divide-by-zero when normalizing
+        float range = (maxVal - minVal) > 0 ? (maxVal - minVal) : 1.0f;
+        std::cout << "[SaveHeightMapR16F] Normalization range: " << range << "\n";
+
+        // Normalize and scale to 16-bit
+        for (size_t i = 0; i < pixelCount; ++i) {
+            //outputData[i] = static_cast<uint16_t>(((rawData[i] - minVal) / range) * 65535.0f);
+            outputData[i] = rawData[i];
+        }
+
+        // Print first 10 pixel values BEFORE saving
+        std::cout << "[SaveHeightMapR16F] First 10 pixel values before saving:\n";
+        for (int i = 0; i < 10; ++i) {
+            std::cout << "Pixel[" << i << "]: Raw=" << rawData[i]
+                << " -> Normalized=" << outputData[i] << "\n";
+        }
+
+        // Encode directly without byte swapping
+        std::vector<unsigned char> png;
+        unsigned error = lodepng::encode(png, reinterpret_cast<const unsigned char*>(outputData.data()), width, height, LCT_GREY, 16);
+
+        if (error) {
+            std::cerr << "[SaveHeightMapR16F] LodePNG error: " << lodepng_error_text(error) << "\n";
+            return;
+        }
+
+        lodepng::save_file(png, filename);
+        std::cout << "[SaveHeightMapR16F] Saved 16-bit grayscale PNG successfully: " << filename << "\n";
     }
 
     void SaveFloatArrayTextureAsBitmap(const std::vector<float>& data, int width, int height, int format, const std::string& filename) {
@@ -534,4 +753,43 @@ namespace ImageTools {
         std::cout << "Format: " << CMPFormatToString(mipset.m_format) << "\n";
         std::cout << "Mipmaps: " << mipset.m_nMaxMipLevels << "\n";
     }
+
+   
+    // Broken do not use!
+    void ConvertRGBA8ToR16F(TextureData& textureData) {
+        if (textureData.m_format != GL_RGBA || textureData.m_internalFormat != GL_RGBA8) {
+            std::cout << "Unsupported format!\n";
+        }
+
+        std::vector<GLfloat> redChannelData;
+        redChannelData.reserve(textureData.m_width * textureData.m_height);
+
+        unsigned char* originalData = (unsigned char*)textureData.m_data;
+
+        for (int y = 0; y < textureData.m_height; ++y) {
+            for (int x = 0; x < textureData.m_width; ++x) {
+                int pixelIndex = (y * textureData.m_width + x) * 4;
+                unsigned char r = originalData[pixelIndex];
+                redChannelData.push_back(r / 255.0f);
+            }
+        }
+
+        int newDataSize = redChannelData.size() * sizeof(GLfloat);
+        std::cout << "New Data Size: " << newDataSize << " bytes" << std::endl;
+
+        textureData.m_dataSize = newDataSize;
+        textureData.m_internalFormat = GL_R16F;
+        textureData.m_channelCount = 1;
+        textureData.m_format = GL_RED;
+        if (textureData.m_data != nullptr) {
+            delete[] textureData.m_data;
+        }
+
+        textureData.m_data = new GLfloat[redChannelData.size()];
+        std::memcpy(textureData.m_data, redChannelData.data(), newDataSize);
+
+        textureData.m_imageDataType = ImageDataType::UNCOMPRESSED;
+    }
+
+
 }

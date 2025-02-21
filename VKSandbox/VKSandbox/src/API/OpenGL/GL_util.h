@@ -11,7 +11,8 @@ namespace OpenGLUtil {
     uint32_t CMPFormatToGLInternalFormat(CMP_FORMAT format);
     const char* GetGLSyncStatusString(GLenum result);
     const char* GLFormatToString(GLenum format);
-    const char* GLInternalFormatToString(GLenum internalFormat);
+    const char* GLInternalFormatToString(GLenum internalFormat); 
+    const char* GLDataTypeToString(GLenum dataType);
     GLint GetChannelCountFromFormat(GLenum format);
     size_t CalculateCompressedDataSize(GLenum format, int width, int height);
     GLint TextureWrapModeToGLEnum(TextureWrapMode wrapMode);

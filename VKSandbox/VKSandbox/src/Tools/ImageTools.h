@@ -15,10 +15,16 @@ namespace ImageTools {
     std::vector<TextureData> LoadTextureDataFromDDSThreadSafe(const std::string filepath);
     std::vector<TextureData> LoadTextureDataFromDDSThreadUnsafe(const std::string filepath);
     TextureData LoadUncompressedTextureData(const std::string& filepath);
+    TextureData LoadR16FTextureData(const std::string& filepath);
     TextureData LoadEXRData(const std::string& filepath);
+    void ConvertRGBA8ToR16F(TextureData& textureData);
 
     // Util
-    void SaveBitmap(const char* filename, unsigned char* data, int width, int height, int numChannels);
+    void SaveBitmap(const char* filename, unsigned char* data, int width, int height, int numChannels); // problematticly similar to below!!!!
+
+    void SaveBitmap(const std::string& filename, void* data, int width, int height, int internalFormat);
+    void SaveHeightMapR16F(const std::string& filename, void* data, int width, int height);
+    
     void SaveTextureAsBitmap(const std::vector<std::vector<uint16_t>>& pixels, int width, int height, const std::string& filename);
     void SaveFloatArrayTextureAsBitmap(const std::vector<float>& data, int width, int height, int format, const std::string& filename);
 

@@ -7,6 +7,7 @@
 
 namespace Editor {
     void Init();
+    void ResetCameras();
     void ResetViewports();
     void Update(float deltaTime);
     void UpdateCursor();
@@ -32,6 +33,7 @@ namespace Editor {
     void SetViewportOrthographicState(uint32_t viewportIndex, bool state);
     //void SetCameraView(uint32_t cameraViewIndex, CameraView cameraView);
     void SetViewportOrthoSize(uint32_t viewportIndex, float size);
+    void SetEditorViewportSplitMode(EditorViewportSplitMode mode);
 
     int GetActiveViewportIndex();
     int GetHoveredViewportIndex();
@@ -54,6 +56,7 @@ namespace Editor {
     EditorObjectType GetSelectedObjectType();
     EditorObjectType GetHoveredObjectType();
     EditorState GetEditorState();
+    EditorViewportSplitMode GetEditorViewportSplitMode();
     SelectionRectangleState& GetSelectionRectangleState();
 
     EditorMesh& GetEditorMesh();

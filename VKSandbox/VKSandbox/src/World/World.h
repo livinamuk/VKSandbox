@@ -2,8 +2,8 @@
 #include "Sector.h"
 
 namespace World {
-
     void NewCampainWorld();
+    void LoadSingleSector(const std::string& name);
     void LoadDeathMatchMap();
 }
 

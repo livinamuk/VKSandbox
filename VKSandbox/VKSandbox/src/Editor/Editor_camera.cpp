@@ -9,20 +9,23 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/constants.hpp>
 
+struct EditorOrthographicCamera {
+    CameraView m_cameraView = CameraView::FRONT;
+    CameraView m_cameraViewPrevious = CameraView::FRONT;
+    glm::vec3 m_positionCurrent = glm::vec3(0);
+    glm::vec3 m_positionTarget = glm::vec3(0);
+    glm::vec3 m_cameraUpCurrent = glm::vec3(0);
+    glm::vec3 m_cameraUpTarget = glm::vec3(0);
+    glm::vec3 m_orbitPosition = glm::vec3(0);
+    glm::mat4 m_viewMatrix = glm::mat4(1);
+    float m_interpolationCounter = 0.0f;
+};
+
 namespace Editor {
     float g_zoomSpeed = 0.4f;
     float g_panSpeed = 0.0075f;
-
     float g_cameraInterolationDuration = 0.2f;
-    float g_interpolationCounter[4];
-    glm::vec3 g_cameraPositionCurrent[4];
-    glm::vec3 g_cameraPositionTarget[4];
-    glm::vec3 g_cameraUpCurrent[4];
-    glm::vec3 g_cameraUpTarget[4];
-    glm::vec3 g_orbitPosition[4];
-    CameraView g_cameraView[4];
-    CameraView g_cameraViewPrevious[4];
-    glm::mat4 g_viewMatrices[4];
+    EditorOrthographicCamera g_orthographicCameras[4];
 
     std::unordered_map<CameraView, glm::vec3> viewDirections = {
             { CameraView::FRONT,  glm::vec3(0,  0,  1) },
@@ -62,22 +65,64 @@ namespace Editor {
 
 #define ORTHO_CAMERA_DISTANCE_FROM_ORIGIN 250.0f // Rethink this
 
+    void ResetCameras() {
+        g_orthographicCameras[0].m_positionCurrent = glm::vec3(-191.80, 84.36, 117.22);
+        g_orthographicCameras[0].m_positionTarget = glm::vec3(-191.80, 84.36, 117.22);
+        g_orthographicCameras[0].m_cameraUpCurrent = glm::vec3(0.00, 1.00, 0.00);
+        g_orthographicCameras[0].m_cameraUpTarget = glm::vec3(0.00, 1.00, 0.00);
+        g_orthographicCameras[0].m_orbitPosition = glm::vec3(19.60, -4.02, 17.26);
+        g_orthographicCameras[0].m_interpolationCounter = 0;
+
+        g_orthographicCameras[1].m_positionCurrent = glm::vec3(-230.36, -3.59, 17.26);
+        g_orthographicCameras[1].m_positionTarget = glm::vec3(-230.36, -3.59, 17.26);
+        g_orthographicCameras[1].m_cameraUpCurrent = glm::vec3(0.00, 1.00, 0.00);
+        g_orthographicCameras[1].m_cameraUpTarget = glm::vec3(0.00, 1.00, 0.00);
+        g_orthographicCameras[1].m_orbitPosition = glm::vec3(19.64, -3.75, 17.26);
+        g_orthographicCameras[1].m_interpolationCounter = 0;
+
+        g_orthographicCameras[2].m_positionCurrent = glm::vec3(19.54, 250.00, 17.25);
+        g_orthographicCameras[2].m_positionTarget = glm::vec3(19.54, 250.00, 17.25);
+        g_orthographicCameras[2].m_cameraUpCurrent = glm::vec3(0.00, 0.00, -1.00);
+        g_orthographicCameras[2].m_cameraUpTarget = glm::vec3(0.00, 0.00, -1.00);
+        g_orthographicCameras[2].m_orbitPosition = glm::vec3(19.54, 0.00, 17.25);
+        g_orthographicCameras[2].m_interpolationCounter = 0;
+
+        g_orthographicCameras[3].m_positionCurrent = glm::vec3(19.55, -3.59, 267.33);
+        g_orthographicCameras[3].m_positionTarget = glm::vec3(19.55, -3.59, 267.33);
+        g_orthographicCameras[3].m_cameraUpCurrent = glm::vec3(0.00, 1.00, 0.00);
+        g_orthographicCameras[3].m_cameraUpTarget = glm::vec3(0.00, 1.00, 0.00);
+        g_orthographicCameras[3].m_orbitPosition = glm::vec3(19.55, -3.75, 17.33);
+        g_orthographicCameras[3].m_interpolationCounter = 0;
+    }
+
     void UpdateCamera() {
+
+       //for (int i = 0; i < 4; i++) {
+       //    Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+       //    glm::vec3 cameraPosition = g_cameraPositionCurrent[i];
+       //    std::cout << "g_cameraPositionCurrent[" << i << "] = glm::vec3" << Util::Vec3ToString(g_cameraPositionCurrent[i]) << ";\n";
+       //    std::cout << "g_cameraPositionTarget[" << i << "] = glm::vec3" << Util::Vec3ToString(g_cameraPositionTarget[i]) << ";\n";
+       //    std::cout << "g_cameraUpCurrent[" << i << "] = glm::vec3" << Util::Vec3ToString(g_cameraUpCurrent[i]) << ";\n";
+       //    std::cout << "g_cameraUpTarget[" << i << "] = glm::vec3" << Util::Vec3ToString(g_cameraUpTarget[i]) << ";\n";
+       //    std::cout << "g_orbitPosition[" << i << "] = glm::vec3" << Util::Vec3ToString(g_orbitPosition[i]) << ";\n";
+       //    std::cout << "\n";
+       //}
+
         Viewport* viewport = ViewportManager::GetViewportByIndex(Editor::GetActiveViewportIndex());
 
         // Pan
         if (Input::MiddleMouseDown() && Input::KeyDown(HELL_KEY_LEFT_SHIFT_GLFW)) {
             int i = Editor::GetActiveViewportIndex();
-            glm::vec3 target = g_orbitPosition[i];
-            glm::vec3 cameraPosition = g_cameraPositionCurrent[i];
-            glm::vec3 up = g_cameraUpCurrent[i]; 
+            glm::vec3 target = g_orthographicCameras[i].m_orbitPosition;
+            glm::vec3 cameraPosition = g_orthographicCameras[i].m_positionCurrent;
+            glm::vec3 up = g_orthographicCameras[i].m_cameraUpCurrent;
             glm::vec3 forward = glm::normalize(target - cameraPosition);
             glm::vec3 right = glm::normalize(glm::cross(forward, up));
 
             float speed = g_panSpeed * 0.25f * viewport->GetOrthoSize();
-            g_cameraPositionCurrent[i] -= (right * speed * Input::GetMouseOffsetX());
-            g_cameraPositionCurrent[i] += (up * speed * Input::GetMouseOffsetY());
-            g_orbitPosition[i] = g_cameraPositionCurrent[i] + forward * glm::vec3(ORTHO_CAMERA_DISTANCE_FROM_ORIGIN);
+            g_orthographicCameras[i].m_positionCurrent -= (right * speed * Input::GetMouseOffsetX());
+            g_orthographicCameras[i].m_positionCurrent += (up * speed * Input::GetMouseOffsetY());
+            g_orthographicCameras[i].m_orbitPosition = g_orthographicCameras[i].m_positionCurrent + forward * glm::vec3(ORTHO_CAMERA_DISTANCE_FROM_ORIGIN);
         }
 
         // Orbit
@@ -85,26 +130,24 @@ namespace Editor {
    
             int i = Editor::GetActiveViewportIndex();
 
-            glm::vec3 up = g_cameraUpCurrent[i];
-            glm::vec3 currentForward = glm::normalize(g_cameraPositionCurrent[i] - g_orbitPosition[i]);
+            glm::vec3 up = g_orthographicCameras[i].m_cameraUpCurrent;
+            glm::vec3 currentForward = glm::normalize(g_orthographicCameras[i].m_positionCurrent - g_orthographicCameras[i].m_orbitPosition);
             glm::vec3 currentRight = glm::normalize(glm::cross(currentForward, up));
 
             float orbitSpeed = 0.5f;
 
-            //g_orbitPosition[i] = g_cameraPositionCurrent[i] - currentForward * glm::vec3(ORTHO_CAMERA_DISTANCE_FROM_ORIGIN);
-            g_cameraPositionCurrent[i] += currentRight * orbitSpeed * Input::GetMouseOffsetX();
-            g_cameraPositionCurrent[i] += up * orbitSpeed * Input::GetMouseOffsetY();
+            g_orthographicCameras[i].m_positionCurrent += currentRight * orbitSpeed * Input::GetMouseOffsetX();
+            g_orthographicCameras[i].m_positionCurrent += up * orbitSpeed * Input::GetMouseOffsetY();
 
-            glm::vec3 newForward = glm::normalize(g_cameraPositionCurrent[i] - g_orbitPosition[i]);
-            g_cameraPositionCurrent[i] = g_orbitPosition[i] + newForward * glm::vec3(ORTHO_CAMERA_DISTANCE_FROM_ORIGIN);
+            glm::vec3 newForward = glm::normalize(g_orthographicCameras[i].m_positionCurrent - g_orthographicCameras[i].m_orbitPosition);
+            g_orthographicCameras[i].m_positionCurrent = g_orthographicCameras[i].m_orbitPosition + newForward * glm::vec3(ORTHO_CAMERA_DISTANCE_FROM_ORIGIN);
 
-            g_cameraPositionTarget[i] = g_cameraPositionCurrent[i];
-            g_cameraUpCurrent[i] = g_cameraUpCurrent[i];
-            g_cameraUpTarget[i] = g_cameraUpCurrent[i];
-            g_interpolationCounter[i] = 0;
+            g_orthographicCameras[i].m_positionTarget = g_orthographicCameras[i].m_positionCurrent;
+            g_orthographicCameras[i].m_cameraUpTarget = g_orthographicCameras[i].m_cameraUpCurrent;
+            g_orthographicCameras[i].m_interpolationCounter = 0;
 
-            g_cameraView[i] = CameraView::ORTHO;
-            g_cameraViewPrevious[i] = CameraView::ORTHO;
+            g_orthographicCameras[i].m_cameraView = CameraView::ORTHO;
+            g_orthographicCameras[i].m_cameraViewPrevious = CameraView::ORTHO;
         }
         // Zoom
         float zoomSpeed = g_zoomSpeed;
@@ -137,15 +180,15 @@ namespace Editor {
     }
 
     glm::mat4 GetViewportViewMatrix(int32_t viewportIndex) {
-        return g_viewMatrices[viewportIndex];
+        return g_orthographicCameras[viewportIndex].m_viewMatrix;
     }
 
 
 
-    // refactor me, you stole this fromt he old code
+    // refactor me, you stole this front he old code
     CameraView GetCameraViewByIndex(uint32_t index) {
         if (index >= 0 && index < 4) {
-            return g_cameraView[index];
+            return g_orthographicCameras[index].m_cameraView;
         }
         else {
             std::cout << "Editor::GetViewportTypeByIndex(int index) failed. " << index << " out of range of editor viewport count 4\n";
@@ -157,57 +200,56 @@ namespace Editor {
 
     void UpdateCameraInterpolation(float deltaTime) {
 
-        static bool runOnce = true;
-        if (runOnce) {
-
-            g_cameraView[0] = CameraView::TOP;
-            g_cameraView[1] = CameraView::FRONT;
-            g_cameraView[2] = CameraView::LEFT;
-            g_cameraView[3] = CameraView::RIGHT;
-
-            g_cameraViewPrevious[0] = CameraView::TOP;
-            g_cameraViewPrevious[1] = CameraView::FRONT;
-            g_cameraViewPrevious[2] = CameraView::LEFT;
-            g_cameraViewPrevious[3] = CameraView::RIGHT;
-
-            for (int i = 0; i < 4; i++) {
-                g_orbitPosition[i] = Gizmo::GetPosition();
-                g_cameraPositionCurrent[i] = g_orbitPosition[i] + viewDirections[g_cameraView[i]] * glm::vec3(ORTHO_CAMERA_DISTANCE_FROM_ORIGIN);
-                g_cameraPositionTarget[i] = g_cameraPositionCurrent[i];
-                g_cameraUpCurrent[i] = upVectors[g_cameraView[i]];
-                g_cameraUpTarget[i] = upVectors[g_cameraView[i]];
-                g_interpolationCounter[i] = 0;
-            }
-            runOnce = false;
-        }
+        //static bool runOnce = true;
+        //if (runOnce) {
+        //
+        //    g_orthographicCameras[0].m_cameraView = CameraView::TOP;
+        //    g_orthographicCameras[1].m_cameraView = CameraView::FRONT;
+        //    g_orthographicCameras[2].m_cameraView = CameraView::LEFT;
+        //    g_orthographicCameras[3].m_cameraView = CameraView::RIGHT;
+        //
+        //    g_orthographicCameras[0].m_cameraViewPrevious = CameraView::TOP;
+        //    g_orthographicCameras[1].m_cameraViewPrevious = CameraView::FRONT;
+        //    g_orthographicCameras[2].m_cameraViewPrevious = CameraView::LEFT;
+        //    g_orthographicCameras[3].m_cameraViewPrevious = CameraView::RIGHT;
+        //
+        //    for (int i = 0; i < 4; i++) {
+        //        g_orthographicCameras[i].m_orbitPosition = Gizmo::GetPosition();
+        //        g_orthographicCameras[i].m_positionCurrent = g_orthographicCameras[i].m_orbitPosition + viewDirections[g_orthographicCameras[i].m_cameraView] * glm::vec3(ORTHO_CAMERA_DISTANCE_FROM_ORIGIN);
+        //        g_orthographicCameras[i].m_positionTarget = g_orthographicCameras[i].m_positionCurrent;
+        //        g_orthographicCameras[i].m_cameraUpCurrent = upVectors[g_orthographicCameras[i].m_cameraView];
+        //        g_orthographicCameras[i].m_cameraUpTarget = upVectors[g_orthographicCameras[i].m_cameraView];
+        //        g_orthographicCameras[i].m_interpolationCounter = 0;
+        //    }
+        //    runOnce = false;
+        //}
 
 
         for (int i = 0; i < 4; i++) {
 
             // Interpolation
-            if (g_interpolationCounter[i] > 0) {
+            if (g_orthographicCameras[i].m_interpolationCounter > 0) {
 
                 // Decrement timer
-                g_interpolationCounter[i] -= deltaTime;
+                g_orthographicCameras[i].m_interpolationCounter -= deltaTime;
 
                 // Convert countdown to interpolation factor
-                float t = 1.0f - (g_interpolationCounter[i] / g_cameraInterolationDuration);
+                float t = 1.0f - (g_orthographicCameras[i].m_interpolationCounter / g_cameraInterolationDuration);
 
 
-                if (g_cameraView[i] == CameraView::ORTHO) {
+                if (g_orthographicCameras[i].m_cameraView == CameraView::ORTHO) {
 
 
-                    if (g_interpolationCounter[i] < 0.0f) {
-                        //g_cameraPositionCurrent[i] = g_cameraPositionTarget[i];
-                        g_interpolationCounter[i] = 0.0f;
-                        g_cameraViewPrevious[i] = g_cameraView[i];
+                    if (g_orthographicCameras[i].m_interpolationCounter < 0.0f) {
+                        g_orthographicCameras[i].m_interpolationCounter = 0.0f;
+                        g_orthographicCameras[i].m_cameraViewPrevious = g_orthographicCameras[i].m_cameraView;
                     }
                 }
                 else {
 
                     // Update position
-                    glm::vec3 currentForward = glm::normalize(g_cameraPositionCurrent[i] - g_orbitPosition[i]);
-                    glm::vec3 targetForward = glm::normalize(g_cameraPositionTarget[i] - g_orbitPosition[i]);
+                    glm::vec3 currentForward = glm::normalize(g_orthographicCameras[i].m_positionCurrent - g_orthographicCameras[i].m_orbitPosition);
+                    glm::vec3 targetForward = glm::normalize(g_orthographicCameras[i].m_positionTarget - g_orthographicCameras[i].m_orbitPosition);
                     glm::quat rotationQuat = glm::rotation(currentForward, targetForward);
                     if (glm::dot(glm::quat(1, 0, 0, 0), rotationQuat) < 0.0f) {
                         rotationQuat = -rotationQuat; // Ensure shortest path in SLERP
@@ -215,18 +257,18 @@ namespace Editor {
                     glm::quat interpolatedQuat = glm::slerp(glm::quat(1, 0, 0, 0), rotationQuat, t);
                     glm::vec3 newForward = interpolatedQuat * currentForward;
                     float orbitRadius = ORTHO_CAMERA_DISTANCE_FROM_ORIGIN;
-                    g_cameraPositionCurrent[i] = g_orbitPosition[i] + newForward * orbitRadius;
+                    g_orthographicCameras[i].m_positionCurrent = g_orthographicCameras[i].m_orbitPosition + newForward * orbitRadius;
 
                     // Interpolate camera current up vector to camera target up vector
-                    glm::vec3 currentUp = g_cameraUpCurrent[i];
-                    glm::vec3 targetUp = g_cameraUpTarget[i];
+                    glm::vec3 currentUp = g_orthographicCameras[i].m_cameraUpCurrent;
+                    glm::vec3 targetUp = g_orthographicCameras[i].m_cameraUpTarget;
                     glm::vec3 interpolatedUp = glm::normalize(glm::mix(currentUp, targetUp, t));
-                    g_cameraUpCurrent[i] = glm::normalize(glm::mix(currentUp, targetUp, t));
+                    g_orthographicCameras[i].m_cameraUpCurrent = glm::normalize(glm::mix(currentUp, targetUp, t));
 
-                    if (g_interpolationCounter[i] < 0.0f) {
-                        g_cameraPositionCurrent[i] = g_cameraPositionTarget[i];
-                        g_interpolationCounter[i] = 0.0f;
-                        g_cameraViewPrevious[i] = g_cameraView[i];
+                    if (g_orthographicCameras[i].m_interpolationCounter < 0.0f) {
+                        g_orthographicCameras[i].m_positionCurrent = g_orthographicCameras[i].m_positionTarget;
+                        g_orthographicCameras[i].m_interpolationCounter = 0.0f;
+                        g_orthographicCameras[i].m_cameraViewPrevious = g_orthographicCameras[i].m_cameraView;
                     }
                 }
             }
@@ -235,25 +277,25 @@ namespace Editor {
 
         // View matrices
         for (int i = 0; i < 4; i++) {
-            glm::vec3 target = g_orbitPosition[i];
-            glm::vec3 cameraPosition = g_cameraPositionCurrent[i];
-            glm::vec3 up = g_cameraUpCurrent[i];
+            glm::vec3 target = g_orthographicCameras[i].m_orbitPosition;
+            glm::vec3 cameraPosition = g_orthographicCameras[i].m_positionCurrent;
+            glm::vec3 up = g_orthographicCameras[i].m_cameraUpCurrent;
 
             // If ortho use regular lookat
-            if (g_cameraView[i] == CameraView::ORTHO) {
+            if (g_orthographicCameras[i].m_cameraView == CameraView::ORTHO) {
                 glm::vec3 forward = glm::normalize(target - cameraPosition);
-                g_viewMatrices[i] = glm::lookAt(cameraPosition, cameraPosition + forward, up);
+                g_orthographicCameras[i].m_viewMatrix = glm::lookAt(cameraPosition, cameraPosition + forward, up);
             }
             // If the current view is the same as the target, just face camera down its forward vector
-            else if (g_cameraViewPrevious[i] == g_cameraView[i]) {
-                glm::vec3 trueForward = g_cameraViewForwardVectors[g_cameraView[i]];
-                target = g_orbitPosition[i] + trueForward;
-                g_viewMatrices[i] = glm::lookAt(cameraPosition, cameraPosition + trueForward, up);
+            else if (g_orthographicCameras[i].m_cameraViewPrevious == g_orthographicCameras[i].m_cameraView) {
+                glm::vec3 trueForward = g_cameraViewForwardVectors[g_orthographicCameras[i].m_cameraView];
+                target = g_orthographicCameras[i].m_orbitPosition + trueForward;
+                g_orthographicCameras[i].m_viewMatrix = glm::lookAt(cameraPosition, cameraPosition + trueForward, up);
             }
             // Otherwise look at the target as it rotates
             else {
                 glm::vec3 forward = glm::normalize(target - cameraPosition);
-                g_viewMatrices[i] = glm::lookAt(cameraPosition, cameraPosition + forward, up);
+                g_orthographicCameras[i].m_viewMatrix = glm::lookAt(cameraPosition, cameraPosition + forward, up);
             }
         }
     }
@@ -262,12 +304,12 @@ namespace Editor {
 
 
     void SetViewportView(uint32_t viewportIndex, glm::vec3 viewportOrigin, CameraView targetView) {
-        g_interpolationCounter[viewportIndex] = g_cameraInterolationDuration;
-        g_cameraUpTarget[viewportIndex] = upVectors[targetView];
-        g_cameraViewPrevious[viewportIndex] = g_cameraView[viewportIndex];
-        g_cameraView[viewportIndex] = targetView;
-        g_orbitPosition[viewportIndex] = viewportOrigin;
-        g_cameraPositionTarget[viewportIndex] = viewportOrigin + viewDirections[g_cameraView[viewportIndex]] * glm::vec3(ORTHO_CAMERA_DISTANCE_FROM_ORIGIN);;
+        g_orthographicCameras[viewportIndex].m_interpolationCounter = g_cameraInterolationDuration;
+        g_orthographicCameras[viewportIndex].m_cameraUpTarget = upVectors[targetView];
+        g_orthographicCameras[viewportIndex].m_cameraViewPrevious = g_orthographicCameras[viewportIndex].m_cameraView;
+        g_orthographicCameras[viewportIndex].m_cameraView = targetView;
+        g_orthographicCameras[viewportIndex].m_orbitPosition = viewportOrigin;
+        g_orthographicCameras[viewportIndex].m_positionTarget = viewportOrigin + viewDirections[g_orthographicCameras[viewportIndex].m_cameraView] * glm::vec3(ORTHO_CAMERA_DISTANCE_FROM_ORIGIN);;
 
         //SetCameraView(viewportIndex, targetView);
         SetViewportOrthographicState(viewportIndex, true);

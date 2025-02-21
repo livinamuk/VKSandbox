@@ -93,7 +93,7 @@ namespace OpenGLRenderer {
     void RenderGrass();
 
     void GrassInit() {
-        int bladesPerAxis = HEIGHTMAP_SIZE * HEIGHTMAP_SCALE_XZ / BLADE_SPACING;
+        int bladesPerAxis = HEIGHT_MAP_SIZE * HEIGHTMAP_SCALE_XZ / BLADE_SPACING;
         int bufferSize = bladesPerAxis * bladesPerAxis * sizeof(glm::vec4);
         //int bufferSize = BLADES_PER_AXIS * BLADES_PER_AXIS * sizeof(glm::vec4);
         CreateSSBO("BladePositions", bufferSize, GL_DYNAMIC_STORAGE_BIT);
@@ -126,6 +126,9 @@ namespace OpenGLRenderer {
     }
 
     void GrassPass() {
+            
+        //return;
+
         if (Input::KeyPressed(HELL_KEY_X)) {
             CreateGrassGeometry();
         }
@@ -249,12 +252,12 @@ namespace OpenGLRenderer {
         int maxIndexCount = bladeCount * 12;
 
         // Uniforms
-        OpenGLShader* generationShader = GetShader("GrassGeneration");
+        OpenGLShader* generationShader = GetShader("GrassPositionGeneration");
         generationShader->Use();
         generationShader->SetInt("gridSize", BLADES_PER_AXIS);
         generationShader->SetFloat("spacing", BLADE_SPACING);
         generationShader->SetVec3("offset", glm::vec3(xOffset, 0.0f, zOffset));
-        generationShader->SetFloat("u_heightMapWorldSpaceSize", HEIGHTMAP_SIZE * HEIGHTMAP_SCALE_XZ);
+        generationShader->SetFloat("u_heightMapWorldSpaceSize", HEIGHT_MAP_SIZE * HEIGHTMAP_SCALE_XZ);
         
         // Dispatch compute shader
         const int workGroupSize = 16;
@@ -268,7 +271,7 @@ namespace OpenGLRenderer {
         const std::vector<ViewportData>& viewportData = RenderDataManager::GetViewportData();
 
         OpenGLSSBO* bladeositionsSSBO = GetSSBO("BladePositions");
-        OpenGLShader* geometryShader = GetShader("GrassToshima");
+        OpenGLShader* geometryShader = GetShader("Grass");
         OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
 
         Player* player = Game::GetLocalPlayerByIndex(0);

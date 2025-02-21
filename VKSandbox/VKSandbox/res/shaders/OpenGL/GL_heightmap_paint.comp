@@ -1,0 +1,107 @@
+#version 430 core
+layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+
+layout(r16f, binding = 0) uniform image2D heightmap;
+
+uniform int u_paintX;
+uniform int u_paintY;
+uniform float u_brushSize;
+uniform float u_strength;
+uniform int u_mode;
+uniform float u_noiseStrength;
+
+// 2D Random Gradient Function
+vec2 randomGradient(vec2 p) {
+    p = mod(p, vec2(289.0));
+    float x = fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    float y = fract(sin(dot(p, vec2(269.5, 183.3))) * 43758.5453);
+    return normalize(vec2(x, y) * 2.0 - 1.0);
+}
+
+// Smooth Interpolation
+float smoothStepInterp(float a, float b, float t) {
+    return mix(a, b, t * t * (3.0 - 2.0 * t));
+}
+
+// Perlin Noise Function
+float perlinNoise(vec2 uv) {
+    vec2 p = floor(uv);
+    vec2 f = fract(uv);
+
+    vec2 g00 = randomGradient(p);
+    vec2 g10 = randomGradient(p + vec2(1.0, 0.0));
+    vec2 g01 = randomGradient(p + vec2(0.0, 1.0));
+    vec2 g11 = randomGradient(p + vec2(1.0, 1.0));
+
+    float d00 = dot(g00, f);
+    float d10 = dot(g10, f - vec2(1.0, 0.0));
+    float d01 = dot(g01, f - vec2(0.0, 1.0));
+    float d11 = dot(g11, f - vec2(1.0, 1.0));
+
+    float tx = smoothStepInterp(d00, d10, f.x);
+    float ty = smoothStepInterp(d01, d11, f.x);
+    
+    return smoothStepInterp(tx, ty, f.y);
+}
+
+// Fractal Brownian Motion (FBM) - Multiple Octaves of Noise
+float fbm(vec2 uv, int octaves) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    float frequency = 1.0;
+
+    for (int i = 0; i < octaves; i++) { 
+        value += amplitude * perlinNoise(uv * frequency);
+        frequency *= 2.0;
+        amplitude *= 0.5;
+    }
+    return value;
+}
+
+void main() {
+    ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 imgSize = imageSize(heightmap);
+    
+    // Compute distance from brush center
+    float dist = length(vec2(pixelCoords) - vec2(u_paintX, u_paintY));
+    
+    // Compute falloff correctly
+    float falloff = smoothstep(0.0, u_brushSize, dist);
+    
+    // Fetch current height
+    float currentHeight = imageLoad(heightmap, pixelCoords).r;
+    
+    float newHeight = currentHeight;
+    
+    // First paint normally
+    float strengthModifier = 0.01;
+    float strength = u_strength * strengthModifier;
+    newHeight += strength * (1.0 - falloff);
+    
+    // Then apply FBM noise if brush is set to Perlin mode
+if (u_mode == 1) {
+    
+    float uvMultipler = 0.25;
+    
+    vec2 offset = vec2(u_paintX * 0.1, u_paintY * 0.1);
+    vec2 uv = vec2(pixelCoords) * uvMultipler + offset;
+    
+    // Generate noise and shift to [0,1] range
+    int octaves = 5;
+    float rawNoise = fbm(uv, octaves);
+    float noise = (rawNoise + 1.0) * 0.5; // Convert from [-1,1] to [0,1]
+
+    // Ensure noise always follows u_strength's sign
+    noise *= abs(u_strength); 
+
+    // Apply noise with a small strength reducer to control intensity
+    float noiseStrengthReducer = 0.025;
+    newHeight += sign(u_strength * 0.5) * noise * u_noiseStrength * (1.0 - falloff) * noiseStrengthReducer;
+}
+    
+    // Don't allow negative values, PhysX doesn't support them
+    newHeight = clamp(newHeight, 0.0, 1.0);
+
+    // Store updated height
+    imageStore(heightmap, pixelCoords, vec4(newHeight, 0.0, 0.0, 1.0));
+}

@@ -14,6 +14,8 @@ namespace Editor {
 
         for (int i = 0; i < 4; i++) {
             const Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+            if (!viewport->IsVisible()) return;
+
             //const Camera* camera = Editor::GetCameraByIndex(i);
             const Resolutions& resolutions = Config::GetResolutions();
             int width = resolutions.ui.x * viewport->GetSize().x;
@@ -21,7 +23,7 @@ namespace Editor {
             int xLeft = resolutions.ui.x * viewport->GetPosition().x;
             int yTop = resolutions.ui.y * (1.0f - viewport->GetPosition().y - viewport->GetSize().y);
 
-            if (!Debug::IsDebugTextVisible() && viewport->GetSize().x > 0.3f && viewport->GetSize().y > 0.2f) {
+            if (!Debug::IsDebugTextVisible() && viewport->GetSize().x > 0.15f && viewport->GetSize().y > 0.2f) {
                 std::string text = "";
                 //text += "ProjectionMatrix: \n" + Util::Mat4ToString(viewport->GetProjectionMatrix()) + "\n\n";
                 //text += "ViewMatrix: \n" + Util::Mat4ToString(camera->GetViewMatrix()) + "\n";
@@ -42,7 +44,7 @@ namespace Editor {
                 
 
 
-                text += "Gizmo Position: " + Util::Vec3ToString(Gizmo::GetPosition()) + "\n";
+               // text += "Gizmo Position: " + Util::Vec3ToString(Gizmo::GetPosition()) + "\n";
 
                // SpaceCoords windowSpaceCoords = viewport->GetWindowSpaceCoords();
                // SpaceCoords gBufferSpaceCoords = viewport->GetGBufferSpaceCoords();
