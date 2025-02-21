@@ -44,8 +44,6 @@ namespace AssetManager {
     void LoadMinimumTextures();
     void LoadTexture(Texture* texture);
 
-
-
     bool FileInfoIsAlbedoTexture(const FileInfo& fileInfo);
     std::string GetMaterialNameFromFileInfo(const FileInfo& fileInfo);
 

@@ -66,9 +66,7 @@ namespace OpenGLRenderer {
     void PaintHeightMap() {
         if (!IsMouseRayWorldPositionReadBackReady()) return;
         if (!Editor::IsOpen()) return;
-        if (Editor::GetHoveredObjectType() == EditorObjectType::GAME_OBJECT) return;
-        if (Gizmo::HasHover()) return;
-        if (Gizmo::GetAction() != GizmoAction::IDLE) return;
+        if (Editor::GetEditorMode() != EditorMode::HEIGHTMAP_EDITOR) return;
 
         OpenGLFrameBuffer* heightmapFBO = GetFrameBuffer("HeightMap");
         OpenGLShader* shader = GetShader("HeightMapPaint");

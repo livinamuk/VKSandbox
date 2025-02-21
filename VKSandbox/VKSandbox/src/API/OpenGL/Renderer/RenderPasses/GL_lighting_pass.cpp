@@ -2,6 +2,7 @@
 
 #include "AssetManagement/AssetManager.h"
 #include "Core/Game.h"
+#include "Editor/Editor.h"
 
 namespace OpenGLRenderer {
 
@@ -18,10 +19,21 @@ namespace OpenGLRenderer {
         lightingShader->Use();
 
         Player* player = Game::GetLocalPlayerByIndex(0);
-        lightingShader->SetMat4("u_flashlightProjectionView", player->GetFlashlightProjectionView());
-        lightingShader->SetVec3("u_flashlightDir", player->GetFlashlightDirection());
-        lightingShader->SetVec3("u_flashlightPosition", player->GetFlashlightPosition());
-        lightingShader->SetFloat("u_flashlightModifer", player->GetFlashLightModifer());
+
+        // Get me out of here
+        // Get me out of here
+        // Get me out of here
+        lightingShader->SetInt("u_editorLighting", 0);
+        if (Editor::IsOpen()) {
+            EditorLightingSettings& lightingSettigns = Editor::GetLightingSettings();
+            if (lightingSettigns.lightingEnabled) {
+                lightingShader->SetInt("u_editorLighting", 1);
+            }
+        }
+        // Get me out of here
+        // Get me out of here
+        // Get me out of here
+
 
         glBindTextureUnit(0, gBuffer->GetColorAttachmentHandleByName("BaseColor"));
         glBindTextureUnit(1, gBuffer->GetColorAttachmentHandleByName("Normal"));

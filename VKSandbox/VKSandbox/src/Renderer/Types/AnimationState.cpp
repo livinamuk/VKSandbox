@@ -1,7 +1,7 @@
 #include "AnimationState.h"
 #include "Animation.h"
 #include "AssetManagement/AssetManager.h"
-#include "../Core/Scene.h"
+#include "Util.h"
 
 void AnimationState::PlayAnimation(const std::string& animationName, const AnimationPlaybackParams& playbackParams) {
     int tempIndex = AssetManager::GetAnimationIndexByName(animationName);

@@ -3,12 +3,16 @@
 #include "BackEnd/BackEnd.h"
 #include "Config/Config.h"
 #include "Core/Audio.h"
-#include "Core/Scene.h"
 #include "Input/Input.h"
 #include "Viewport/ViewportManager.h"
 #include "UI/UIBackEnd.h"
 
 #include "Renderer/Renderer.h"
+
+// Get me out of here
+#include "World/World.h"
+// Get me out of here
+
 
 namespace Editor {
 
@@ -63,10 +67,12 @@ namespace Editor {
             }
         }
 
-        UpdateObjectSelection();
-        UpdateGizmoInteract();
-        UpdateSelectRect();
-        UpdateMouseWrapping();
+        if (GetEditorMode() == EditorMode::SECTOR_EDITOR) {
+            UpdateObjectSelection();
+            UpdateGizmoInteract();
+            UpdateSelectRect();
+            UpdateMouseWrapping();
+        }
     }
 
     void UpdateObjectSelection() {
@@ -85,7 +91,7 @@ namespace Editor {
             }
 
             if (GetSelectedObjectType() == EditorObjectType::GAME_OBJECT) {
-                GameObject& gameObject = Scene::GetGameObjects()[GetSelectedObjectIndex()];
+                GameObject& gameObject = World::GetGameObjects()[GetSelectedObjectIndex()];
                 if (!Gizmo::HasHover()) { // Prevents selection objects behind the gizmo
                     glm::vec3 newGizmoPosition = gameObject.GetModelMatrix()[3];
                     Gizmo::SetPosition(newGizmoPosition);
@@ -95,7 +101,7 @@ namespace Editor {
             }
 
             if (GetSelectedObjectType() == EditorObjectType::LIGHT) {
-                Light& light = Scene::GetLights()[GetSelectedObjectIndex()];
+                Light& light = World::GetLights()[GetSelectedObjectIndex()];
                 if (!Gizmo::HasHover()) { // Prevents selection objects behind the gizmo
                     Gizmo::SetPosition(light.GetPosition());
                 }
@@ -125,14 +131,14 @@ namespace Editor {
         if (GetEditorState() == EditorState::GIZMO_TRANSLATING) {
 
             if (GetSelectedObjectType() == EditorObjectType::GAME_OBJECT) {
-                GameObject* gameObject = Scene::GetGameObjectByIndex(GetSelectedObjectIndex());
+                GameObject* gameObject = World::GetGameObjectByIndex(GetSelectedObjectIndex());
                 if (gameObject) {
                     gameObject->m_transform.position = Gizmo::GetPosition();
                 }
             }
 
             if (GetSelectedObjectType() == EditorObjectType::LIGHT) {
-                Light* light = Scene::GetLightByIndex(GetSelectedObjectIndex());
+                Light* light = World::GetLightByIndex(GetSelectedObjectIndex());
                 if (light) {
                     light->SetPosition(Gizmo::GetPosition());
                 }
@@ -141,7 +147,7 @@ namespace Editor {
         // Rotate the selected object
         if (GetEditorState() == EditorState::GIZMO_ROTATING) {
             if (GetSelectedObjectType() == EditorObjectType::GAME_OBJECT) {
-                GameObject* gameObject = Scene::GetGameObjectByIndex(GetSelectedObjectIndex());
+                GameObject* gameObject = World::GetGameObjectByIndex(GetSelectedObjectIndex());
                 if (gameObject) {
                     gameObject->m_transform.rotation = Gizmo::GetEulerRotation() + m_selectedObjectGizmoRotateOffset;
                 }

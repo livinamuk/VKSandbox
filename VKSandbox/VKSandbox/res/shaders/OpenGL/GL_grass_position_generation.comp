@@ -12,6 +12,7 @@ uniform int gridSize;
 uniform vec3 offset;
 uniform float u_heightMapWorldSpaceSize;
 uniform float spacing2;
+uniform int u_viewportIndex;
 
 struct Vertex {
     float position[3];
@@ -94,9 +95,7 @@ uint RandomUInt(vec2 seedVec, uint max) {
     return seed % (max + 1u);
 }
 
-
-void main() {
-
+void main() {    
     // tweakables
     float bendStrength = 0.1;
     float bladeHeight = 0.075;
@@ -106,7 +105,8 @@ void main() {
     float spacing = 0.05;
     spacing = 0.0185185185185185;
 
-    int viewportIndex = 0;
+    int viewportIndex = u_viewportIndex;
+    
     vec2 viewportPos = vec2(viewportData[viewportIndex].posX, viewportData[viewportIndex].posY);
     vec2 viewportSize = vec2(viewportData[viewportIndex].sizeX, viewportData[viewportIndex].sizeY);
     mat4 inverseView = viewportData[viewportIndex].inverseView;
@@ -139,7 +139,7 @@ void main() {
         return;        
     }
         
-    // Cull to screen bounds        
+    // Get screen uv  
     vec2 screenUV = WorldToScreen(basePos, projectionView, viewportPos, viewportSize);
     screenUV = clamp(screenUV, vec2(0.0), vec2(1.0));
 

@@ -31,11 +31,8 @@ namespace HeightMapManager {
     void LoadHeightMapsFromDisk() {
         std::cout << "\n";
         for (FileInfo& fileInfo : Util::IterateDirectory("res/height_maps/256x256")) {
-            //TextureData textureData = ImageTools::LoadR16FTextureData(fileInfo.path);
             TextureData textureData = ImageTools::LoadUncompressedTextureData(fileInfo.path);
             Util::PrintDebugInfo(textureData);
-
-            ImageTools::ConvertRGBA8ToR16F(textureData);
 
             if (BackEnd::GetAPI() == API::OPENGL) {
                 g_glTextureArray.LoadTextureData(textureData, g_heightmapCount++);

@@ -101,14 +101,14 @@ namespace Util {
         case WeaponAction::DRAWING:                       return "DRAWING";
         case WeaponAction::DRAWING_WITH_SHOTGUN_PUMP:     return "DRAWING_WITH_SHOTGUN_PUMP";
         case WeaponAction::SPAWNING:                      return "SPAWNING";
-        case WeaponAction::RELOAD_SHOTGUN_BEGIN:          return "RELOAD_SHOTGUN_BEGIN";
-        case WeaponAction::RELOAD_SHOTGUN_SINGLE_SHELL:   return "RELOAD_SHOTGUN_SINGLE_SHELL";
-        case WeaponAction::RELOAD_SHOTGUN_DOUBLE_SHELL:   return "RELOAD_SHOTGUN_DOUBLE_SHELL";
-        case WeaponAction::RELOAD_SHOTGUN_END:            return "RELOAD_SHOTGUN_END";
-        case WeaponAction::RELOAD_SHOTGUN_END_WITH_PUMP:  return "RELOAD_SHOTGUN_END_WITH_PUMP";
-        case WeaponAction::RELOAD_REVOLVER_BEGIN:         return "RELOAD_REVOLVER_BEGIN";
-        case WeaponAction::RELOAD_REVOLVER_LOOP:          return "RELOAD_REVOLVER_LOOP";
-        case WeaponAction::RELOAD_REVOLVER_END:           return "RELOAD_REVOLVER_END";
+        case WeaponAction::SHOTGUN_RELOAD_BEGIN:          return "SHOTGUN_RELOAD_BEGIN";
+        case WeaponAction::SHOTGUN_RELOAD_SINGLE_SHELL:   return "SHOTGUN_RELOAD_SINGLE_SHELL";
+        case WeaponAction::SHOTGUN_RELOAD_DOUBLE_SHELL:   return "SHOTGUN_RELOAD_DOUBLE_SHELL";
+        case WeaponAction::SHOTGUN_RELOAD_END:            return "SHOTGUN_RELOAD_END";
+        case WeaponAction::SHOTGUN_RELOAD_END_WITH_PUMP:  return "SHOTGUN_RELOAD_END_WITH_PUMP";
+            //case WeaponAction::RELOAD_REVOLVER_BEGIN:         return "RELOAD_REVOLVER_BEGIN";
+            //case WeaponAction::RELOAD_REVOLVER_LOOP:          return "RELOAD_REVOLVER_LOOP";
+            //case WeaponAction::RELOAD_REVOLVER_END:           return "RELOAD_REVOLVER_END";
         case WeaponAction::ADS_IN:                        return "ADS_IN";
         case WeaponAction::ADS_OUT:                       return "ADS_OUT";
         case WeaponAction::ADS_IDLE:                      return "ADS_IDLE";
@@ -126,6 +126,15 @@ namespace Util {
         case ImageDataType::COMPRESSED:   return "COMPRESSED";
         case ImageDataType::EXR:          return "EXR";
         default:                          return "UNDEFINED";
+        }
+    }
+    std::string EditorModeToString(const EditorMode& editorMode) {
+        switch (editorMode) {
+        case EditorMode::EDITOR_IS_CLOSED:  return "EDITOR_IS_CLOSED";
+        case EditorMode::SECTOR_EDITOR:     return "SECTOR_EDITOR";
+        case EditorMode::HEIGHTMAP_EDITOR:  return "HEIGHTMAP_EDITOR";
+        case EditorMode::WEAPON_EDITOR:     return "WEAPON_EDITOR";
+        default:                            return "UNDEFINED";
         }
     }
 }

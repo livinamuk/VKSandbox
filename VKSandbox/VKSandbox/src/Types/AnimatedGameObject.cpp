@@ -116,7 +116,7 @@ void AnimatedGameObject::Update(float deltaTime) {
     }
 }
 
-void AnimatedGameObject::SetMeshMaterialByMeshName(std::string meshName, std::string materialName) {
+void AnimatedGameObject::SetMeshMaterialByMeshName(const std::string& meshName, const std::string& materialName) {
     if (!m_skinnedModel) {
         return;
     }
@@ -127,7 +127,7 @@ void AnimatedGameObject::SetMeshMaterialByMeshName(std::string meshName, std::st
     }
 }
 
-void AnimatedGameObject::SetMeshMaterialByMeshIndex(int meshIndex, std::string materialName) {
+void AnimatedGameObject::SetMeshMaterialByMeshIndex(int meshIndex, const std::string& materialName) {
     if (!m_skinnedModel) {
         return;
     }
@@ -136,7 +136,7 @@ void AnimatedGameObject::SetMeshMaterialByMeshIndex(int meshIndex, std::string m
     }
 }
 
-void AnimatedGameObject::SetMeshToRenderAsGlassByMeshIndex(std::string meshName) {
+void AnimatedGameObject::SetMeshToRenderAsGlassByMeshIndex(const std::string& meshName) {
     if (!m_skinnedModel) {
         return;
     }
@@ -147,7 +147,7 @@ void AnimatedGameObject::SetMeshToRenderAsGlassByMeshIndex(std::string meshName)
     }
 }
 
-void AnimatedGameObject::SetMeshEmissiveColorTextureByMeshName(std::string meshName, std::string textureName) {
+void AnimatedGameObject::SetMeshEmissiveColorTextureByMeshName(const std::string& meshName, const std::string& textureName) {
     if (!m_skinnedModel) {
         return;
     }
@@ -167,7 +167,7 @@ void AnimatedGameObject::EnableBlendingByMeshIndex(int meshIndex) {
     }
 }
 
-void AnimatedGameObject::SetAllMeshMaterials(std::string materialName) {
+void AnimatedGameObject::SetAllMeshMaterials(const std::string& materialName) {
     if (!m_skinnedModel) {
         return;
     }
@@ -191,12 +191,12 @@ void AnimatedGameObject::SetAnimationModeToBindPose() {
     m_animationLayer.ClearAllAnimationStates();
 }
 
-void AnimatedGameObject::PlayAnimation(std::string animationName, const AnimationPlaybackParams& playbackParams) {
+void AnimatedGameObject::PlayAnimation(const std::string& animationName, const AnimationPlaybackParams& playbackParams) {
     m_animationMode = AnimationMode::ANIMATION;
     m_animationLayer.PlayAnimation(animationName, playbackParams);
 }
 
-void AnimatedGameObject::PlayAndLoopAnimation(std::string animationName, const AnimationPlaybackParams& playbackParams) {
+void AnimatedGameObject::PlayAndLoopAnimation(const std::string& animationName, const AnimationPlaybackParams& playbackParams) {
     m_animationMode = AnimationMode::ANIMATION;
     m_animationLayer.PlayAndLoopAnimation(animationName, playbackParams);
 }
@@ -304,7 +304,7 @@ void AnimatedGameObject::EnableDrawingForAllMesh() {
     }
 }
 
-void AnimatedGameObject::EnableDrawingForMeshByMeshName(std::string meshName) {
+void AnimatedGameObject::EnableDrawingForMeshByMeshName(const std::string& meshName) {
     for (MeshRenderingEntry& meshRenderingEntry : m_meshRenderingEntries) {
         if (meshRenderingEntry.meshName == meshName) {
             meshRenderingEntry.drawingEnabled = true;
@@ -314,7 +314,7 @@ void AnimatedGameObject::EnableDrawingForMeshByMeshName(std::string meshName) {
     //std::cout << "DisableDrawingForMeshByMeshName() called but name " << meshName << " was not found!\n";
 }
 
-void AnimatedGameObject::DisableDrawingForMeshByMeshName(std::string meshName) {
+void AnimatedGameObject::DisableDrawingForMeshByMeshName(const std::string& meshName) {
     for (MeshRenderingEntry& meshRenderingEntry : m_meshRenderingEntries) {
         if (meshRenderingEntry.meshName == meshName) {
             meshRenderingEntry.drawingEnabled = false;

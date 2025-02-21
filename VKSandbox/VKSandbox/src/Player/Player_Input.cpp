@@ -140,6 +140,15 @@ bool Player::PresingJump() {
         return false;
     }
 }
+bool Player::PressedWeaponMiscFunction() {
+    if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {
+        return InputMulti::KeyDown(m_keyboardIndex, m_mouseIndex, m_controls.MISC_WEAPON_FUNCTION);
+    }
+    else {
+        //return InputMulti::ButtonPressed(_controllerIndex, m_controls.JUMP);
+        return false;
+    }
+}
 
 bool Player::PressedCrouch() {
     if (m_inputType == InputType::KEYBOARD_AND_MOUSE) {

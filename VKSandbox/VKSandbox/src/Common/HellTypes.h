@@ -240,6 +240,7 @@ struct ViewportData {
     glm::mat4 projectionView;
     glm::mat4 inverseProjectionView;
     glm::mat4 skyboxProjectionView;
+    glm::mat4 flashlightProjectionView;
     int xOffset;
     int yOffset;
     int width;
@@ -254,6 +255,12 @@ struct ViewportData {
     glm::vec4 frustumPlane3;
     glm::vec4 frustumPlane4;
     glm::vec4 frustumPlane5;
+    glm::vec4 flashlightDir;
+    glm::vec4 flashlightPosition;
+    float flashlightModifer;
+    float padding0;
+    float padding1;
+    float padding2;
 };
 
 struct RendererData {
@@ -393,6 +400,7 @@ struct PlayerControls {
     unsigned int DEBUG_FOUR = HELL_KEY_4;
     unsigned int MELEE = HELL_KEY_V;
     unsigned int FLASHLIGHT = HELL_KEY_F;
+    unsigned int MISC_WEAPON_FUNCTION = HELL_KEY_T;
 };
 
 struct Bullet {

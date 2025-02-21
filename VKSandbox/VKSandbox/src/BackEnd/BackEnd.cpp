@@ -11,7 +11,7 @@
 #include "Core/Audio.h"
 #include "Core/Debug.h"
 #include "Core/Game.h"
-#include "Core/Scene.h"
+#include "Core/ImGuiBackend.h"
 #include "Editor/Editor.h"
 #include "Editor/Gizmo.h"
 #include "Input/Input.h"
@@ -22,6 +22,8 @@
 #include "UI/UIBackEnd.h"
 #include "Viewport/ViewportManager.h"
 #include "Weapon/WeaponManager.h"
+#include "World/World.h"
+
 
 #include "GLFWIntegration.h"
 
@@ -73,6 +75,8 @@ namespace BackEnd {
         Editor::Init();
         WeaponManager::Init();
         Physics::Init();
+        ImGuiBackend::Init();
+
 
         glfwShowWindow(static_cast<GLFWwindow*>(BackEnd::GetWindowPointer()));
         return true;
@@ -97,8 +101,7 @@ namespace BackEnd {
         ViewportManager::Update();
         Editor::Update(Game::GetDeltaTime());
         Game::Update();
-        Scene::SetMaterials();
-        Scene::Update(Game::GetDeltaTime());
+        World::Update(Game::GetDeltaTime());
 
         // Mouse picking
         float textureWidth = resolutions.gBuffer.x;
@@ -119,6 +122,7 @@ namespace BackEnd {
         UIBackEnd::EndFrame();
         Debug::EndFrame();
         InputMulti::ResetMouseOffsets();
+        ImGuiBackend::Update();
     }
 
     void UpdateSubSystems() {
@@ -277,17 +281,14 @@ namespace BackEnd {
     }
 
     void UpdateLazyKeypresses() {
+        if (Input::KeyPressed(HELL_KEY_H)) {
+            Renderer::HotloadShaders();
+        }
         if (Input::KeyPressed(HELL_KEY_ESCAPE)) {
             BackEnd::ForceCloseWindow();
         }
         if (Input::KeyPressed(HELL_KEY_G)) {
             BackEnd::ToggleFullscreen();
-        }
-        if (Input::KeyPressed(HELL_KEY_H)) {
-            Renderer::HotloadShaders();
-        }
-        if (Input::KeyPressed(HELL_KEY_TAB)) {
-            Editor::ToggleOpenState();
         }
         if (Input::KeyPressed(HELL_KEY_GRAVE_ACCENT)) {
             Audio::PlayAudio(AUDIO_SELECT, 1.00f);

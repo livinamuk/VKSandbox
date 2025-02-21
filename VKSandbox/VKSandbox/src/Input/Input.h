@@ -23,6 +23,7 @@ namespace Input {
     void DisableCursor();
     void HideCursor();
     void ShowCursor();
+    void CenterMouseCursor();
     int GetCursorScreenX();
     int GetCursorScreenY();
     void SetCursorPosition(int x, int y);

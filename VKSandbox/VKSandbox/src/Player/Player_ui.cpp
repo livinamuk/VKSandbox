@@ -97,8 +97,22 @@ void Player::UpdateUI() {
                     float padding = 4;
                     float autoY = ammoY;
                     float pumpY = autoY + ((texture->GetHeight(0) + padding) * smallScale);
-                    UIBackEnd::BlitTexture("Weapon_Auto", glm::ivec2(ammoX + modifierX, autoY), Alignment::TOP_LEFT, colorAuto, glm::ivec2(modifierScaleX, modifierScaleY), TextureFilter::LINEAR);
-                    UIBackEnd::BlitTexture("Weapon_Pump", glm::ivec2(ammoX + modifierX, pumpY), Alignment::TOP_LEFT, colorPump, glm::ivec2(modifierScaleX, modifierScaleY), TextureFilter::LINEAR);
+
+                    int negHack = -9 + 9;
+                    int hack = 7 + 9;
+
+                    std::string shellTextureName = "ShotgunShellRed";
+                    WeaponState* weaponState = GetCurrentWeaponState();
+                    if (weaponState->shotgunSlug) {
+                        shellTextureName = "ShotgunShellGreen";
+                    }
+                    Texture* texture = AssetManager::GetTextureByName(shellTextureName);
+                    int shellScaleX = texture->GetWidth(0) * smallScale;
+                    int shellScaleY = texture->GetHeight(0) * smallScale * 1.1f;
+
+                    UIBackEnd::BlitTexture(shellTextureName, glm::ivec2(ammoX + modifierX + negHack, autoY), Alignment::TOP_LEFT, WHITE, glm::ivec2(shellScaleX, shellScaleY), TextureFilter::LINEAR);
+                    UIBackEnd::BlitTexture("Weapon_Auto", glm::ivec2(ammoX + modifierX + hack, autoY), Alignment::TOP_LEFT, colorAuto, glm::ivec2(modifierScaleX, modifierScaleY), TextureFilter::LINEAR);
+                    UIBackEnd::BlitTexture("Weapon_Pump", glm::ivec2(ammoX + modifierX + hack, pumpY), Alignment::TOP_LEFT, colorPump, glm::ivec2(modifierScaleX, modifierScaleY), TextureFilter::LINEAR);
 
                     //modifierX += 40;
                     //UIBackEnd::BlitText("AUTO", "StandardFont", ammoX + modifierX, autoY, Alignment::TOP_RIGHT, 1.0, TextureFilter::NEAREST);

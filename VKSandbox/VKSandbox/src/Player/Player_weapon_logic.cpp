@@ -1,13 +1,18 @@
 ﻿#include "Player.h"
 #include "Core/Audio.h"
 #include "Core/Game.h"
-#include "Core/Scene.h"
 #include "Input/Input.h"
 #include "Input/InputMulti.h"
 #include "Util.h"
 
+// GET ME OUT OF HERE
+#include "World/World.h"
+// GET ME OUT OF HERE
+
 void Player::UpdateWeaponLogic() {
-    if (HasControl() && PressedNextWeapon()) {
+    if (!HasControl()) return;
+
+    if (PressedNextWeapon()) {
         NextWeapon();
     }
 
@@ -239,7 +244,7 @@ void Player::SpawnMuzzleFlash(float speed, float scale) {
     m_muzzleFlash.SetRotation(glm::vec3(0.0f, 0.0f, Util::RandomFloat(0, HELL_PI * 2)));
 }
 
-void Player::SpawnCasing(AmmoInfo* ammoInfo) {
+void Player::SpawnCasing(AmmoInfo* ammoInfo, bool alternateAmmo) {
     AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
     WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
 
@@ -255,7 +260,14 @@ void Player::SpawnCasing(AmmoInfo* ammoInfo) {
         createInfo.position += GetCameraRight() * glm::vec3(0.05f);
         createInfo.position += GetCameraUp() * glm::vec3(-0.025f);
 
-        Scene::AddBulletCasing(createInfo);
+        if (alternateAmmo) {
+            createInfo.materialIndex = AssetManager::GetMaterialIndexByName("ShellGreen");
+        }
+
+
+        World::AddBulletCasing(createInfo);
+
+
     }
     else {
         std::cout << "Player::SpawnCasing(AmmoInfo* ammoInfo) failed to spawn a casing coz invalid casing model name in weapon info\n";

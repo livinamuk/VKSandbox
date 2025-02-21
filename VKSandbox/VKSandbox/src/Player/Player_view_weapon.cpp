@@ -8,28 +8,16 @@ void Player::UpdateViewWeapon(float deltaTime) {
     AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
     if (!viewWeapon) return;
 
+    SkinnedModel* model = viewWeapon->m_skinnedModel;
+
     glm::mat4 dmMaster = glm::mat4(1);
     glm::mat4 cameraMatrix = glm::mat4(1);
     glm::mat4 cameraBindMatrix = glm::mat4(1);
     glm::mat4 root = glm::mat4(1);
 
-    //for (int i = 0; i < viewWeapon->m_jointWorldMatrices.size(); i++) {
-    //    if (Util::StrCmp(viewWeapon->m_jointWorldMatrices[i].name, "camera")) {
-    //        cameraMatrix = viewWeapon->m_jointWorldMatrices[i].worldMatrix;
-    //    }
-    //}
-    //for (int i = 0; i < viewWeapon->m_jointWorldMatrices.size(); i++) {
-    //    if (Util::StrCmp(viewWeapon->m_jointWorldMatrices[i].name, "Dm-Master")) {
-    //        dmMaster = viewWeapon->m_jointWorldMatrices[i].worldMatrix;
-    //    }
-    //}
-
-    SkinnedModel* model = viewWeapon->m_skinnedModel;
 
     for (int i = 0; i < model->m_nodes.size(); i++) {
         if (Util::StrCmp(model->m_nodes[i].m_name, "camera")) {
-            //glm::mat4 cameraBoneTransform = viewWeapon->m_jointWorldMatrices[i].worldMatrix;
-            //glm::mat4 cameraBindPose = model->m_joints[i].m_inverseBindTransform;
             cameraBindMatrix = model->m_nodes[i].m_inverseBindTransform;
         }
     }
@@ -62,8 +50,10 @@ void Player::UpdateViewWeapon(float deltaTime) {
     movementY = std::min(movementY, SWAY_MAX_Y);
     movementY = std::max(movementY, SWAY_MIN_Y);
 
-    m_weaponSwayX = Util::FInterpTo(m_weaponSwayX, movementX, deltaTime, SMOOTH_AMOUNT);
-    m_weaponSwayY = Util::FInterpTo(m_weaponSwayY, movementY, deltaTime, SMOOTH_AMOUNT);
+    if (HasControl()) {
+        m_weaponSwayX = Util::FInterpTo(m_weaponSwayX, movementX, deltaTime, SMOOTH_AMOUNT);
+        m_weaponSwayY = Util::FInterpTo(m_weaponSwayY, movementY, deltaTime, SMOOTH_AMOUNT);
+    }
 
     if (ViewportIsVisible()) {
        //Debug::AddText("m_weaponSwayX: " + std::to_string(m_weaponSwayX));

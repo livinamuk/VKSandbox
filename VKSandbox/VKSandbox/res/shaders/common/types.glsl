@@ -7,6 +7,7 @@ struct ViewportData {
     mat4 projectionView;
     mat4 inverseProjectionView;
     mat4 skyboxProjectionView;
+    mat4 flashlightProjectionView;
     int xOffset;
     int yOffset;
     int width;
@@ -21,6 +22,12 @@ struct ViewportData {
     vec4 frustumPlane3;
     vec4 frustumPlane4;
     vec4 frustumPlane5;
+    vec4 flashlightDir;
+    vec4 flashlightPosition;
+    float flashlightModifer;
+    float padding0;
+    float padding1;
+    float padding2;
 };
 
 struct RendererData {

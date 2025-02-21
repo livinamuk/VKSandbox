@@ -6,18 +6,20 @@
 #include "Config/Config.h"
 #include "Core/Audio.h"
 #include "Core/Debug.h"
-#include "Core/Scene.h"
 #include "Input/Input.h"
 #include "Renderer/Renderer.h"
 #include "Viewport/ViewportManager.h"
 
 namespace Editor {
 
+    EditorMode g_editorMode = EditorMode::EDITOR_IS_CLOSED;
     EditorMesh g_editorMesh;
+    EditorLightingSettings g_editorLightingSettings;
     int g_activeViewportIndex = 3;
     bool g_isOpen = false;
     bool g_isOrthographic[4];
     bool g_editorStateWasIdleLastFrame = true;
+    bool g_editorSelectMenuVisible = false;
     float g_OrthographicSizes[4];
     float g_verticalDividerXPos = 0.2f;
     float g_horizontalDividerYPos = 0.2f;
@@ -80,20 +82,46 @@ namespace Editor {
     }
 
     void Update(float deltaTime) {
+
+        if (Input::KeyPressed(HELL_KEY_TAB)) {
+
+            if (!Editor::IsOpen()) {
+
+                // Show editor select menu
+                if (!IsEditorSelectMenuVisible()) {
+                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+                    ShowEditorSelectMenu();
+                    Input::ShowCursor();
+                    Input::CenterMouseCursor();
+                }
+                // Close editor select menu
+                else {
+                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+                    CloseEditorSelectMenu();
+                    Input::DisableCursor();
+                }
+            }
+            // Close editor
+            else {
+                Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+                Editor::Close();
+            }
+        }
+
         if (!IsOpen()) return;
 
-        static bool runOnce = true;
-        if (runOnce) {
-            glm::vec3 gizmoPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-            GameObject* mermaid = Scene::GetGameObjectByName("Mermaid");
-            if (mermaid) {
-                gizmoPosition = mermaid->GetPosition();
-                Gizmo::SetPosition(gizmoPosition);
-                SetSelectedObjectType(EditorObjectType::GAME_OBJECT);
-                SetHoveredObjectType(EditorObjectType::GAME_OBJECT);
-            }
-            runOnce = false;
-        }
+        //static bool runOnce = true;
+        //if (runOnce) {
+        //    glm::vec3 gizmoPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+        //    GameObject* mermaid = Scene::GetGameObjectByName("Mermaid");
+        //    if (mermaid) {
+        //        gizmoPosition = mermaid->GetPosition();
+        //        Gizmo::SetPosition(gizmoPosition);
+        //        SetSelectedObjectType(EditorObjectType::GAME_OBJECT);
+        //        SetHoveredObjectType(EditorObjectType::GAME_OBJECT);
+        //    }
+        //    runOnce = false;
+        //}
 
         g_editorStateWasIdleLastFrame = g_editorState == EditorState::IDLE;
 
@@ -119,27 +147,29 @@ namespace Editor {
         }
     }
 
-    void Open() {
+    void OpenEditor(EditorMode mode) {
         Audio::PlayAudio("UI_Select.wav", 1.0f);
         Input::ShowCursor();
-        Input::SetCursorPosition(BackEnd::GetCurrentWindowWidth() / 2, BackEnd::GetCurrentWindowHeight() / 2);
+        Input::CenterMouseCursor();
         g_isOpen = true;
+        g_editorMode = mode;
     }
 
     void Close() {
         Audio::PlayAudio("UI_Select.wav", 1.0f);
         Input::DisableCursor();
         g_isOpen = false;
+        g_editorMode = EditorMode::EDITOR_IS_CLOSED;
     }
 
-    void ToggleOpenState() {
-        if (g_isOpen) {
-            Close();
-        }
-        else {
-            Open();
-        }
+    void ShowEditorSelectMenu() {
+        g_editorSelectMenuVisible = true;
     }
+
+    void CloseEditorSelectMenu() {
+        g_editorSelectMenuVisible = false;
+    }
+
     void SetActiveViewportIndex(int index) {
         g_activeViewportIndex = index;
     }
@@ -160,6 +190,10 @@ namespace Editor {
 
     bool IsOpen() {
         return g_isOpen;
+    }
+
+    bool IsEditorSelectMenuVisible() {
+        return g_editorSelectMenuVisible;
     }
 
     bool EditorIsIdle() {
@@ -291,6 +325,14 @@ namespace Editor {
 
     SelectionRectangleState& GetSelectionRectangleState() {
         return g_viewportSelectionRectangleState;
+    }
+
+    EditorMode& GetEditorMode() {
+        return g_editorMode;
+    }
+
+    EditorLightingSettings& GetLightingSettings() {
+        return g_editorLightingSettings;
     }
 
     float GetVerticalDividerXPos() {

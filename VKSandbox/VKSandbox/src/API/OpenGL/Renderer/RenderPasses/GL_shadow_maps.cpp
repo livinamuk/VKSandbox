@@ -1,7 +1,10 @@
 #include "API/OpenGL/GL_backend.h"
 #include "API/OpenGL/Renderer/GL_renderer.h"
 #include "Core/Game.h"
-#include "Core/Scene.h"
+
+// Get me out of here
+#include "World/World.h"
+// Get me out of here
 
 namespace OpenGLRenderer {
 
@@ -35,7 +38,7 @@ namespace OpenGLRenderer {
         // Scene geometry
         glCullFace(GL_FRONT);
         glBindVertexArray(OpenGLBackEnd::GetVertexDataVAO());
-        for (RenderItem& renderItem : Scene::GetRenderItems()) {
+        for (RenderItem& renderItem : World::GetRenderItems()) {
             shader->SetMat4("u_modelMatrix", renderItem.modelMatrix);
             Mesh* mesh = AssetManager::GetMeshByIndex(renderItem.meshIndex);
             glDrawElementsBaseVertex(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), mesh->baseVertex);

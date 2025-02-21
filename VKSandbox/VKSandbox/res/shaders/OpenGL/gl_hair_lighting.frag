@@ -27,6 +27,7 @@
 layout (location = 0) out vec4 FragOut;
 layout (location = 1) out vec4 ViewSpaceDepthPreviousOut;
 layout (binding = 3) uniform sampler2D ViewSpaceDepthTexture;
+layout (binding = 4) uniform sampler2D FlashlightCookieTexture;
 
 readonly restrict layout(std430, binding = 1) buffer rendererDataBuffer {
 	RendererData rendererData;
@@ -42,6 +43,11 @@ in vec3 Tangent;
 in vec3 BiTangent;
 in vec4 WorldPos;
 in vec3 ViewPos;
+in mat4 FlashlightProjectionView;
+in vec4 FlashlightDir;
+in vec4 FlashlightPosition;
+in float FlashlightModifer;
+in vec3 CameraForward;
 
 in flat int MousePickType;
 in flat int MousePickIndex;
@@ -65,8 +71,6 @@ void main() {
     
     float roughness = rma.r;
     float metallic = rma.g;
-    
-
 
     // Direct light
     vec3 directLighting = vec3(0); 
@@ -77,6 +81,29 @@ void main() {
         float lightStrength = light.strength;
         float lightRadius = light.radius;
         directLighting += GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal.xyz, WorldPos.xyz, baseColor.rgb, roughness, metallic, ViewPos);
+    }
+
+
+    if (FlashlightModifer > 0.1) { 
+        // Player flashlight				
+		vec3 spotLightPos = FlashlightPosition.xyz;
+		spotLightPos -= vec3(0, 0.0, 0);
+		vec3 spotLightDir = normalize(spotLightPos - (ViewPos - CameraForward));
+        spotLightDir = FlashlightDir.xyz;
+        vec3 spotLightColor = vec3(0.9, 0.95, 1.1);
+        float fresnelReflect = 0.9;
+        float spotLightRadius = 50.0;
+        float spotLightStregth = 3.0;        
+        float innerAngle = cos(radians(0.0 * FlashlightModifer));
+        float outerAngle = cos(radians(30.0));        
+        mat4 lightProjectionView = FlashlightProjectionView;
+        vec3 cookie = ApplyCookie(lightProjectionView, WorldPos.xyz, spotLightPos, spotLightColor, 10, FlashlightCookieTexture);
+        vec3 spotLighting = GetSpotlightLighting(spotLightPos, spotLightDir, spotLightColor, spotLightRadius, spotLightStregth, innerAngle, outerAngle, normal.xyz, WorldPos.xyz, baseColor.rgb, roughness, metallic, ViewPos, lightProjectionView);
+        vec4 FragPosLightSpace = lightProjectionView * vec4(WorldPos.xyz, 1.0);
+        //float shadow = SpotlightShadowCalculation(FragPosLightSpace, normal.xyz, spotLightDir, WorldPos.xyz, spotLightPos, ViewPos, FlashlighShadowMapTexture);  
+        //spotLighting *= vec3(1 - shadow);
+        spotLighting *= cookie * cookie * 5 * spotLightColor;
+        directLighting += vec3(spotLighting) * FlashlightModifer;
     }
        
     

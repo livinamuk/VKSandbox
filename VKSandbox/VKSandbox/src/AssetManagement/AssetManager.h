@@ -27,6 +27,7 @@ namespace AssetManager {
     std::vector<Material>& GetMaterials();
     Material* GetDefaultMaterial();
     Material* GetMaterialByIndex(int index);
+    Material* GetMaterialByName(const std::string& name);
     int GetMaterialIndexByName(const std::string& name);
     std::string GetMaterialNameByIndex(int index);
 

@@ -188,11 +188,15 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\Config\Config.cpp" />
     <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\AssetManagement\BakeQueue.cpp" />
+    <ClCompile Include="src\Core\ImguiBackEnd.cpp" />
     <ClCompile Include="src\Core\JSON.cpp" />
     <ClCompile Include="src\Core\Nuklear.cpp" />
     <ClCompile Include="src\Core\Scene.cpp" />
     <ClCompile Include="src\Core\Map.cpp" />
+    <ClCompile Include="src\Editor\Editor_imgui.cpp" />
+    <ClCompile Include="src\Player\Player_util.cpp" />
     <ClCompile Include="src\Renderer\Types\TextureArray.cpp" />
+    <ClCompile Include="src\Types\PickUp.cpp" />
     <ClCompile Include="src\Util\Util_debug_info.cpp" />
     <ClCompile Include="src\World\HeightMapManager.cpp" />
     <ClCompile Include="src\World\HeightMap.cpp" />
@@ -265,6 +269,8 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\Viewport\ViewportManager.cpp" />
     <ClCompile Include="src\World\Sector.cpp" />
     <ClCompile Include="src\World\World.cpp" />
+    <ClCompile Include="src\World\World_lights.cpp" />
+    <ClCompile Include="src\World\World_render_items.cpp" />
     <ClCompile Include="vendor\glad\src\glad.c" />
     <ClCompile Include="vendor\imgui\include\imgui\imgui.cpp" />
     <ClCompile Include="vendor\imgui\include\imgui\imgui_demo.cpp" />
@@ -366,10 +372,12 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClInclude Include="src\Config\Config.h" />
     <ClInclude Include="src\Core\Audio.h" />
     <ClInclude Include="src\AssetManagement\BakeQueue.h" />
+    <ClInclude Include="src\Core\ImguiBackEnd.h" />
     <ClInclude Include="src\Core\JSON.h" />
     <ClInclude Include="src\Core\Map.h" />
     <ClInclude Include="src\Core\Nuklear.h" />
     <ClInclude Include="src\Renderer\Types\TextureArray.h" />
+    <ClInclude Include="src\Types\PickUp.h" />
     <ClInclude Include="src\World\HeightMapManager.h" />
     <ClInclude Include="src\World\HeightMap.h" />
     <ClInclude Include="src\Physics\Physics.h" />

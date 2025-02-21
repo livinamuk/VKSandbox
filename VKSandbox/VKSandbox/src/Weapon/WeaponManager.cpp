@@ -485,6 +485,10 @@ namespace WeaponManager {
         spas.animationSpeeds.shotgunReloadTwoShells = 1.25f;
         spas.animationNames.shotgunReloadOneShell = "SPAS_Reload1Shell";
         spas.animationNames.shotgunReloadTwoShells = "SPAS_Reload2Shells";
+        spas.animationNames.shotgunUnloadStart = "SPAS_UnloadStart";
+        spas.animationNames.shotgunUnloadOneShell = "SPAS_UnloadOneShell";
+        spas.animationNames.shotgunUnloadTwoShells = "SPAS_UnloadTwoShells";
+        spas.animationNames.shotgunUnloadEnd = "SPAS_UnloadEnd";
         spas.audioFiles.fire.push_back("SPAS_Fire.wav");
         spas.audioFiles.shotgunPump = "SPAS_Pump.wav";
         spas.type = WeaponType::SHOTGUN;

@@ -1,4 +1,4 @@
-#include "Scene.h"
+/*#include "Scene.h"
 #include "HellDefines.h"
 #include "Core/Game.h"
 #include "Core/Map.h"
@@ -10,6 +10,7 @@ namespace Scene {
     std::vector<BulletCasing> g_bulletCasings;
     std::vector<GameObject> g_gameObjects;
     std::vector<Light> g_lights;
+    std::vector<PickUp> g_pickUps;
 
     std::vector<RenderItem> g_renderItems;
     std::vector<RenderItem> g_renderItemsBlended;
@@ -45,6 +46,17 @@ namespace Scene {
         createInfo.radius = 7 * 0.8;
         AddLight(createInfo);
 
+        PickUpCreateInfo pickUpCreateInfo;
+        pickUpCreateInfo.position = glm::vec3(16.10f, -4.95f, 16.97f);
+        pickUpCreateInfo.rotation = glm::vec3(0.0f);
+        pickUpCreateInfo.pickUpType = Util::PickUpTypeToString(PickUpType::SHOTGUN_AMMO_BUCKSHOT);
+        AddPickUp(pickUpCreateInfo);
+
+        pickUpCreateInfo;
+        pickUpCreateInfo.position = glm::vec3(16.50f, -4.95f, 16.97f);
+        pickUpCreateInfo.rotation = glm::vec3(0.0f);
+        pickUpCreateInfo.pickUpType = Util::PickUpTypeToString(PickUpType::SHOTGUN_AMMO_SLUG);
+        AddPickUp(pickUpCreateInfo);
     }
 
     void LoadHeightMap() {
@@ -82,6 +94,11 @@ namespace Scene {
         g_renderItemsAlphaDiscarded.clear();
         g_renderItemsHairTopLayer.clear();
         g_renderItemsHairBottomLayer.clear();
+
+        for (PickUp& pickUp: g_pickUps) {
+            pickUp.Update(99999.0);
+            g_renderItems.insert(g_renderItems.end(), pickUp.GetRenderItems().begin(), pickUp.GetRenderItems().end());
+        }
 
         // Update each GameObject and collect render items
         int mousePickIndex = 0;
@@ -218,20 +235,6 @@ namespace Scene {
         mermaid->SetMeshBlendingMode("HairInner", BlendingMode::HAIR_UNDER_LAYER);
         mermaid->SetName("Mermaid");
 
-      //for (int i = 0; i < 500; i++) {
-      //    float x = Util::RandomFloat(-30.0f, 30.0f);
-      //    float y = Util::RandomFloat(3.0f, 25);
-      //    float z = Util::RandomFloat(-30.0f, 30.0f);
-      //    CreateGameObject();
-      //    GameObject* cube = &g_gameObjects.back();
-      //    cube->SetPosition(glm::vec3(x, y, z));
-      //    cube->SetRotation(glm::vec3(Util::RandomFloat(-HELL_PI, HELL_PI), Util::RandomFloat(-HELL_PI, HELL_PI), Util::RandomFloat(-HELL_PI, HELL_PI)));
-      //    cube->SetModel("Cube");
-      //    cube->SetMeshMaterials("MermaidTail");
-      //}
-
-
-
         CreateGameObject();
         GameObject* bench = &g_gameObjects.back();
         bench->SetPosition(glm::vec3(17.24f, -5.0f, 16.53f));
@@ -259,57 +262,14 @@ namespace Scene {
         tree3->SetRotationY(-0.4f);
         tree3->SetModel("TreeLarge_2");
         tree3->SetMeshMaterials("TreeLarge_0");
-
-     //  CreateGameObject();
-     //  GameObject* bench2 = &g_gameObjects.back();
-     //  bench2->SetPosition(glm::vec3(17.24f, -5.0f, 16.53f));
-     //  bench2->SetRotationY(-0.4f);
-     //  bench2->SetModel("LampPost");
-     //  bench2->SetMeshMaterials("LampPost");
-
-
-
-        return;
-
-        CreateAnimatedGameObject();
-        AnimatedGameObject& object = g_animatedGameObjects.back();
-        object.SetPlayerIndex(1);
-        object.SetSkinnedModel("Shark");
-        object.SetName("222");
-        object.SetAnimationModeToBindPose();
-        object.SetAllMeshMaterials("Shark");
-        object.SetPosition(glm::vec3(3.8f, -0.5, 11.3f));
-        object.SetScale(0.01);
-        object.PlayAndLoopAnimation("Shark_Attack_Left_Quick");
-
-      
-
-        CreateAnimatedGameObject();
-        AnimatedGameObject& object2 = g_animatedGameObjects.back();
-        object2.SetPlayerIndex(1);
-        object2.SetSkinnedModel("Shark");
-        object2.SetName("222");
-        object2.SetAnimationModeToBindPose();
-        object2.SetAllMeshMaterials("Shark");
-        object2.SetPosition(glm::vec3(7.8f, -0.5, 11.3f));
-        object2.SetScale(0.01);
-        object2.SetAnimationModeToBindPose();
-        return;
-        CreateAnimatedGameObject();
-        AnimatedGameObject& object3 = g_animatedGameObjects.back();
-        object3.SetPlayerIndex(1);
-        object3.SetSkinnedModel("Glock");
-        object3.SetName("222");
-        object3.SetAnimationModeToBindPose();
-        object3.SetAllMeshMaterials("Doberman");
-        object3.SetPosition(glm::vec3(0.8f, -0.5, 11.3f));
-        object3.SetScale(0.01);
-        object3.PlayAndLoopAnimation("Glock_ReloadEmpty");
-        //object3.SetAnimationModeToBindPose();
     }
 
     void AddLight(LightCreateInfo createInfo) {
         g_lights.push_back(Light(createInfo));
+    }
+    
+    void AddPickUp(PickUpCreateInfo createInfo) {
+        g_pickUps.push_back(PickUp(createInfo));
     }
 
     void AddBulletCasing(BulletCasingCreateInfo createInfo) {
@@ -336,3 +296,4 @@ namespace Scene {
     std::vector<RenderItem>& GetRenderItemsHairBottomLayer()    { return g_renderItemsHairBottomLayer; }
     std::vector<RenderItem>& GetSkinnedRenderItems()            { return g_skinnedRenderItems; }
 }
+*/

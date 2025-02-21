@@ -24,6 +24,14 @@ namespace Util {
         return current + Dist * glm::clamp(deltaTime * interpSpeed, 0.0f, 1.0f);
     }
 
+    glm::vec3 LerpVec3(glm::vec3 current, glm::vec3 target, float deltaTime, float interpSpeed) {
+        glm::vec3 result;
+        result.x = FInterpTo(current.x, target.x, deltaTime, interpSpeed);
+        result.y = FInterpTo(current.y, target.y, deltaTime, interpSpeed);
+        result.z = FInterpTo(current.z, target.z, deltaTime, interpSpeed);
+        return result;
+    }
+
     float RandomFloat(float min, float max) {
         return min + static_cast<float>(rand()) / (RAND_MAX / (max - min));
     }

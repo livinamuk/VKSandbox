@@ -79,6 +79,8 @@ namespace OpenGLRenderer {
     // Texture readback
     bool IsMouseRayWorldPositionReadBackReady();
     glm::vec3 GetMouseRayWorldPostion();
+    bool IsPlayerRayWorldPositionReadBackReady(int playerIndex);
+    glm::vec3 GetPlayerRayWorldPostion(int playerIndex);
 
     // Rasterizer State
     void InitRasterizerStates();

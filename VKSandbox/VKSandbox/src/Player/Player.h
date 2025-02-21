@@ -58,7 +58,6 @@ struct Player {
     void GiveRedDotToWeapon(const std::string& name);
     void GiveSilencerToWeapon(const std::string& name);
     void DropWeapons();
-    void UpdateWeaponSway(float deltaTime);
     WeaponAction& GetWeaponAction();
     WeaponInfo* GetCurrentWeaponInfo();
     WeaponState* GetWeaponStateByName(const std::string &name);
@@ -69,6 +68,7 @@ struct Player {
 
     //RenderItem CreateAttachmentRenderItem(WeaponAttachmentInfo* weaponAttachmentInfo, const char* boneName);
    
+    glm::ivec2 GetViewportCenter();
     void CheckForMeleeHit();
 
     // Water
@@ -115,6 +115,7 @@ struct Player {
     bool PressingFire();
     bool PresingJump();
     bool PressedCrouch();
+    bool PressedWeaponMiscFunction();
     bool PressedNextWeapon();
     bool PressingADS();
     bool PressedADS();
@@ -215,6 +216,7 @@ private:
     uint32_t _bulletFlags;
     int m_playerIndex;
 
+
     public:
         float _muzzleFlashTimer = 0;
 
@@ -248,18 +250,21 @@ private:
         void FireShotgun(); 
         void DryFireShotgun();
         void ReloadShotgun();
+        void UnloadShotgun();
         void ToggleAutoShotgun();
         void UpdatePumpAudio();        
         void UpdateShotgunReloadLogic();
+        void UpdateShotgunUnloadLogic();
         bool CanToggleShotgunAuto();
         bool CanFireShotgun();
         bool CanDryFireShotgun();
         bool CanReloadShotgun();
+        bool CanUnloadShotgun();
         bool ShotgunRequiresPump();
 
         // Casings and Muzzle flash
         void SpawnMuzzleFlash(float speed, float scale);
-        void SpawnCasing(AmmoInfo* ammoInfo);
+        void SpawnCasing(AmmoInfo* ammoInfo, bool alternateAmmo);
 
 
         bool ViewModelAnimationsCompleted();

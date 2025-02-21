@@ -73,3 +73,52 @@ vec3 GetSpotlightLighting(
     vec3 brdf = microfacetBRDF(toLight, viewDir, Normal, baseColor, metallic, fresnelReflect, roughness);
     return brdf * irradiance * clamp(lightColor, 0, 1);
 }
+
+float SpotlightShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, vec3 fragWorldPos, vec3 lightPos, vec3 viewPos, sampler2D shadowMap) {
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    float currentDepth = projCoords.z;    
+    const float slopeFactor = 0.003;
+    float slopeBias = slopeFactor * max(0.0, (1.0 - dot(normal, lightDir)));
+
+    float dist = distance(fragWorldPos, lightPos);
+    float scaleFactor = 0.028;
+    float epsilon = 0.001;
+    float baseBias = 0.0001;
+    float bias = baseBias + (scaleFactor / (dist + epsilon));
+
+    // PCF Filtering
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    const int kernelSize = 2;
+    for (int x = -kernelSize; x <= kernelSize; ++x) {
+        for (int y = -kernelSize; y <= kernelSize; ++y) {
+            vec2 offset = vec2(x, y) * texelSize;
+            float closestDepth = texture(shadowMap, projCoords.xy + offset).r;
+            shadow += (currentDepth - bias > closestDepth) ? 1.0 : 0.0;
+        }
+    }
+    shadow /= pow((2 * kernelSize + 1), 2);
+
+    return shadow;
+}
+
+vec3 ApplyCookie(mat4 LightViewProj, vec3 worldPos, vec3 lightPos, vec3 lightColor, float maxDistance, sampler2D cookieTexture) {
+    vec4 lightSpacePos = LightViewProj * vec4(worldPos, 1.0);
+    vec2 cookieUV = lightSpacePos.xy / lightSpacePos.w;
+    float depthFactor = 1.0 / max(lightSpacePos.w, 0.001);
+    cookieUV *= depthFactor;
+    cookieUV = cookieUV * 0.5 + 0.5;
+    vec2 clampedUV = clamp(cookieUV, vec2(0.0), vec2(1.0));
+    float fadeFactor = 1.0 - length(cookieUV - clampedUV) * 15.0;
+    fadeFactor = clamp(fadeFactor, 0.0, 1.0);
+
+    // Distance weakening
+    float dist = length(worldPos - lightPos);
+    float distanceFactor = clamp(1.0 - (dist / maxDistance), 0.0, 1.0);
+    distanceFactor = distanceFactor * distanceFactor;
+
+    float cookieFactor = texture(cookieTexture, clampedUV).r;
+    return lightColor * cookieFactor * fadeFactor * distanceFactor;
+}

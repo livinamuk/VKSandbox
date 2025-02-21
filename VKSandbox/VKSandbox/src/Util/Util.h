@@ -13,6 +13,7 @@ namespace Util {
     void NormalizeWeights(std::vector<float>& weights); 
     void InterpolateQuaternion(glm::quat& Out, const glm::quat& Start, const glm::quat& End, float pFactor);
     float FInterpTo(float current, float target, float deltaTime, float interpSpeed);
+    glm::vec3 LerpVec3(glm::vec3 current, glm::vec3 target, float deltaTime, float interpSpeed);
     float RandomFloat(float min, float max);
     float MapRange(float inValue, float minInRange, float maxInRange, float minOutRange, float maxOutRange);
     glm::ivec2 WorldToScreenCoords(const glm::vec3& worldPos, const glm::mat4& viewProjection, int screenWidth, int screenHeight, bool flipY = false);
@@ -51,6 +52,7 @@ namespace Util {
     std::string EditorStateToString(const EditorState& g_editorState);
     std::string WeaponActionToString(const WeaponAction& weaponAction);
     std::string ImageDataTypeToString(const ImageDataType& imageDataType);
+    std::string EditorModeToString(const EditorMode& editorMode);
 
     // File
     const char* CopyConstChar(const char* text);
@@ -90,9 +92,12 @@ namespace Util {
     AnimatedTransform BlendMultipleTransforms(const std::vector<AnimatedTransform>& transforms, const std::vector<float>& weights);
 
     // Conversions
-    std::string LightTypeToString(LightType);
+    std::string LightTypeToString(LightType type);
     LightType StringToLightType(const std::string& str);
-    
+    std::string PickUpTypeToString(PickUpType type);
+    PickUpType StringToPickUpType(const std::string& str);
+
     // Debug Info
     void PrintDebugInfo(TextureData& textureData);
+    std::string BytesToMBString(size_t bytes);
 }

@@ -2,6 +2,7 @@
 
 #include "API/OpenGL/Types/GL_texture_readback.h"
 #include "BackEnd/BackEnd.h"
+#include "Core/Game.h"
 #include "Input/Input.h"
 #include "Tools/ImageTools.h"
 #include "Util/Util.h"
@@ -12,7 +13,12 @@ namespace OpenGLRenderer {
     bool g_mouseRayWorldPositionReadBackReady = false;
     glm::vec3 g_mouseRayWorldPosition = glm::vec3(0, 1, 0);
 
+    static OpenGLTextureReadBack g_playerRayReadBack[4];
+    bool g_playerRayWorldPositionReadBackReady[4] = { false, false, false, false };
+    glm::vec3 g_playerRayWorldPosition[4];
+
     void TextureReadBackPass() {
+        // Get mouse hit position
         if (!g_mouseRayReadBack.IsRequestInProgress()) {
             OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
             GLuint fboHandle = gBuffer->GetHandle();
@@ -32,6 +38,32 @@ namespace OpenGLRenderer {
             g_mouseRayWorldPosition = g_mouseRayReadBack.GetFloatPixel(0);
             g_mouseRayWorldPositionReadBackReady = true;
             g_mouseRayReadBack.Reset();
+        }
+
+        // Get player crosshair ray hit position
+        for (int i = 0; i < Game::GetLocalPlayerCount(); i++) {
+            if (!g_playerRayReadBack[i].IsRequestInProgress()) {
+                OpenGLFrameBuffer* gBuffer = GetFrameBuffer("GBuffer");
+                GLuint fboHandle = gBuffer->GetHandle();
+                GLuint attachment = gBuffer->GetColorAttachmentSlotByName("WorldSpacePosition");
+
+                Player* player = Game::GetLocalPlayerByIndex(i);
+                glm::ivec2 coords = player->GetViewportCenter();
+
+                int xOffset = coords.x;
+                int yOffset = coords.y;
+                int width = 1;
+                int height = 1;
+                g_playerRayReadBack[i].IssueDataRequest(fboHandle, attachment, xOffset, yOffset, width, height, GL_RGBA32F);
+            }
+            if (g_playerRayReadBack[i].IsRequestInProgress()) {
+                g_playerRayReadBack[i].Update();
+            }
+            if (g_playerRayReadBack[i].IsResultReady()) {
+                g_playerRayWorldPosition[i] = g_playerRayReadBack[i].GetFloatPixel(0);
+                g_playerRayWorldPositionReadBackReady[i] = true;
+                g_playerRayReadBack[i].Reset();
+            }
         }
     }
 
@@ -63,8 +95,16 @@ namespace OpenGLRenderer {
     bool IsMouseRayWorldPositionReadBackReady() {
         return g_mouseRayWorldPositionReadBackReady;
     }
-    
+
     glm::vec3 GetMouseRayWorldPostion() {
         return g_mouseRayWorldPosition;
+    }
+
+    bool IsPlayerRayWorldPositionReadBackReady(int playerIndex) {
+        return g_playerRayWorldPositionReadBackReady[playerIndex];
+    }
+
+    glm::vec3 GetPlayerRayWorldPostion(int playerIndex) {
+        return g_playerRayWorldPosition[playerIndex];
     }
 }

@@ -5,6 +5,7 @@
 #include "Viewport/ViewportManager.h"
 #include "Renderer/RenderDataManager.h"
 
+#include "AssetManagement/AssetManager.h"
 #include "Core/Audio.h"
 #include "Input/Input.h"
 
@@ -55,6 +56,7 @@ namespace OpenGLRenderer {
         glBindTexture(GL_TEXTURE_2D, hairFrameBuffer->GetColorAttachmentHandleByName("Composite"));
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, gBuffer->GetColorAttachmentHandleByName("FinalLighting"));
+
         glBindImageTexture(0, gBuffer->GetColorAttachmentHandleByName("FinalLighting"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
         glDispatchCompute((gBuffer->GetWidth() + 7) / 8, (gBuffer->GetHeight() + 7) / 8, 1);
     }
@@ -116,6 +118,7 @@ namespace OpenGLRenderer {
                     hairLightingShader->Use();
 
                     glBindTextureUnit(3, hairFrameBuffer->GetColorAttachmentHandleByName("ViewspaceDepth"));
+                    glBindTextureUnit(4, AssetManager::GetTextureByName("Flashlight2")->GetGLTexture().GetHandle());
 
                     SetRasterizerState("HairLighting");
 

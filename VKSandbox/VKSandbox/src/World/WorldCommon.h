@@ -8,9 +8,9 @@ struct HouseData {
 };
 
 struct SectorData {
-    //std::vector<GameObjectCreateInfo> gameObjects;    
+    //std::vector<GameObjectCreateInfo> gameObjects;
     //std::vector<InteractTextCreateInfo> interactTexts;
-    //std::vector<LightCreateInfo> lights;
+    std::vector<LightCreateInfo> lights;
     //std::vector<TreeCreateInfo> trees;
     //std::vector<PickUpCreateInfo> pickUps;
     //std::vector<HouseLocation> houseLocations;

@@ -52,14 +52,14 @@ public:
 	void SetRotationX(float rotation);
 	void SetRotationY(float rotation);
 	void SetRotationZ(float rotation);
-	void PlayAnimation(std::string animationName, const AnimationPlaybackParams& playbackParams = AnimationPlaybackParams());
-	void PlayAndLoopAnimation(std::string animationName, const AnimationPlaybackParams& playbackParams = AnimationPlaybackParams());
+	void PlayAnimation(const std::string& animationName, const AnimationPlaybackParams& playbackParams = AnimationPlaybackParams());
+	void PlayAndLoopAnimation(const std::string& animationName, const AnimationPlaybackParams& playbackParams = AnimationPlaybackParams());
     void SetAnimationModeToBindPose();
-    void SetMeshMaterialByMeshName(std::string meshName, std::string materialName);
-    void SetMeshMaterialByMeshIndex(int meshIndex, std::string materialName);
-    void SetMeshToRenderAsGlassByMeshIndex(std::string materialName);
-    void SetMeshEmissiveColorTextureByMeshName(std::string meshName, std::string textureName);
-	void SetAllMeshMaterials(std::string materialName);
+    void SetMeshMaterialByMeshName(const std::string& meshName, const std::string& materialName);
+    void SetMeshMaterialByMeshIndex(int meshIndex, const std::string& materialName);
+    void SetMeshToRenderAsGlassByMeshIndex(const std::string& materialName);
+    void SetMeshEmissiveColorTextureByMeshName(const std::string& meshName, const std::string& textureName);
+	void SetAllMeshMaterials(const std::string& materialName);
 
 	std::string GetName();
 	const glm::mat4 GetModelMatrix();
@@ -80,8 +80,8 @@ public:
     glm::mat4 m_cameraSpawnMatrix = glm::mat4(1);
 
     void EnableDrawingForAllMesh();
-    void EnableDrawingForMeshByMeshName(std::string meshName);
-    void DisableDrawingForMeshByMeshName(std::string meshName);
+    void EnableDrawingForMeshByMeshName(const std::string& meshName);
+    void DisableDrawingForMeshByMeshName(const std::string& meshName);
     void PrintBoneNames();
     void PrintMeshNames();
     void EnableBlendingByMeshIndex(int index);

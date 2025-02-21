@@ -13,4 +13,11 @@ namespace Util {
         std::cout << "Image Data Type: " << Util::ImageDataTypeToString(textureData.m_imageDataType) << "\n";
         std::cout << "Data Pointer: " << textureData.m_data << "\n";
     }
+
+    std::string BytesToMBString(size_t bytes) {
+        double megabytes = bytes / (1024.0 * 1024.0);
+        std::ostringstream stream;
+        stream << std::fixed << std::setprecision(2) << megabytes << " MB";
+        return stream.str();
+    }
 }

@@ -1,7 +1,12 @@
 #include "../GL_renderer.h"
 #include "API/OpenGL/GL_backend.h"
-#include "Core/Scene.h"
 #include "Renderer/RenderDataManager.h"
+
+
+// Get me out of here
+#include "World/World.h"
+// Get me out of here
+
 
 namespace OpenGLRenderer {
 
@@ -13,7 +18,7 @@ namespace OpenGLRenderer {
         if (!skinningTransforms) return;
 
         // Append all animated transforms into a single buffer
-        std::vector<AnimatedGameObject>& animatedGameObjects = Scene::GetAnimatedGameObjects();
+        std::vector<AnimatedGameObject>& animatedGameObjects = World::GetAnimatedGameObjects();
         RenderDataManager::skinningTransforms.clear();
         for (int i = 0; i < animatedGameObjects.size(); i++) {
             AnimatedGameObject& animatedGameObject = animatedGameObjects[i];

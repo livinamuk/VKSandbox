@@ -2,6 +2,15 @@
 #include "Core/Audio.h"
 #include "Util.h"
 
+// GET THIS OUT OF HERE
+// GET THIS OUT OF HERE
+// GET THIS OUT OF HERE
+#include "API/OpenGL/Renderer/GL_renderer.h"
+// GET THIS OUT OF HERE
+// GET THIS OUT OF HERE
+// GET THIS OUT OF HERE
+
+
 void Player::UpdateFlashlight(float deltaTime) {
     // Toggle on/off
     if (PressedFlashlight()) {
@@ -35,12 +44,28 @@ void Player::UpdateFlashlight(float deltaTime) {
     }
     glm::vec3 rayOrigin = GetCameraPosition();
     glm::vec3 rayDir = GetCameraForward();
-    PxU32 raycastFlags = RaycastGroup::RAYCAST_ENABLED;
-    PhysXRayResult rayResult = Physics::CastPhysXRay(rayOrigin, rayDir, 250, raycastFlags);
-    if (rayResult.hitFound) {
-        glm::vec3 hitPosition = rayResult.hitPosition;
-        m_flashlightDirection = glm::normalize(hitPosition - m_flashlightPosition);
-        //Renderer::DrawPoint(hitPosition, WHITE);
+
+    // Prevent NAN direction, which is the case on first spawn
+    if (Util::IsNan(m_flashlightDirection)) {
+        m_flashlightDirection = GetCameraForward();
     }
-    m_flashlightDirection = GetCameraForward();
+
+    if (OpenGLRenderer::IsPlayerRayWorldPositionReadBackReady(m_viewportIndex)) {
+        glm::vec3 target = GetCameraPosition() + GetCameraForward() * glm::vec3(4);
+
+        // Unless crosshair hit position is less than 4 meters, then use ray hit pos
+        glm::vec3 crosshairHitPosition = OpenGLRenderer::GetPlayerRayWorldPostion(m_viewportIndex);
+        if (glm::distance(crosshairHitPosition, GetCameraPosition()) < 4) {
+            target = crosshairHitPosition;
+        }
+        glm::vec3 flashlightDirectionTarget = glm::normalize(target - m_flashlightPosition);
+
+        float interSpeed = 30;
+        m_flashlightDirection = Util::LerpVec3(m_flashlightDirection, flashlightDirectionTarget, deltaTime, interSpeed);
+    }
+    // If worldspace position pixel readback is not ready, 
+    // then fall back to the camera forward vector
+    else {
+        m_flashlightDirection = GetCameraForward();
+    }
 }

@@ -40,6 +40,11 @@ namespace AssetManager {
         return GetMaterialByIndex(index);
     }
 
+    Material* GetMaterialByName(const std::string& name) {
+        int index = GetMaterialIndexByName(name);
+        return GetMaterialByIndex(index);
+    }
+
     Material* GetMaterialByIndex(int index) {
         std::vector<Material>& materials = GetMaterials();
         if (index >= 0 && index < materials.size()) {

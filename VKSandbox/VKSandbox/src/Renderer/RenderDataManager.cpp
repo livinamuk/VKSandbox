@@ -2,12 +2,15 @@
 #include "HellDefines.h"
 #include "../Camera/Frustum.h"
 #include "../Core/Game.h"
-#include "../Core/Scene.h"
 #include "../Config/Config.h"
 #include "../Editor/Editor.h"
 #include "../Viewport/ViewportManager.h"
 #include <span>
 #include <unordered_map>
+
+// Get me out of here
+#include "World/World.h"
+// Get me out of here
 
 namespace RenderDataManager {
     DrawCommandsSet g_drawCommandsSet;
@@ -77,6 +80,21 @@ namespace RenderDataManager {
             g_viewportData[i].frustumPlane3 = viewport->GetFrustum().GetPlane(3);
             g_viewportData[i].frustumPlane4 = viewport->GetFrustum().GetPlane(4);
             g_viewportData[i].frustumPlane5 = viewport->GetFrustum().GetPlane(5);
+
+            // Flashlight
+            if (Editor::IsOpen()) {
+                g_viewportData[i].flashlightModifer = 0;
+                g_viewportData[i].flashlightProjectionView = glm::mat4(1);
+                g_viewportData[i].flashlightDir = glm::vec4(0.0f);
+                g_viewportData[i].flashlightPosition = glm::vec4(0.0f);
+            }
+            else {
+                Player* player = Game::GetLocalPlayerByIndex(i);
+                g_viewportData[i].flashlightProjectionView = player->GetFlashlightProjectionView();
+                g_viewportData[i].flashlightDir = glm::vec4(player->GetFlashlightDirection(), 0.0f);
+                g_viewportData[i].flashlightPosition = glm::vec4(player->GetFlashlightPosition(), 0.0f);
+                g_viewportData[i].flashlightModifer = player->GetFlashLightModifer();
+            }
         }
     }
 
@@ -91,7 +109,7 @@ namespace RenderDataManager {
 
     void UpdateGPULightData() {
         g_gpuLightData.clear();
-        for (Light& light : Scene::GetLights()) {
+        for (Light& light : World::GetLights()) {
             GPULight& gpuLight = g_gpuLightData.emplace_back();
             gpuLight.posX = light.GetPosition().x;
             gpuLight.posY = light.GetPosition().y;
@@ -125,12 +143,12 @@ namespace RenderDataManager {
     void UpdateDrawCommandsSet() {
         g_instanceData.clear();
         auto& set = g_drawCommandsSet;
-        CreateDrawCommands(set.geometry, Scene::GetRenderItems());
-        CreateDrawCommands(set.geometryBlended, Scene::GetRenderItemsBlended());
-        CreateDrawCommands(set.geometryAlphaDiscarded, Scene::GetRenderItemsAlphaDiscarded());
-        CreateDrawCommands(set.hairTopLayer, Scene::GetRenderItemsHairTopLayer());
-        CreateDrawCommands(set.hairBottomLayer, Scene::GetRenderItemsHairBottomLayer());
-        CreateDrawCommandsSkinned(set.skinnedGeometry, Scene::GetSkinnedRenderItems());
+        CreateDrawCommands(set.geometry, World::GetRenderItems());
+        CreateDrawCommands(set.geometryBlended, World::GetRenderItemsBlended());
+        CreateDrawCommands(set.geometryAlphaDiscarded, World::GetRenderItemsAlphaDiscarded());
+        CreateDrawCommands(set.hairTopLayer, World::GetRenderItemsHairTopLayer());
+        CreateDrawCommands(set.hairBottomLayer, World::GetRenderItemsHairBottomLayer());
+        CreateDrawCommandsSkinned(set.skinnedGeometry, World::GetSkinnedRenderItems());
     }
 
     void CreateDrawCommands(DrawCommands& drawCommands, std::vector<RenderItem>& renderItems) {

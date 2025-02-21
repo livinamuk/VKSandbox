@@ -9,7 +9,6 @@
 #include "../BackEnd/BackEnd.h"
 #include "../Core/Audio.h"
 #include "../Core/Game.h"
-#include "../Core/Scene.h"
 #include "../Config/Config.h"
 #include "../Input/Input.h"
 #include "../Player/Player.h"
@@ -439,44 +438,44 @@ namespace OpenGLRenderer {
 
     std::vector<glm::mat4> getLightSpaceMatrices();
 
-    void CascadedShadowMappingPass() {
-
-        const std::vector<glm::mat4> lightMatrices = getLightSpaceMatrices();
-
-        g_ssbos["LightSpaceMatrices"].Update(lightMatrices.size() * sizeof(glm::mat4), (void*)&lightMatrices[0]);
-        g_ssbos["LightSpaceMatrices"].Bind(0);           
-
-
-        for (int i = 0; i < lightMatrices.size(); i++) {
-
-            std::cout << i << "\n";
-            std::cout << Util::Mat4ToString(lightMatrices[i]);
-
-            std::cout << "\n\n";
-        }
-
-
-        std::cout <<  "\n";
-
-        OpenGLShader* csmDepthShader = GetShader("CSMDepth");        
-        csmDepthShader->Use();
-
-        glBindFramebuffer(GL_FRAMEBUFFER, g_lightFBO);
-        glViewport(0, 0, g_depthMapResolution, g_depthMapResolution);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glCullFace(GL_FRONT);  // peter panning
-
-        glBindVertexArray(OpenGLBackEnd::GetVertexDataVAO());
-
-        for (RenderItem& renderItem : Scene::GetRenderItems()) {
-            Mesh* mesh = AssetManager::GetMeshByIndex(renderItem.meshIndex);
-            csmDepthShader->SetMat4("model", renderItem.modelMatrix);
-            glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), 1, mesh->baseVertex, 0);
-        }
-
-        glCullFace(GL_BACK);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
+    //void CascadedShadowMappingPass() {
+    //
+    //    const std::vector<glm::mat4> lightMatrices = getLightSpaceMatrices();
+    //
+    //    g_ssbos["LightSpaceMatrices"].Update(lightMatrices.size() * sizeof(glm::mat4), (void*)&lightMatrices[0]);
+    //    g_ssbos["LightSpaceMatrices"].Bind(0);           
+    //
+    //
+    //    for (int i = 0; i < lightMatrices.size(); i++) {
+    //
+    //        std::cout << i << "\n";
+    //        std::cout << Util::Mat4ToString(lightMatrices[i]);
+    //
+    //        std::cout << "\n\n";
+    //    }
+    //
+    //
+    //    std::cout <<  "\n";
+    //
+    //    OpenGLShader* csmDepthShader = GetShader("CSMDepth");        
+    //    csmDepthShader->Use();
+    //
+    //    glBindFramebuffer(GL_FRAMEBUFFER, g_lightFBO);
+    //    glViewport(0, 0, g_depthMapResolution, g_depthMapResolution);
+    //    glClear(GL_DEPTH_BUFFER_BIT);
+    //    glCullFace(GL_FRONT);  // peter panning
+    //
+    //    glBindVertexArray(OpenGLBackEnd::GetVertexDataVAO());
+    //
+    //    for (RenderItem& renderItem : Scene::GetRenderItems()) {
+    //        Mesh* mesh = AssetManager::GetMeshByIndex(renderItem.meshIndex);
+    //        csmDepthShader->SetMat4("model", renderItem.modelMatrix);
+    //        glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int) * mesh->baseIndex), 1, mesh->baseVertex, 0);
+    //    }
+    //
+    //    glCullFace(GL_BACK);
+    //    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //}
 
 
 

@@ -8,7 +8,6 @@
 #include <GLFW/glfw3.h>
 #include "Backend/Backend.h"
 #include "Core/Audio.h"
-#include "Core/Scene.h"
 #include "Editor/Editor.h"
 #include "File/File.h"
 #include "Input/Input.h"
@@ -17,6 +16,10 @@
 #include "Tools/ImageTools.h"
 #include "UI/UIBackEnd.h"
 #include "Viewport/ViewportManager.h"
+
+// Get me out of here
+#include "World/World.h"
+// Get me out of here
 
 namespace Game {
     float g_deltaTime = 0;
@@ -43,8 +46,11 @@ namespace Game {
     }
 
     void Create() {
-        Scene::Init();
-        Scene::CreateGameObjects();
+
+        World::CreateHardCodedTestSector();
+
+        //Scene::Init();
+        //Scene::CreateGameObjects();
 
         // Create players
         AddLocalPlayer(glm::vec3(12.82, -4.5f, 18.27f), glm::vec3(-0.13f, -1.46f, 0.0f));
@@ -97,6 +103,17 @@ namespace Game {
          //UIBackEnd::BlitText("Never in cuffs.", "StandardFont", 0, 30, 2.0f);
          //UIBackEnd::BlitText(debugText, "StandardFont", 0, 90, 2.0f);
 
+
+        // Editor select menu open?
+        if (Editor::IsEditorSelectMenuVisible()) {
+            for (Player& player : g_localPlayers) {
+                player.DisableControl();
+            }
+        } else{
+            for (Player& player : g_localPlayers) {
+                player.EnableControl();
+            }
+        }
 
         for (Player& player : g_localPlayers) {
             player.Update(g_deltaTime);

@@ -39,6 +39,10 @@ struct AnimationNames {
     std::string shotgunReloadTwoShells;
     std::string shotgunFireNoPump;
     std::string shotgunDrawPump;
+    std::string shotgunUnloadStart;
+    std::string shotgunUnloadEnd;
+    std::string shotgunUnloadOneShell;
+    std::string shotgunUnloadTwoShells;
 };
 
 struct AnimationCancelPercentages {
@@ -64,6 +68,10 @@ struct AnimationSpeeds {
     float shotgunReloadOneShell = 1.0f;
     float shotgunReloadTwoShells = 1.0f;
     float shotgunFireNoPump = 1.0f;
+    float shotgunUnloadStart = 1.0f;
+    float shotgunUnloadEnd = 1.0f;
+    float shotgunUnloadOneShell = 1.0f;
+    float shotgunUnloadTwoShells = 1.0f;
 };
 
 struct AudioFiles {
@@ -137,6 +145,7 @@ struct WeaponState {
     bool shotgunAwaitingPumpAudio = true;
     bool shotgunShellChambered = false;
     bool shotgunInAutoMode = false;
+    bool shotgunSlug = false;
     int ammoInMag = 0;
     std::string name = "UNDEFINED_STRING";
 };

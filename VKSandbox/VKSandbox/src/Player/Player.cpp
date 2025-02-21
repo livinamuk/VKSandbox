@@ -5,10 +5,13 @@
 #include "BackEnd/BackEnd.h"
 #include "Core/Audio.h"
 #include "Core/Game.h"
-#include "Core/Scene.h"
 #include "Editor/Editor.h"
 #include "Input/Input.h"
 #include "Viewport/ViewportManager.h"
+
+// Get me out of here
+#include "World/World.h"
+// Get me out of here
 
 void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex) {
     m_position = position;
@@ -19,14 +22,14 @@ void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex)
     // fix me: make it some unique ID
     m_playerIndex = viewportIndex;
 
-    Scene::CreateAnimatedGameObject();
-    m_viewWeaponAnimatedGameObjectIndex = Scene::GetAnimatedGameObjects().size() - 1;
+    World::CreateAnimatedGameObject();
+    m_viewWeaponAnimatedGameObjectIndex = World::GetAnimatedGameObjects().size() - 1;
     AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
     viewWeapon->SetPlayerIndex(viewportIndex);
     viewWeapon->SetExclusiveViewportIndex(viewportIndex);
 
-    Scene::CreateAnimatedGameObject();
-    m_characterModelAnimatedGameObjectIndex = Scene::GetAnimatedGameObjects().size() - 1;
+    World::CreateAnimatedGameObject();
+    m_characterModelAnimatedGameObjectIndex = World::GetAnimatedGameObjects().size() - 1;
     AnimatedGameObject* characterModel = GetCharacterModelAnimatedGameObject();
     characterModel->SetPlayerIndex(viewportIndex);
 
@@ -137,6 +140,10 @@ void Player::Respawn() {
     }
     m_flashlightOn = false;
     m_awaitingSpawn = false; 
+
+    m_camera.Update();
+    m_flashlightDirection = m_camera.GetForward();
+
 }
 
 
@@ -207,11 +214,11 @@ Camera& Player::GetCamera() {
 }
 
 AnimatedGameObject* Player::GetCharacterModelAnimatedGameObject() {
-    return Scene::GetAnimatedGameObjectByIndex(m_characterModelAnimatedGameObjectIndex);
+    return World::GetAnimatedGameObjectByIndex(m_characterModelAnimatedGameObjectIndex);
 }
 
 AnimatedGameObject* Player::GetViewWeaponAnimatedGameObject() {
-    return Scene::GetAnimatedGameObjectByIndex(m_viewWeaponAnimatedGameObjectIndex);
+    return World::GetAnimatedGameObjectByIndex(m_viewWeaponAnimatedGameObjectIndex);
 }
 
 bool Player::IsDead() {

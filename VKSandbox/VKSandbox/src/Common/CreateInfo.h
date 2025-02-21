@@ -9,6 +9,14 @@ struct LightCreateInfo {
     std::string type = "LAMP_POST";
 };
 
+struct PickUpCreateInfo {
+    glm::vec3 position = glm::vec3(0.0f);
+    glm::vec3 rotation = glm::vec3(0.0f);
+    //std::string modelName = "";
+    //std::string materialName = "";
+    std::string pickUpType = "";
+};
+
 struct SpriteSheetObjectCreateInfo {
     glm::vec3 position = glm::vec3(0.0f);
     glm::vec3 rotation = glm::vec3(0.0f);

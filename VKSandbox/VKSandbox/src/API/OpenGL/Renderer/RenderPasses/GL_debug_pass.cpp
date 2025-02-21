@@ -2,7 +2,6 @@
 #include "../../GL_backend.h"
 #include "AssetManagement/AssetManager.h"
 #include "Config/Config.h"
-#include "Core/Scene.h"
 #include "Editor/Editor.h"
 #include "Input/Input.h"
 #include "Viewport/ViewportManager.h"
@@ -45,57 +44,57 @@ namespace OpenGLRenderer {
         }
 
 
-        if (false) {
-            for (RenderItem& renderItem : Scene::GetRenderItems()) {
-                Util::UpdateRenderItemAABB(renderItem);
-                AABB aabb(renderItem.aabbMin, renderItem.aabbMax);
-                DrawAABB(aabb, WHITE);
-            }
-        }
+        //if (false) {
+        //    for (RenderItem& renderItem : Scene::GetRenderItems()) {
+        //        Util::UpdateRenderItemAABB(renderItem);
+        //        AABB aabb(renderItem.aabbMin, renderItem.aabbMax);
+        //        DrawAABB(aabb, WHITE);
+        //    }
+        //}
 
         const std::vector<ViewportData>& viewportData = RenderDataManager::GetViewportData();
 
-        if (false) {
-            const Resolutions& resolutions = Config::GetResolutions();
-
-            for (GameObject& gameObject : Scene::GetGameObjects()) {
-                Model* model = gameObject.m_model;
-                for (auto meshIndex : model->GetMeshIndices()) {
-                    Mesh* mesh = AssetManager::GetMeshByIndex(meshIndex);
-                    AABB aabb = AABB(mesh->aabbMin, mesh->aabbMax);
-                    glm::vec3 color = glm::vec3(YELLOW);
-                    glm::mat4 modelMatrix = gameObject.m_transform.to_mat4();
-
-                    if (model->GetName() == "Cube") {
-
-                        int viewportIndex = Editor::GetHoveredViewportIndex();
-                        Viewport* viewport = ViewportManager::GetViewportByIndex(viewportIndex);
-                        if (!viewport->IsVisible()) continue;
-
-                        glm::vec3 rayOrigin = Editor::GetMouseRayOriginByViewportIndex(viewportIndex);
-                        glm::vec3 rayDir = Editor::GetMouseRayDirectionByViewportIndex(viewportIndex);
-
-                        std::vector<Vertex>& vertices = mesh->m_vertices;
-                        std::vector<uint32_t>& indices = mesh->m_indices;
-
-                        for (int j = 0; j < indices.size(); j += 3) {
-                            Vertex& v0 = vertices[indices[j + 0]];
-                            Vertex& v1 = vertices[indices[j + 1]];
-                            Vertex& v2 = vertices[indices[j + 2]];
-                            glm::vec3 pos0 = modelMatrix * glm::vec4(v0.position, 1.0f);
-                            glm::vec3 pos1 = modelMatrix * glm::vec4(v1.position, 1.0f);
-                            glm::vec3 pos2 = modelMatrix * glm::vec4(v2.position, 1.0f);
-
-                            float t = 9999;
-                            if (Util::RayIntersectsTriangle(rayOrigin, rayDir, pos0, pos1, pos2, t)) {
-                                color = glm::vec3(GREEN);
-                            }
-                        }
-                    }
-                    DrawAABB(aabb, color, modelMatrix);
-                }
-            }
-        }
+        //if (false) {
+        //    const Resolutions& resolutions = Config::GetResolutions();
+        //
+        //    for (GameObject& gameObject : Scene::GetGameObjects()) {
+        //        Model* model = gameObject.m_model;
+        //        for (auto meshIndex : model->GetMeshIndices()) {
+        //            Mesh* mesh = AssetManager::GetMeshByIndex(meshIndex);
+        //            AABB aabb = AABB(mesh->aabbMin, mesh->aabbMax);
+        //            glm::vec3 color = glm::vec3(YELLOW);
+        //            glm::mat4 modelMatrix = gameObject.m_transform.to_mat4();
+        //
+        //            if (model->GetName() == "Cube") {
+        //
+        //                int viewportIndex = Editor::GetHoveredViewportIndex();
+        //                Viewport* viewport = ViewportManager::GetViewportByIndex(viewportIndex);
+        //                if (!viewport->IsVisible()) continue;
+        //
+        //                glm::vec3 rayOrigin = Editor::GetMouseRayOriginByViewportIndex(viewportIndex);
+        //                glm::vec3 rayDir = Editor::GetMouseRayDirectionByViewportIndex(viewportIndex);
+        //
+        //                std::vector<Vertex>& vertices = mesh->m_vertices;
+        //                std::vector<uint32_t>& indices = mesh->m_indices;
+        //
+        //                for (int j = 0; j < indices.size(); j += 3) {
+        //                    Vertex& v0 = vertices[indices[j + 0]];
+        //                    Vertex& v1 = vertices[indices[j + 1]];
+        //                    Vertex& v2 = vertices[indices[j + 2]];
+        //                    glm::vec3 pos0 = modelMatrix * glm::vec4(v0.position, 1.0f);
+        //                    glm::vec3 pos1 = modelMatrix * glm::vec4(v1.position, 1.0f);
+        //                    glm::vec3 pos2 = modelMatrix * glm::vec4(v2.position, 1.0f);
+        //
+        //                    float t = 9999;
+        //                    if (Util::RayIntersectsTriangle(rayOrigin, rayDir, pos0, pos1, pos2, t)) {
+        //                        color = glm::vec3(GREEN);
+        //                    }
+        //                }
+        //            }
+        //            DrawAABB(aabb, color, modelMatrix);
+        //        }
+        //    }
+        //}
 
         gBuffer->Bind();
         gBuffer->DrawBuffer("FinalLighting");
@@ -168,7 +167,12 @@ namespace OpenGLRenderer {
   //     }
   // }
 
-
+      //for (int i = 0; i < 4; i++) {
+      //    if (IsPlayerRayWorldPositionReadBackReady(i)) {
+      //        glm::vec3 position = GetPlayerRayWorldPostion(i);
+      //        DrawPoint(position, WHITE);
+      //    }
+      //}
 
         shader->Use();
         shader->SetMat4("model", glm::mat4(1));

@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "Core/Audio.h"
+#include "Core/Game.h"
 #include "Input/Input.h"
 
 void Player::UpdateShotgunGunLogic() {
@@ -12,15 +13,17 @@ void Player::UpdateShotgunGunLogic() {
     if (PressedReload() && CanReloadShotgun()) {
         ReloadShotgun();
     }
+    if (PressedWeaponMiscFunction() && CanUnloadShotgun()) {
+        UnloadShotgun();
+    }
     if (PressedADS() && CanToggleShotgunAuto()) {
         ToggleAutoShotgun();
     }
+
     UpdateShotgunReloadLogic();
+    UpdateShotgunUnloadLogic();
     UpdatePumpAudio();
 
-    if (Input::KeyPressed(HELL_KEY_Y)) {
-        SpawnCasing(GetCurrentAmmoInfo());
-    }
     if (Input::KeyPressed(HELL_KEY_I)) {
         AmmoState* ammoState = GetCurrentAmmoState();
         WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
@@ -34,6 +37,27 @@ void Player::UpdateShotgunGunLogic() {
         ammoState->ammoOnHand++;
     }
 
+    // Green shell hack
+    static float delayCounter = 0.0f;
+    delayCounter -= Game::GetDeltaTime();
+    if (delayCounter <= 0.0f)
+    if (Input::MouseWheelDown() || Input::MouseWheelUp()) {
+        WeaponState* weaponState = GetCurrentWeaponState();
+        weaponState->shotgunSlug = !weaponState->shotgunSlug;   
+        Audio::PlayAudio("SPAS_AutoToggle_STOLEN_FROM_HALFLIFE.wav", 1.0f, GetWeaponAudioFrequency());
+        delayCounter = 0.1f;
+    }
+
+    WeaponState* weaponState = GetCurrentWeaponState();
+    AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
+    if (weaponState->shotgunSlug) {
+        viewWeapon->SetMeshMaterialByMeshName("Shells", "ShellGreen");
+        viewWeapon->SetMeshMaterialByMeshName("Shells.001", "ShellGreen");
+    }
+    else {
+        viewWeapon->SetMeshMaterialByMeshName("Shells", "Shell");
+        viewWeapon->SetMeshMaterialByMeshName("Shells.001", "Shell");
+    }
 }
 
 void Player::ToggleAutoShotgun() {
@@ -81,7 +105,7 @@ void Player::FireShotgun() {
         viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunFireNoPump, params);
     }
     SpawnMuzzleFlash(55.0f, 0.3f);
-    SpawnCasing(ammoInfo);
+    SpawnCasing(ammoInfo, weaponState->shotgunSlug);
     Audio::PlayAudio(weaponInfo->audioFiles.fire[0], 1.0f, GetWeaponAudioFrequency());
 }
 
@@ -105,10 +129,106 @@ void Player::ReloadShotgun() {
     params.animationSpeed = weaponInfo->animationSpeeds.shotgunReloadStart;
 
     viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunReloadStart, params);
-    m_weaponAction = RELOAD_SHOTGUN_BEGIN;
+    m_weaponAction = SHOTGUN_RELOAD_BEGIN;
     weaponState->shotgunAwaitingFirstShellReload = true;
     weaponState->shotgunAwaitingSecondShellReload = true;
 }
+
+void Player::UnloadShotgun() {
+    std::cout << "UnloadShotgun()\n";
+    AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
+    WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
+    WeaponState* weaponState = GetWeaponStateByName(weaponInfo->name);
+
+    AnimationPlaybackParams params = AnimationPlaybackParams::GetDefaultPararms();
+    params.animationSpeed = weaponInfo->animationSpeeds.shotgunUnloadStart;
+
+    viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunUnloadStart, params);
+    m_weaponAction = SHOTGUN_UNLOAD_BEGIN;
+    weaponState->shotgunAwaitingFirstShellReload = true;
+    weaponState->shotgunAwaitingSecondShellReload = true;
+
+    Audio::PlayAudio("SPAS_RackIn.wav", 1.0f);
+}
+
+void Player::UpdateShotgunUnloadLogic() {
+    AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
+    WeaponAction weaponAction = GetCurrentWeaponAction();
+    WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
+    WeaponState* weaponState = GetWeaponStateByName(weaponInfo->name);
+    AmmoState* ammoState = GetAmmoStateByName(weaponInfo->ammoType);
+
+    if (ViewModelAnimationsCompleted() && weaponAction == WeaponAction::SHOTGUN_UNLOAD_BEGIN ||
+        ViewModelAnimationsCompleted() && weaponAction == WeaponAction::SHOTGUN_UNLOAD_SINGLE_SHELL ||
+        ViewModelAnimationsCompleted() && weaponAction == WeaponAction::SHOTGUN_UNLOAD_DOUBLE_SHELL) {
+        AnimationPlaybackParams params = AnimationPlaybackParams::GetDefaultPararms();
+
+        if (weaponState->ammoInMag >= 2) {
+            params.animationSpeed = weaponInfo->animationSpeeds.shotgunUnloadTwoShells;
+            viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunUnloadTwoShells, params);
+            m_weaponAction = WeaponAction::SHOTGUN_UNLOAD_DOUBLE_SHELL;
+            weaponState->shotgunAwaitingFirstShellReload = true;
+            weaponState->shotgunAwaitingSecondShellReload = true;
+        }
+        else if (weaponState->ammoInMag == 1) {
+            params.animationSpeed = weaponInfo->animationSpeeds.shotgunUnloadOneShell;
+            viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunUnloadOneShell, params);
+            m_weaponAction = WeaponAction::SHOTGUN_UNLOAD_SINGLE_SHELL;
+            weaponState->shotgunAwaitingFirstShellReload = true;
+        }
+        else {
+            params.animationSpeed = weaponInfo->animationSpeeds.shotgunUnloadEnd;
+            viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunUnloadEnd, params);
+            m_weaponAction = WeaponAction::SHOTGUN_UNLOAD_END;
+            Audio::PlayAudio("SPAS_RackOut.wav", 1.0f);
+            std::cout << "Audio::PlayAudio(SPAS_RackOut.wav, 1.0f);\n";
+        }
+    }
+
+
+    // Audio
+    if (weaponAction == WeaponAction::SHOTGUN_UNLOAD_SINGLE_SHELL) {
+        if (weaponState->shotgunAwaitingFirstShellReload && viewWeapon->AnimationIsPastFrameNumber(3)) {
+            Audio::PlayAudio("Shotgun_Reload.wav", 1.0f, GetWeaponAudioFrequency());
+            weaponState->shotgunAwaitingFirstShellReload = false;
+            weaponState->ammoInMag--;
+            ammoState->ammoOnHand++;
+        }
+    }
+
+    if (weaponAction == WeaponAction::SHOTGUN_UNLOAD_DOUBLE_SHELL) {
+        if (weaponState->shotgunAwaitingFirstShellReload && viewWeapon->AnimationIsPastFrameNumber(3)) {
+            Audio::PlayAudio("Shotgun_Reload.wav", 1.0f, GetWeaponAudioFrequency());
+            weaponState->shotgunAwaitingFirstShellReload = false;
+            weaponState->ammoInMag--;
+            ammoState->ammoOnHand++;
+        }
+        if (weaponState->shotgunAwaitingSecondShellReload && viewWeapon->AnimationIsPastFrameNumber(13)) {
+            Audio::PlayAudio("Shotgun_Reload.wav", 1.0f, GetWeaponAudioFrequency());
+            weaponState->shotgunAwaitingSecondShellReload = false;
+            weaponState->ammoInMag--;
+            ammoState->ammoOnHand++;
+        }
+    }
+
+    // This needs reconsidering
+    // Specifically, considering the chambering logic, 
+    // Coz it's already incorrect before you get to this point
+    if (PressedFire() || PressedADS()) {
+        if (weaponAction == SHOTGUN_UNLOAD_BEGIN ||
+            weaponAction == SHOTGUN_UNLOAD_SINGLE_SHELL ||
+            weaponAction == SHOTGUN_UNLOAD_DOUBLE_SHELL ||
+            weaponAction == SHOTGUN_UNLOAD_BEGIN ||
+            weaponAction == SHOTGUN_UNLOAD_BEGIN ||
+            weaponAction == SHOTGUN_UNLOAD_BEGIN) {
+            AnimationPlaybackParams params = AnimationPlaybackParams::GetDefaultPararms();
+            weaponState->shotgunAwaitingPumpAudio = true;
+            viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunReloadEnd, params);
+            m_weaponAction = SHOTGUN_UNLOAD_END;
+        }
+    }
+}
+
 
 void Player::UpdateShotgunReloadLogic() {
     AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
@@ -118,9 +238,9 @@ void Player::UpdateShotgunReloadLogic() {
     AmmoState* ammoState = GetAmmoStateByName(weaponInfo->ammoType);
 
     // Begin loading anim has complete, time to reload!
-    if (ViewModelAnimationsCompleted() && weaponAction == WeaponAction::RELOAD_SHOTGUN_BEGIN ||
-        ViewModelAnimationsCompleted() && weaponAction == WeaponAction::RELOAD_SHOTGUN_SINGLE_SHELL ||
-        ViewModelAnimationsCompleted() && weaponAction == WeaponAction::RELOAD_SHOTGUN_DOUBLE_SHELL) {
+    if (ViewModelAnimationsCompleted() && weaponAction == WeaponAction::SHOTGUN_RELOAD_BEGIN ||
+        ViewModelAnimationsCompleted() && weaponAction == WeaponAction::SHOTGUN_RELOAD_SINGLE_SHELL ||
+        ViewModelAnimationsCompleted() && weaponAction == WeaponAction::SHOTGUN_RELOAD_DOUBLE_SHELL) {
 
         // Reload 1 shell ONLY if the shotty can only take 1, or you only have 1
         if (weaponState->ammoInMag == 7 && ammoState->ammoOnHand > 0 || 
@@ -132,7 +252,7 @@ void Player::UpdateShotgunReloadLogic() {
 
             weaponState->shotgunAwaitingFirstShellReload = true;
 
-            m_weaponAction = RELOAD_SHOTGUN_SINGLE_SHELL;
+            m_weaponAction = SHOTGUN_RELOAD_SINGLE_SHELL;
         }
         // Otherwise do the double reload
         else if (weaponState->ammoInMag <= 6 && ammoState->ammoOnHand >= 2) {
@@ -143,7 +263,7 @@ void Player::UpdateShotgunReloadLogic() {
             weaponState->shotgunAwaitingFirstShellReload = true;
             weaponState->shotgunAwaitingSecondShellReload = true;
 
-            m_weaponAction = RELOAD_SHOTGUN_DOUBLE_SHELL;
+            m_weaponAction = SHOTGUN_RELOAD_DOUBLE_SHELL;
         }
         // Otherwise reload is done, time to flip the gun back to idle
         else {
@@ -151,43 +271,42 @@ void Player::UpdateShotgunReloadLogic() {
             params.animationSpeed = weaponInfo->animationSpeeds.shotgunReloadEnd;
 
             if (IsShellInShotgunChamber()) {
-                m_weaponAction = RELOAD_SHOTGUN_END;
+                m_weaponAction = SHOTGUN_RELOAD_END;
                 weaponState->shotgunAwaitingPumpAudio = false;
                 viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunReloadEnd, params);
             }
             else {
-                m_weaponAction = RELOAD_SHOTGUN_END_WITH_PUMP;
+                m_weaponAction = SHOTGUN_RELOAD_END_WITH_PUMP;
                 weaponState->shotgunAwaitingPumpAudio = true;
                 viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunReloadEndPump, params);
-
             }
         }
     }
 
     // Cancel reload with no shell in chamber ?
     if (PressedFire() || PressedADS()) {
-        if (weaponAction == RELOAD_SHOTGUN_BEGIN ||
-            weaponAction == RELOAD_SHOTGUN_SINGLE_SHELL ||
-            weaponAction == RELOAD_SHOTGUN_DOUBLE_SHELL ||
-            weaponAction == RELOAD_SHOTGUN_BEGIN ||
-            weaponAction == RELOAD_SHOTGUN_BEGIN ||
-            weaponAction == RELOAD_SHOTGUN_BEGIN) {
+        if (weaponAction == SHOTGUN_RELOAD_BEGIN ||
+            weaponAction == SHOTGUN_RELOAD_SINGLE_SHELL ||
+            weaponAction == SHOTGUN_RELOAD_DOUBLE_SHELL ||
+            weaponAction == SHOTGUN_RELOAD_BEGIN ||
+            weaponAction == SHOTGUN_RELOAD_BEGIN ||
+            weaponAction == SHOTGUN_RELOAD_BEGIN) {
             AnimationPlaybackParams params = AnimationPlaybackParams::GetDefaultPararms();
             weaponState->shotgunAwaitingPumpAudio = true;
 
             if (IsShellInShotgunChamber()) {
                 viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunReloadEnd, params);
-                m_weaponAction = RELOAD_SHOTGUN_END;
+                m_weaponAction = SHOTGUN_RELOAD_END;
             }
             else {
                 viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunReloadEndPump, params);
-                m_weaponAction = RELOAD_SHOTGUN_END_WITH_PUMP;
+                m_weaponAction = SHOTGUN_RELOAD_END_WITH_PUMP;
             }
         }
     }
 
     // Audio
-    if (weaponAction == WeaponAction::RELOAD_SHOTGUN_SINGLE_SHELL) {
+    if (weaponAction == WeaponAction::SHOTGUN_RELOAD_SINGLE_SHELL) {
         if (weaponState->shotgunAwaitingFirstShellReload && viewWeapon->AnimationIsPastFrameNumber(7)) {
             Audio::PlayAudio("Shotgun_Reload.wav", 1.0f, GetWeaponAudioFrequency());
             weaponState->shotgunAwaitingFirstShellReload = false;
@@ -196,7 +315,7 @@ void Player::UpdateShotgunReloadLogic() {
         }
     }
 
-    if (weaponAction == WeaponAction::RELOAD_SHOTGUN_DOUBLE_SHELL) {
+    if (weaponAction == WeaponAction::SHOTGUN_RELOAD_DOUBLE_SHELL) {
         if (weaponState->shotgunAwaitingFirstShellReload && viewWeapon->AnimationIsPastFrameNumber(7)) {
             Audio::PlayAudio("Shotgun_Reload.wav", 1.0f, GetWeaponAudioFrequency());
             weaponState->shotgunAwaitingFirstShellReload = false;
@@ -229,7 +348,7 @@ void Player::UpdatePumpAudio() {
     };
 
     PlayPumpAudioIfNeeded(WeaponAction::FIRE, 3);
-    PlayPumpAudioIfNeeded(WeaponAction::RELOAD_SHOTGUN_END_WITH_PUMP, 3);
+    PlayPumpAudioIfNeeded(WeaponAction::SHOTGUN_RELOAD_END_WITH_PUMP, 3);
     PlayPumpAudioIfNeeded(WeaponAction::DRAWING_WITH_SHOTGUN_PUMP, 6);
 }
 
@@ -293,9 +412,31 @@ bool Player::CanReloadShotgun() {
             weaponAction == IDLE ||
             weaponAction == FIRE && viewWeapon->AnimationIsPastFrameNumber(22) ||
             weaponAction == DRY_FIRE && viewWeapon->AnimationIsPastFrameNumber(5) ||
-            weaponAction == RELOAD_SHOTGUN_END && viewWeapon->AnimationIsPastFrameNumber(5) ||
-            weaponAction == RELOAD_SHOTGUN_END_WITH_PUMP && viewWeapon->AnimationIsPastFrameNumber(5)
+            weaponAction == SHOTGUN_RELOAD_END && viewWeapon->AnimationIsPastFrameNumber(5) ||
+            weaponAction == SHOTGUN_RELOAD_END_WITH_PUMP && viewWeapon->AnimationIsPastFrameNumber(5)
         );
+    }
+    return false;
+}
+
+
+bool Player::CanUnloadShotgun() {
+    AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
+    WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
+    AmmoState* ammoState = GetAmmoStateByName(weaponInfo->ammoType);
+    WeaponState* weaponState = GetWeaponStateByName(weaponInfo->name);
+    WeaponAction weaponAction = GetCurrentWeaponAction();
+
+    // If shotty aint full, and you have enough ammo
+    if (weaponState->ammoInMag > 0) {
+        return (
+            // And you are playing an acceptable animation to cancel
+            weaponAction == IDLE ||
+            weaponAction == FIRE && viewWeapon->AnimationIsPastFrameNumber(22) ||
+            weaponAction == DRY_FIRE && viewWeapon->AnimationIsPastFrameNumber(5) ||
+            weaponAction == SHOTGUN_RELOAD_END && viewWeapon->AnimationIsPastFrameNumber(5) ||
+            weaponAction == SHOTGUN_RELOAD_END_WITH_PUMP && viewWeapon->AnimationIsPastFrameNumber(5)
+            );
     }
     return false;
 }

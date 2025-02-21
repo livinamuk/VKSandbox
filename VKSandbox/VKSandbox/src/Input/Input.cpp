@@ -195,6 +195,10 @@ namespace Input {
     void ShowCursor() {
         glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
+    
+    void CenterMouseCursor() {
+        SetCursorPosition(BackEnd::GetCurrentWindowWidth() / 2, BackEnd::GetCurrentWindowHeight() / 2);
+    }
 
     int GetCursorScreenX() {
         return g_mouseScreenX;
