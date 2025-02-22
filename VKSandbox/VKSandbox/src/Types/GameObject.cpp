@@ -1,6 +1,20 @@
 #include "GameObject.h"
 #include "../AssetManagement/AssetManager.h"
 
+GameObject::GameObject(GameObjectCreateInfo createInfo) {
+    m_transform.position = createInfo.position;
+    m_transform.rotation = createInfo.rotation;
+    m_transform.scale = createInfo.scale;
+    SetModel(createInfo.modelName);
+    SetMeshMaterials(createInfo.baseMaterial);
+    for (MeshMaterialInfo& meshMaterialInfo : createInfo.meshMaterialInfo) {
+        SetMeshMaterialByMeshName(meshMaterialInfo.meshName, meshMaterialInfo.materialName);
+    }
+    for (MeshBlendingInfo& meshBlendingInfo : createInfo.meshBlendingInfo) {
+        SetMeshBlendingMode(meshBlendingInfo.meshName, meshBlendingInfo.blendingMode);
+    }
+}
+
 void GameObject::SetPosition(glm::vec3 position) {
     m_transform.position = position;
 }
@@ -32,16 +46,21 @@ void GameObject::SetModel(const std::string& name) {
     }
 }
 
-void GameObject::SetMeshMaterials(const char* materialName) {
+void GameObject::SetMeshMaterials(const std::string& materialName) {
+    if (m_meshMaterialIndices.empty()) {
+        std::cout << "GameObject::SetMeshMaterials() failed because m_meshMaterialIndices was empty, you most likely forget to set the model pointer\n";
+        return;
+    }
+
     int materialIndex = AssetManager::GetMaterialIndexByName(materialName);
     if (m_model && materialIndex != -1) {
-        for (int i = 0; i < m_model->GetMeshCount(); i++) {
+        for (int i = 0; i < m_meshMaterialIndices.size(); i++) {
             m_meshMaterialIndices[i] = materialIndex;
         }
     }
 }
 
-void GameObject::SetMeshMaterialByMeshName(std::string meshName, const char* materialName) {
+void GameObject::SetMeshMaterialByMeshName(const std::string& meshName, const std::string& materialName) {
     int materialIndex = AssetManager::GetMaterialIndexByName(materialName);
     if (m_model && materialIndex != -1) {
         for (int i = 0; i < m_model->GetMeshCount(); i++) {
@@ -62,7 +81,7 @@ void GameObject::SetMeshMaterialByMeshName(std::string meshName, const char* mat
     }
 }
 
-void GameObject::SetMeshBlendingMode(const char* meshName, BlendingMode blendingMode) {
+void GameObject::SetMeshBlendingMode(const std::string& meshName, BlendingMode blendingMode) {
     // Range checks
     if (m_meshBlendingModes.empty()) {
         std::cout << "GameObject::SetMeshBlendingMode() failed: m_meshBlendingModes was empty!\n";

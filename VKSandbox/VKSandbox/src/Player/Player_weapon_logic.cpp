@@ -67,9 +67,10 @@ void Player::UpdateWeaponLogic() {
 
 void Player::GiveDefaultLoadout() {
     GiveWeapon("Knife");
-    GiveWeapon("SPAS");    
+    GiveWeapon("SPAS");
+    //GiveWeapon("Glock");
     GiveAmmo("Shotgun", 80); 
-    GiveAmmo("Tokarev", 200);
+    //GiveAmmo("Glock", 200);
 }
 
 void Player::NextWeapon() {

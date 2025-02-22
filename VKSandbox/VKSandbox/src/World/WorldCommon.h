@@ -8,11 +8,14 @@ struct HouseData {
 };
 
 struct SectorData {
-    //std::vector<GameObjectCreateInfo> gameObjects;
-    //std::vector<InteractTextCreateInfo> interactTexts;
+    std::vector<GameObjectCreateInfo> gameObjects;
     std::vector<LightCreateInfo> lights;
-    //std::vector<TreeCreateInfo> trees;
-    //std::vector<PickUpCreateInfo> pickUps;
+    std::vector<PickUpCreateInfo> pickUps;
+    std::vector<TreeCreateInfo> trees;
+
+    // TO DO:
+    //std::vector<InteractTextCreateInfo> interactTexts;
+    //
     //std::vector<HouseLocation> houseLocations;
     //glm::vec3 mermaidsLocation;
     //std::string heightMapName;

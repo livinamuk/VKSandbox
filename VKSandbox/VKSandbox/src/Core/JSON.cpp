@@ -21,6 +21,12 @@ namespace JSON {
         return j;
     }
 
+    glm::vec3 JsonToVec3(nlohmann::json& j) {
+        glm::vec3 v;
+        from_json(j, v);
+        return v;
+    }
+
     void SaveToFile(nlohmann::json& json, const std::string& filepath) {
         std::ofstream file(filepath);
         if (file.is_open()) {

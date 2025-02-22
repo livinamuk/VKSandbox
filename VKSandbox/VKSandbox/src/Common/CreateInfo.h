@@ -12,8 +12,6 @@ struct LightCreateInfo {
 struct PickUpCreateInfo {
     glm::vec3 position = glm::vec3(0.0f);
     glm::vec3 rotation = glm::vec3(0.0f);
-    //std::string modelName = "";
-    //std::string materialName = "";
     std::string pickUpType = "";
 };
 
@@ -34,4 +32,21 @@ struct BulletCasingCreateInfo {
     glm::vec3 force = glm::vec3(0.0f);
     uint32_t modelIndex = 0;
     uint32_t materialIndex = 0;
+};
+
+struct GameObjectCreateInfo {
+    glm::vec3 position = glm::vec3(0.0f);
+    glm::vec3 rotation = glm::vec3(0.0f);
+    glm::vec3 scale = glm::vec3(1.0f);
+    std::string modelName = "";
+    std::string baseMaterial = "";
+    std::vector<MeshMaterialInfo> meshMaterialInfo;
+    std::vector<MeshBlendingInfo> meshBlendingInfo;
+};
+
+struct TreeCreateInfo {
+    glm::vec3 position = glm::vec3(0.0f);
+    glm::vec3 rotation = glm::vec3(0.0f);
+    glm::vec3 scale = glm::vec3(1.0f);
+    int type = 0;
 };

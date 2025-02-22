@@ -42,6 +42,10 @@ namespace Editor {
         }
         ResetViewports();
         ResetCameras();
+
+
+        g_editorLightingSettings.lightingEnabled = true;
+        g_editorLightingSettings.grassEnabled = true;
     }
 
     void ResetViewports() {

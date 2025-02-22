@@ -17,6 +17,7 @@ layout(binding = 7) uniform sampler2D FlashlightCookieTexture;
 layout(binding = 8) uniform sampler2D FlashlighShadowMapTexture;
 
 uniform int u_editorLighting;
+uniform int u_ambientLightingBoost;
 
 layout(rgba16f, binding = 0) uniform image2D outputImage;
 
@@ -97,6 +98,11 @@ void main() {
         float lightStrength = light.strength;
         float lightRadius = light.radius;
        
+         if (u_ambientLightingBoost == 1) {
+            lightRadius *= 10;
+            lightStrength *= 0.25;
+         }
+
         directLighting += GetDirectLighting(lightPosition, lightColor, lightRadius, lightStrength, normal.xyz, worldSpacePosition.xyz, gammaBaseColor.rgb, roughness, metallic, viewPos);
      
         // Subsurface scattering
@@ -136,9 +142,16 @@ void main() {
     // Ambient light
     vec3 amibentLightColor = vec3(1, 0.98, 0.94);
     float ambientIntensity = 0.0025;
+
+    
+    if (u_ambientLightingBoost == 1) {
+        //ambientIntensity = 0.075;
+    }
+
+
     vec3 ambientColor = baseColor.rgb * amibentLightColor;
     vec3 ambientLighting = ambientColor * ambientIntensity;
-
+    
     // Alpha
     float finalAlpha = baseColor.a;
     

@@ -24,11 +24,13 @@ namespace OpenGLRenderer {
         // Get me out of here
         // Get me out of here
         lightingShader->SetInt("u_editorLighting", 0);
+        lightingShader->SetInt("u_ambientLightingBoost", 0);
         if (Editor::IsOpen()) {
             EditorLightingSettings& lightingSettigns = Editor::GetLightingSettings();
-            if (lightingSettigns.lightingEnabled) {
+            if (!lightingSettigns.lightingEnabled) {
                 lightingShader->SetInt("u_editorLighting", 1);
             }
+            lightingShader->SetInt("u_ambientLightingBoost", 1);
         }
         // Get me out of here
         // Get me out of here

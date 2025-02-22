@@ -5,5 +5,6 @@
 
 namespace JSON {
     nlohmann::json Vec3ToJson(const glm::vec3& v);
+    glm::vec3 JsonToVec3(nlohmann::json& j);
     void SaveToFile(nlohmann::json& json, const std::string& filepath);
 }

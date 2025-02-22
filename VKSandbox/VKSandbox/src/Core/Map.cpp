@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 #include "Map.h"
 #include "JSON.h"
 
@@ -29,4 +29,4 @@ namespace Map {
         JSON::SaveToFile(json, filepath);
     }
 
-}
+}*/

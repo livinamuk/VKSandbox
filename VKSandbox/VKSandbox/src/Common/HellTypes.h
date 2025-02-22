@@ -448,3 +448,20 @@ struct PhysXRayResult {
     //void* parent;
     //ObjectType objectType;
 };
+
+struct MeshMaterialInfo {
+    std::string meshName;
+    std::string materialName;
+};
+
+struct MeshBlendingInfo {
+    std::string meshName;
+    BlendingMode blendingMode;
+};
+
+enum struct TreeType {
+    TREE_LARGE_0 = 0,
+    TREE_LARGE_1,
+    TREE_LARGE_2,
+    UNDEFINED
+};

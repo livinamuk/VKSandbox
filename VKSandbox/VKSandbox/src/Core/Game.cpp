@@ -47,7 +47,6 @@ namespace Game {
 
     void Create() {
 
-        World::CreateHardCodedTestSector();
 
         //Scene::Init();
         //Scene::CreateGameObjects();
@@ -71,6 +70,16 @@ namespace Game {
     }
 
     void Update() {
+
+        if (Input::KeyPressed(HELL_KEY_SPACE)) {
+            World::CreateHardCodedTestSector();
+        }            
+      
+        if (Input::KeyPressed(HELL_KEY_BACKSPACE)) {
+            SectorData sectorData = World::LoadSectorData("res/sectors/TestSector.json");
+            World::LoadSingleSector(sectorData);
+        }
+
         static double lastTime = glfwGetTime();
         double currentTime = glfwGetTime();
         g_deltaTime = static_cast<float>(currentTime - lastTime);

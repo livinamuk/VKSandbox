@@ -350,10 +350,10 @@ namespace WeaponManager {
         tokarev.pickUpMeshMaterials["TokarevBody"] = "Tokarev";
         tokarev.pickUpMeshMaterials["TokarevGripPolymer"] = "TokarevGrip";
 
-        tokarev.animationNames.idle = "Tokarev_ReloadEmpty";
-        tokarev.animationNames.walk = "Tokarev_ReloadEmpty";
-        tokarev.animationNames.draw = "Tokarev_ReloadEmpty";
-        tokarev.animationNames.spawn = "Tokarev_ReloadEmpty";
+      
+      
+      
+      
 
 
         WeaponInfo& glock = g_weapons.emplace_back();

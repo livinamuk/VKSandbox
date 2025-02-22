@@ -191,12 +191,12 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\Core\ImguiBackEnd.cpp" />
     <ClCompile Include="src\Core\JSON.cpp" />
     <ClCompile Include="src\Core\Nuklear.cpp" />
-    <ClCompile Include="src\Core\Scene.cpp" />
     <ClCompile Include="src\Core\Map.cpp" />
     <ClCompile Include="src\Editor\Editor_imgui.cpp" />
     <ClCompile Include="src\Player\Player_util.cpp" />
     <ClCompile Include="src\Renderer\Types\TextureArray.cpp" />
     <ClCompile Include="src\Types\PickUp.cpp" />
+    <ClCompile Include="src\Types\Tree.cpp" />
     <ClCompile Include="src\Util\Util_debug_info.cpp" />
     <ClCompile Include="src\World\HeightMapManager.cpp" />
     <ClCompile Include="src\World\HeightMap.cpp" />
@@ -378,6 +378,7 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClInclude Include="src\Core\Nuklear.h" />
     <ClInclude Include="src\Renderer\Types\TextureArray.h" />
     <ClInclude Include="src\Types\PickUp.h" />
+    <ClInclude Include="src\Types\Tree.h" />
     <ClInclude Include="src\World\HeightMapManager.h" />
     <ClInclude Include="src\World\HeightMap.h" />
     <ClInclude Include="src\Physics\Physics.h" />
@@ -435,7 +436,6 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClInclude Include="src\Tools\DDS.h" />
     <ClInclude Include="src\Renderer\Types\DetachedMesh.hpp" />
     <ClInclude Include="src\Renderer\Types\Model.hpp" />
-    <ClInclude Include="src\Core\Scene.h" />
     <ClInclude Include="src\Tools\ImageTools.h" />
     <ClInclude Include="src\UI\UIBackEnd.h" />
     <ClInclude Include="src\Renderer\Types\Texture.h" />

@@ -1,8 +1,12 @@
 #pragma once
 #include "HellTypes.h"
+#include "CreateInfo.h"
 #include "../Renderer/Types/Model.hpp"
 
 struct GameObject {
+    GameObject() = default;
+    GameObject(GameObjectCreateInfo createInfo);
+
     std::string m_name;
     Model* m_model = nullptr;
     Transform m_transform;
@@ -15,9 +19,9 @@ struct GameObject {
     void SetRotationY(float rotation);
     void SetScale(glm::vec3 scale);
     void SetModel(const std::string& name);
-    void SetMeshMaterials(const char* materialName);
-    void SetMeshMaterialByMeshName(std::string meshName, const char* materialName);
-    void SetMeshBlendingMode(const char* meshName, BlendingMode blendingMode);
+    void SetMeshMaterials(const std::string& materialName);
+    void SetMeshMaterialByMeshName(const std::string& meshName, const std::string& materialName);
+    void SetMeshBlendingMode(const std::string& meshName, BlendingMode blendingMode);
     void SetMeshBlendingModes(BlendingMode blendingMode);
     void SetMousePickIndex(int index);
     void PrintMeshNames();

@@ -93,9 +93,15 @@ namespace Util {
 
     // Conversions
     std::string LightTypeToString(LightType type);
-    LightType StringToLightType(const std::string& str);
     std::string PickUpTypeToString(PickUpType type);
+    std::string BlendingModeToString(BlendingMode mode);
+    std::string MeshMaterialInfoToString(MeshMaterialInfo meshMatrialInfo);
+    std::string MeshBlendingInfoToString(MeshBlendingInfo meshBlendingInfo);
+    LightType StringToLightType(const std::string& str);
     PickUpType StringToPickUpType(const std::string& str);
+    BlendingMode StringToBlendingMode(const std::string& str);
+    MeshMaterialInfo StringToMeshMaterialInfo(const std::string& str);
+    MeshBlendingInfo StringToMeshBlendingMode(const std::string& str);
 
     // Debug Info
     void PrintDebugInfo(TextureData& textureData);

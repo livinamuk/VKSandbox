@@ -120,6 +120,7 @@ void Player::Respawn() {
 
     GiveDefaultLoadout();
     SwitchWeapon("Knife", WeaponAction::DRAW_BEGIN);
+    //SwitchWeapon("Glock", WeaponAction::DRAW_BEGIN);
 
     //if (m_viewportIndex == 0) {
     //    SwitchWeapon("SPAS", WeaponAction::DRAW_BEGIN);

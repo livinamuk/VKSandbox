@@ -9,14 +9,29 @@
 #include "Types/GameObject.h"
 #include "Types/Light.h"
 #include "Types/PickUp.h"
+#include "Types/Tree.h"
 #include "Util/Util.h"
 #include "glm/gtx/intersect.hpp"
 #include <vector>
 
 namespace World {
     void NewCampainWorld();
-    void LoadSingleSector(const std::string& name);
+    void LoadSingleSector(SectorData& secondData);
     void LoadDeathMatchMap();
+
+    SectorData LoadSectorData(const std::string& filepath);
+    void SaveSectorData(const std::string& filepath, SectorData& sectorData);
+
+
+
+
+
+
+
+
+
+
+
 
     void CreateHardCodedTestSector();
 
@@ -57,6 +72,7 @@ namespace World {
     void AddBulletCasing(BulletCasingCreateInfo createInfo);
     void AddLight(LightCreateInfo createInfo);
     void AddPickUp(PickUpCreateInfo createInfo);
+    void AddGameObject(GameObjectCreateInfo createInfo);
 }
 
 /*
