@@ -178,6 +178,7 @@ namespace OpenGLRenderer {
         shader->SetMat4("model", glm::mat4(1));
         shader->SetBool("useUniformColor", false);
 
+
        // glEnable(GL_CULL_FACE);
        // glBindVertexArray(grassMesh.glMesh.GetVAO());
        // glDrawElements(GL_TRIANGLE_STRIP, grassMesh.glMesh.GetIndexCount(), GL_UNSIGNED_INT, 0);

@@ -13,7 +13,7 @@ namespace OpenGLRenderer {
         OpenGLShader* shader = GetShader("SolidColor");
 
         if (!shader) return;
-        if (!Editor::IsOpen()) return;
+        if (!Editor::IsEditorOpen()) return;
 
         gBuffer->Bind();
         gBuffer->DrawBuffers({ "FinalLighting" });

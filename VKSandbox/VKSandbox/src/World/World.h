@@ -16,11 +16,11 @@
 
 namespace World {
     void NewCampainWorld();
-    void LoadSingleSector(SectorData& secondData);
+    void LoadSingleSector(SectorCreateInfo& sectorCreateInfo);
     void LoadDeathMatchMap();
 
-    SectorData LoadSectorData(const std::string& filepath);
-    void SaveSectorData(const std::string& filepath, SectorData& sectorData);
+    SectorCreateInfo& GetEditorSectorCreateInfo();
+
 
 
 
@@ -52,15 +52,19 @@ namespace World {
     void CreateGameObject();
     void CreateAnimatedGameObject();
 
-    AnimatedGameObject* GetAnimatedGameObjectByIndex(int32_t index);
+    //AnimatedGameObject* GetAnimatedGameObjectByIndex(int32_t index);
     GameObject* GetGameObjectByIndex(int32_t index);
     GameObject* GetGameObjectByName(const std::string& name);
     Light* GetLightByIndex(int32_t index);
+    PickUp* GetPickUpByIndex(int32_t index);
+    Tree* GetTreeByIndex(int32_t index);
 
-    std::vector<AnimatedGameObject>& GetAnimatedGameObjects();
+    //std::vector<AnimatedGameObject>& GetAnimatedGameObjects();
     std::vector<GameObject>& GetGameObjects();
     std::vector<BulletCasing>& GetBulletCasings();
     std::vector<Light>& GetLights();
+    std::vector<PickUp>& GetPickUps();
+    std::vector<Tree>& GetTrees();
 
     std::vector<RenderItem>& GetRenderItems();
     std::vector<RenderItem>& GetRenderItemsBlended();

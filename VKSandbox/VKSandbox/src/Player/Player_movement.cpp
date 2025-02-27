@@ -13,7 +13,7 @@ void Player::UpdateMovement(float deltaTime) {
         //return;
     }
 
-    if (!Editor::IsOpen() && m_controlEnabled) {
+    if (!Editor::IsEditorOpen() && m_controlEnabled) {
         // Speed factor
         float speedFactor = 1.0f;
         if (Input::KeyDown(GLFW_KEY_LEFT_SHIFT)) {

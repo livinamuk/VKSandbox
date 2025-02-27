@@ -9,7 +9,7 @@
 #include "Viewport/ViewportManager.h"
 
 void Player::UpdateUI() {
-    if (Editor::IsOpen()) return;
+    if (Editor::IsEditorOpen()) return;
 
     const Viewport* viewport = ViewportManager::GetViewportByIndex(m_viewportIndex);
     if (!viewport->IsVisible()) return;

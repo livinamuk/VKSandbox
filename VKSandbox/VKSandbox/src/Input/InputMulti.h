@@ -20,6 +20,7 @@ struct KeyboardState {
 
 namespace InputMulti {
     void Init();
+    void ResetState();
     void Update();
     bool LeftMouseDown(int index);
     bool RightMouseDown(int index);

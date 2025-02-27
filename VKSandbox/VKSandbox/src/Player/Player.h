@@ -27,9 +27,10 @@ struct Player {
     const glm::vec3& GetCameraRight() const;
     const glm::vec3& GetCameraUp() const;
     const int32_t GetViewportIndex() const;
-    Camera& GetCamera();
     AnimatedGameObject* GetCharacterModelAnimatedGameObject();
     AnimatedGameObject* GetViewWeaponAnimatedGameObject();
+    Camera& GetCamera();
+
 
     void UpdateCamera(float deltaTime);
     void UpdateViewWeapon(float deltaTime);
@@ -40,17 +41,14 @@ struct Player {
     void UpdateBreatheBob(float deltaTime);
     void UpdateAudio();
     void UpdateFlashlight(float deltaTime);
+    void UpdateAnimatedGameObjects(float deltaTime);
+    void UpdateWeaponSlide();
 
     // Weapon shit
     int GetCurrentWeaponMagAmmo();
     int GetCurrentWeaponTotalAmmo();
-    bool CanFire();
-    bool CanReload();
-    bool CanEnterADS();
-    bool InADS(); 
-    bool CanMelee();
     bool IsShellInShotgunChamber();
-    void UpdateWeaponLogic();
+    void UpdateWeaponLogic(float deltaTime);
     void GiveDefaultLoadout();
     void GiveWeapon(const std::string& name);
     void GiveAmmo(const std::string& name, int amount);
@@ -192,8 +190,8 @@ private:
     float m_mouseSensitivity = 0.002f;
     float m_cameraZoom = 1.0f; 
     float m_accuracyModifer = 0;
-    int32_t m_characterModelAnimatedGameObjectIndex = 0;
-    int32_t m_viewWeaponAnimatedGameObjectIndex = 0;
+    //int32_t m_characterModelAnimatedGameObjectIndex = 0;
+    //int32_t m_viewWeaponAnimatedGameObjectIndex = 0;
     int32_t m_viewportIndex = 0;
     Camera m_camera;
     InputType m_inputType = KEYBOARD_AND_MOUSE;
@@ -232,19 +230,30 @@ private:
         float GetWeaponAudioFrequency();
 
         void NextWeapon();
-        void UpdateMeleeLogic();
-        void UpdateGunLogic();
-        void UpdateShotgunGunLogic();
+        void UpdateMeleeLogic(float deltaTime);
+        void UpdateGunLogic(float deltaTime);
+        void UpdateShotgunGunLogic(float deltaTime);
 
         WeaponType GetCurrentWeaponType();
         WeaponAction GetCurrentWeaponAction();
 
+        // Melee
         void FireMelee();
         bool CanFireMelee();
         
+        // Gun
         void FireGun();
+        void ReloadGun();
+        void EnterADS();
+        void LeaveADS();
+        void UpdateGunReloadLogic();
+        void UpdateSlideLogic();
+        void UpdateADSLogic(float deltaTime);
         bool CanFireGun();
-
+        bool CanReloadGun();
+        bool CanEnterADS();
+        bool CanLeaveADS();
+        bool IsInADS();
 
         // Shotgun
         void FireShotgun(); 
@@ -285,6 +294,9 @@ private:
         float m_weaponSwayY = 0;
 
     private:
+
+        AnimatedGameObject m_viewWeaponAnimatedGameObject;
+        AnimatedGameObject m_characterModelAnimatedGameObject;
         SpriteSheetObject m_muzzleFlash;
         PxController* m_characterController = NULL;
 

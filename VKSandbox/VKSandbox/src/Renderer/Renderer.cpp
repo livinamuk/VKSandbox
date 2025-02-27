@@ -1,9 +1,16 @@
 #include "Renderer.h"
-#include "../API/OpenGL/Renderer/GL_renderer.h"
-#include "../API/Vulkan/Renderer/VK_renderer.h"
-#include "../BackEnd/BackEnd.h"
+#include "API/OpenGL/Renderer/GL_renderer.h"
+#include "API/Vulkan/Renderer/VK_renderer.h"
+#include "BackEnd/BackEnd.h"
+#include "Editor/Editor.h"
 
 namespace Renderer {
+
+    struct RendererSettingsSet {
+        RendererSettings game;
+        RendererSettings heightMapEditor;
+        RendererSettings sectorEditor;
+    } g_rendererSettingsSet;
 
     DebugLineRenderMode g_debugLineRenderMode = DebugLineRenderMode::SHOW_NO_LINES;
 
@@ -110,5 +117,22 @@ namespace Renderer {
 
     DebugLineRenderMode GetDebugLineRenderMode() {
         return g_debugLineRenderMode;
+    }
+
+    RendererSettings& GetCurrentRendererSettings() {
+        if (Editor::IsEditorOpen()) {
+            switch (Editor::GetEditorMode()) {
+                case EditorMode::HEIGHTMAP_EDITOR: return g_rendererSettingsSet.heightMapEditor;
+                case EditorMode::SECTOR_EDITOR:    return g_rendererSettingsSet.sectorEditor;
+            }
+        }
+        return g_rendererSettingsSet.game;
+    }
+
+    void NextRendererOverrideState() {
+        RendererSettings& rendererSettings = GetCurrentRendererSettings();
+        int i = static_cast<int>(rendererSettings.rendererOverrideState);
+        i = (i + 1) % static_cast<int>(RendererOverrideState::STATE_COUNT);
+        rendererSettings.rendererOverrideState = static_cast<RendererOverrideState>(i);
     }
 }

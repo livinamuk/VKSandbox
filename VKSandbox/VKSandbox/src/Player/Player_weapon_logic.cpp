@@ -9,7 +9,7 @@
 #include "World/World.h"
 // GET ME OUT OF HERE
 
-void Player::UpdateWeaponLogic() {
+void Player::UpdateWeaponLogic(float deltaTime) {
     if (!HasControl()) return;
 
     if (PressedNextWeapon()) {
@@ -24,33 +24,56 @@ void Player::UpdateWeaponLogic() {
     if (!weaponInfo) return;
 
     switch (GetCurrentWeaponType()) {
-    case WeaponType::MELEE:     UpdateMeleeLogic();      break;
-    case WeaponType::PISTOL:    UpdateGunLogic();        break;
-    case WeaponType::AUTOMATIC: UpdateGunLogic();        break;
-    case WeaponType::SHOTGUN:   UpdateShotgunGunLogic(); break;
+    case WeaponType::MELEE:     UpdateMeleeLogic(deltaTime);        break;
+    case WeaponType::PISTOL:    UpdateGunLogic(deltaTime);          break;
+    case WeaponType::AUTOMATIC: UpdateGunLogic(deltaTime);          break;
+    case WeaponType::SHOTGUN:   UpdateShotgunGunLogic(deltaTime);   break;
     }
 
     // Need to initiate draw animation?
     if (GetCurrentWeaponAction() == WeaponAction::DRAW_BEGIN) {
 
-        // Shotgun may need pump
+        // Drawing a shotgun when it needs a pump
         if (GetCurrentWeaponType() == WeaponType::SHOTGUN && !IsShellInShotgunChamber() && weaponState->ammoInMag > 0) {
-            viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunDrawPump, AnimationPlaybackParams::GetDefaultPararms());
+            viewWeapon->PlayAnimation(weaponInfo->animationNames.shotgunDrawPump, weaponInfo->animationSpeeds.shotgunDrawPump);
             weaponState->shotgunAwaitingPumpAudio = true;
             weaponState->shotgunRequiresPump = true;
             m_weaponAction = DRAWING_WITH_SHOTGUN_PUMP;
         }
-        // Initiate regular draw
+        // First draw
+        else if (weaponState->awaitingDrawFirst && weaponInfo->animationNames.drawFirst != "") {
+            viewWeapon->PlayAnimation(weaponInfo->animationNames.drawFirst, weaponInfo->animationSpeeds.drawFirst);
+            weaponState->awaitingDrawFirst = false;
+            m_weaponAction = DRAWING_FIRST;
+        }
+        // Regular draw
         else {
-            viewWeapon->PlayAnimation(weaponInfo->animationNames.draw, AnimationPlaybackParams::GetDefaultPararms());
+            viewWeapon->PlayAnimation(weaponInfo->animationNames.draw, weaponInfo->animationSpeeds.draw);
             m_weaponAction = DRAWING;
         }
     }
 
-    // Finished drawing? Return to idle
+    // Finished ADS in? Return to ADS idle
+    if (GetWeaponAction() == WeaponAction::ADS_IN && viewWeapon->AnimationByNameIsComplete(weaponInfo->animationNames.adsIn) ||
+        GetWeaponAction() == WeaponAction::ADS_FIRE && ViewModelAnimationsCompleted()) {
+        m_weaponAction = WeaponAction::ADS_IDLE;
+    }
+
+    // Finished drawing weapon? Return to idle
     if (GetCurrentWeaponAction() == WeaponAction::DRAWING && viewWeapon->AnimationByNameIsComplete(weaponInfo->animationNames.draw) ||
+        GetCurrentWeaponAction() == WeaponAction::DRAWING_FIRST && viewWeapon->AnimationByNameIsComplete(weaponInfo->animationNames.drawFirst) ||
         GetCurrentWeaponAction() == WeaponAction::DRAWING_WITH_SHOTGUN_PUMP && viewWeapon->AnimationByNameIsComplete(weaponInfo->animationNames.shotgunDrawPump)) {
         m_weaponAction = WeaponAction::IDLE;
+    }
+
+    // In ADS idle?
+    if (GetCurrentWeaponAction() == WeaponAction::ADS_IDLE) {
+        if (IsMoving()) {
+            viewWeapon->PlayAndLoopAnimation(weaponInfo->animationNames.adsWalk, weaponInfo->animationSpeeds.adsWalk);
+        }
+        else {
+            viewWeapon->PlayAndLoopAnimation(weaponInfo->animationNames.adsIdle, weaponInfo->animationSpeeds.adsIdle);
+        }
     }
 
     // In idle? Then play idle or walk if moving
@@ -68,9 +91,9 @@ void Player::UpdateWeaponLogic() {
 void Player::GiveDefaultLoadout() {
     GiveWeapon("Knife");
     GiveWeapon("SPAS");
-    //GiveWeapon("Glock");
+    GiveWeapon("Glock");
     GiveAmmo("Shotgun", 80); 
-    //GiveAmmo("Glock", 200);
+    GiveAmmo("Glock", 200);
 }
 
 void Player::NextWeapon() {
@@ -109,13 +132,6 @@ void Player::SwitchWeapon(const std::string& name, WeaponAction weaponAction) {
     // Is it gold?
     weaponInfo->isGold ? viewWeapon->MakeGold() : viewWeapon->MakeNotGold();
 
-    // Set animation
-    if (weaponAction == SPAWNING) {
-        //    viewWeaponAnimatedGameObject->PlayAnimation(weaponInfo->animationNames.spawn, 1.0f);
-    }
-    if (weaponAction == DRAW_BEGIN) {
-        //    viewWeaponAnimatedGameObject->PlayAnimation(weaponInfo->animationNames.draw, 1.0f);
-    }
     // Set materials
     for (auto& it : weaponInfo->meshMaterials) {
         viewWeapon->SetMeshMaterialByMeshName(it.first, it.second);
@@ -141,6 +157,10 @@ WeaponType Player::GetCurrentWeaponType() {
 }
 
 WeaponAction Player::GetCurrentWeaponAction() {
+    return m_weaponAction;
+}
+
+WeaponAction& Player::GetWeaponAction() {
     return m_weaponAction;
 }
 
@@ -273,4 +293,36 @@ void Player::SpawnCasing(AmmoInfo* ammoInfo, bool alternateAmmo) {
     else {
         std::cout << "Player::SpawnCasing(AmmoInfo* ammoInfo) failed to spawn a casing coz invalid casing model name in weapon info\n";
     }
+}
+
+void Player::UpdateWeaponSlide() {
+    AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
+    WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
+    WeaponState* weaponState = GetCurrentWeaponState();
+    if (weaponState->requiresSlideOffset) {
+
+        AnimationLayer& animationLayer = viewWeapon->GetAnimationLayer();
+        std::string& boneName = weaponInfo->pistolSlideBoneName;
+        int boneIndex = viewWeapon->GetBoneIndex(boneName);
+
+        if (boneIndex == -1 || animationLayer.m_globalBlendedNodeTransforms.empty()) {
+            std::cout << "Player::UpdateWeaponSlide() failed: bone name '" << boneName << "' not found!\n";
+        }
+        else {
+            std::cout << "found bone!\n";
+        }
+
+      
+        //  m_globalNodeTransforms
+        //
+        //  for (int j = 0; j < viewWeaponAnimatedGameObject->GetAnimatedTransformCount(); j++) {
+        //      if (viewWeaponAnimatedGameObject->_animatedTransforms.names[j] == weaponInfo->pistolSlideBoneName) {
+        //          auto& boneMatrix = viewWeaponAnimatedGameObject->_animatedTransforms.local[j];
+        //          Transform newTransform;
+        //          newTransform.position.z = weaponInfo->pistolSlideOffset;
+        //          boneMatrix = boneMatrix * newTransform.to_mat4();
+        //      }
+        //  }
+    }
+
 }

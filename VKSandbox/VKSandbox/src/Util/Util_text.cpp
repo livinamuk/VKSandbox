@@ -28,6 +28,10 @@ namespace Util {
         return b ? "TRUE" : "FALSE";
     }
 
+    std::string Vec2ToString(glm::vec2 v) {
+        return std::format("({:.2f}, {:.2f})", v.x, v.y);
+    }
+
     std::string Vec3ToString(glm::vec3 v) {
         return std::format("({:.2f}, {:.2f}, {:.2f})", v.x, v.y, v.z);
     }
@@ -50,37 +54,37 @@ namespace Util {
 
     std::string ViewportModeToString(const ShadingMode& viewportMode) {
         switch (viewportMode) {
-        case ShadingMode::SHADED:            return "SHADED";
-        case ShadingMode::WIREFRAME:         return "WIREFRAME";
-        case ShadingMode::WIREFRAME_OVERLAY: return "WIREFRAME_OVERLAY";
-        default:                              return "UNDEFINED";
+            case ShadingMode::SHADED:            return "SHADED";
+            case ShadingMode::WIREFRAME:         return "WIREFRAME";
+            case ShadingMode::WIREFRAME_OVERLAY: return "WIREFRAME_OVERLAY";
+            default:                              return "UNDEFINED";
         }
     }
 
     std::string CameraViewToString(const CameraView& cameraView) {
         switch (cameraView) {
-        case CameraView::PERSPECTIVE:   return "PERSPECTIVE";
-        case CameraView::ORTHO:         return "ORTHOGRAPHIC";
-        case CameraView::FRONT:         return "FRONT";
-        case CameraView::BACK:          return "BACK";
-        case CameraView::TOP:           return "TOP";
-        case CameraView::BOTTOM:        return "BOTTOM";
-        case CameraView::LEFT:          return "LEFT";
-        case CameraView::RIGHT:         return "RIGHT";
-        default:                        return "UNDEFINED"; 
+            case CameraView::PERSPECTIVE:   return "PERSPECTIVE";
+            case CameraView::ORTHO:         return "ORTHOGRAPHIC";
+            case CameraView::FRONT:         return "FRONT";
+            case CameraView::BACK:          return "BACK";
+            case CameraView::TOP:           return "TOP";
+            case CameraView::BOTTOM:        return "BOTTOM";
+            case CameraView::LEFT:          return "LEFT";
+            case CameraView::RIGHT:         return "RIGHT";
+            default:                        return "UNDEFINED";
         }
     }
 
     std::string EditorStateToString(const EditorState& editorState) {
         switch (editorState) {
-        case EditorState::IDLE:                             return "IDLE";
-        case EditorState::RESIZING_HORIZONTAL:              return "RESIZING_HORIZONTAL";
-        case EditorState::RESIZING_VERTICAL:                return "RESIZING_VERTICAL";
-        case EditorState::RESIZING_HORIZONTAL_VERTICAL:     return "RESIZING_HORIZONTAL_VERTICAL";
-        case EditorState::GIZMO_TRANSLATING:                return "GIZMO_TRANSLATING";
-        case EditorState::GIZMO_SCALING:                    return "GIZMO_SCALING";
-        case EditorState::GIZMO_ROTATING:                   return "GIZMO_ROTATING";
-        case EditorState::DRAGGING_SELECT_RECT:             return "DRAGGING_SELECT_RECT";
+            case EditorState::IDLE:                             return "IDLE";
+            case EditorState::RESIZING_HORIZONTAL:              return "RESIZING_HORIZONTAL";
+            case EditorState::RESIZING_VERTICAL:                return "RESIZING_VERTICAL";
+            case EditorState::RESIZING_HORIZONTAL_VERTICAL:     return "RESIZING_HORIZONTAL_VERTICAL";
+            case EditorState::GIZMO_TRANSLATING:                return "GIZMO_TRANSLATING";
+            case EditorState::GIZMO_SCALING:                    return "GIZMO_SCALING";
+            case EditorState::GIZMO_ROTATING:                   return "GIZMO_ROTATING";
+            case EditorState::DRAGGING_SELECT_RECT:             return "DRAGGING_SELECT_RECT";
         default:                                            return "UNDEFINED";
         }
     }
@@ -93,48 +97,45 @@ namespace Util {
 
     std::string WeaponActionToString(const WeaponAction& weaponAction) {
         switch (weaponAction) {
-        case WeaponAction::IDLE:                          return "IDLE";
-        case WeaponAction::FIRE:                          return "FIRE";
-        case WeaponAction::RELOAD:                        return "RELOAD";
-        case WeaponAction::RELOAD_FROM_EMPTY:             return "RELOAD_FROM_EMPTY";
-        case WeaponAction::DRAW_BEGIN:                    return "DRAW_BEGIN";
-        case WeaponAction::DRAWING:                       return "DRAWING";
-        case WeaponAction::DRAWING_WITH_SHOTGUN_PUMP:     return "DRAWING_WITH_SHOTGUN_PUMP";
-        case WeaponAction::SPAWNING:                      return "SPAWNING";
-        case WeaponAction::SHOTGUN_RELOAD_BEGIN:          return "SHOTGUN_RELOAD_BEGIN";
-        case WeaponAction::SHOTGUN_RELOAD_SINGLE_SHELL:   return "SHOTGUN_RELOAD_SINGLE_SHELL";
-        case WeaponAction::SHOTGUN_RELOAD_DOUBLE_SHELL:   return "SHOTGUN_RELOAD_DOUBLE_SHELL";
-        case WeaponAction::SHOTGUN_RELOAD_END:            return "SHOTGUN_RELOAD_END";
-        case WeaponAction::SHOTGUN_RELOAD_END_WITH_PUMP:  return "SHOTGUN_RELOAD_END_WITH_PUMP";
-            //case WeaponAction::RELOAD_REVOLVER_BEGIN:         return "RELOAD_REVOLVER_BEGIN";
-            //case WeaponAction::RELOAD_REVOLVER_LOOP:          return "RELOAD_REVOLVER_LOOP";
-            //case WeaponAction::RELOAD_REVOLVER_END:           return "RELOAD_REVOLVER_END";
-        case WeaponAction::ADS_IN:                        return "ADS_IN";
-        case WeaponAction::ADS_OUT:                       return "ADS_OUT";
-        case WeaponAction::ADS_IDLE:                      return "ADS_IDLE";
-        case WeaponAction::ADS_FIRE:                      return "ADS_FIRE";
-        case WeaponAction::MELEE:                         return "MELEE";
-        case WeaponAction::TOGGLING_AUTO:                 return "TOGGLING_AUTO";
-        case WeaponAction::DRY_FIRE:                      return "DRY_FIRE";
-        default:                                          return "UNDEFINED";
+            case WeaponAction::IDLE:                          return "IDLE";
+            case WeaponAction::FIRE:                          return "FIRE";
+            case WeaponAction::RELOAD:                        return "RELOAD";
+            case WeaponAction::RELOAD_FROM_EMPTY:             return "RELOAD_FROM_EMPTY";
+            case WeaponAction::DRAW_BEGIN:                    return "DRAW_BEGIN";
+            case WeaponAction::DRAWING:                       return "DRAWING";
+            case WeaponAction::DRAWING_FIRST:                 return "DRAWING_FIRST";
+            case WeaponAction::DRAWING_WITH_SHOTGUN_PUMP:     return "DRAWING_WITH_SHOTGUN_PUMP";
+            case WeaponAction::SPAWNING:                      return "SPAWNING";
+            case WeaponAction::SHOTGUN_RELOAD_BEGIN:          return "SHOTGUN_RELOAD_BEGIN";
+            case WeaponAction::SHOTGUN_RELOAD_SINGLE_SHELL:   return "SHOTGUN_RELOAD_SINGLE_SHELL";
+            case WeaponAction::SHOTGUN_RELOAD_DOUBLE_SHELL:   return "SHOTGUN_RELOAD_DOUBLE_SHELL";
+            case WeaponAction::SHOTGUN_RELOAD_END:            return "SHOTGUN_RELOAD_END";
+            case WeaponAction::SHOTGUN_RELOAD_END_WITH_PUMP:  return "SHOTGUN_RELOAD_END_WITH_PUMP";
+            case WeaponAction::ADS_IN:                        return "ADS_IN";
+            case WeaponAction::ADS_OUT:                       return "ADS_OUT";
+            case WeaponAction::ADS_IDLE:                      return "ADS_IDLE";
+            case WeaponAction::ADS_FIRE:                      return "ADS_FIRE";
+            case WeaponAction::MELEE:                         return "MELEE";
+            case WeaponAction::TOGGLING_AUTO:                 return "TOGGLING_AUTO";
+            case WeaponAction::DRY_FIRE:                      return "DRY_FIRE";
+            default:                                          return "UNDEFINED";
         }
     }
 
     std::string ImageDataTypeToString(const ImageDataType& imageDataType) {
         switch (imageDataType) {
-        case ImageDataType::UNCOMPRESSED: return "UNCOMPRESSED";
-        case ImageDataType::COMPRESSED:   return "COMPRESSED";
-        case ImageDataType::EXR:          return "EXR";
-        default:                          return "UNDEFINED";
+            case ImageDataType::UNCOMPRESSED: return "UNCOMPRESSED";
+            case ImageDataType::COMPRESSED:   return "COMPRESSED";
+            case ImageDataType::EXR:          return "EXR";
+            default:                          return "UNDEFINED";
         }
     }
     std::string EditorModeToString(const EditorMode& editorMode) {
         switch (editorMode) {
-        case EditorMode::EDITOR_IS_CLOSED:  return "EDITOR_IS_CLOSED";
-        case EditorMode::SECTOR_EDITOR:     return "SECTOR_EDITOR";
-        case EditorMode::HEIGHTMAP_EDITOR:  return "HEIGHTMAP_EDITOR";
-        case EditorMode::WEAPON_EDITOR:     return "WEAPON_EDITOR";
-        default:                            return "UNDEFINED";
+            case EditorMode::SECTOR_EDITOR:     return "SECTOR_EDITOR";
+            case EditorMode::HEIGHTMAP_EDITOR:  return "HEIGHTMAP_EDITOR";
+            case EditorMode::WEAPON_EDITOR:     return "WEAPON_EDITOR";
+            default:                            return "UNDEFINED";
         }
     }
 }

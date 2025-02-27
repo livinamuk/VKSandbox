@@ -94,7 +94,7 @@ namespace Gizmo {
     }
 
     void Update() {
-        if (!Editor::IsOpen()) return;
+        if (!Editor::IsEditorOpen()) return;
         UpdateLocalAxes();
         UpdateInput();
         UpdateRenderItems();
@@ -337,7 +337,7 @@ namespace Gizmo {
 
     void UpdateRenderItems() {
 
-        if (!Editor::IsOpen()) return;
+        if (!Editor::IsEditorOpen()) return;
 
         for (int i = 0; i < 4; i++) {
             g_renderItems[i].clear();

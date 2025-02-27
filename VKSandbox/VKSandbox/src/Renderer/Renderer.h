@@ -6,6 +6,7 @@ namespace Renderer {
     void RenderLoadingScreen();
     void RenderGame();
     void HotloadShaders();
+    void NextRendererOverrideState();
     void NextDebugLineRenderMode();
 
     void DrawPoint(glm::vec3 position, glm::vec3 color);
@@ -14,4 +15,5 @@ namespace Renderer {
     void DrawAABB(AABB& aabb, glm::vec3 color, glm::mat4 worldTransform);
 
     DebugLineRenderMode GetDebugLineRenderMode();
+    RendererSettings& GetCurrentRendererSettings();
 }

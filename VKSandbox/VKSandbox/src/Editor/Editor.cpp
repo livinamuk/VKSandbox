@@ -12,9 +12,8 @@
 
 namespace Editor {
 
-    EditorMode g_editorMode = EditorMode::EDITOR_IS_CLOSED;
+    EditorMode g_editorMode = EditorMode::SECTOR_EDITOR;
     EditorMesh g_editorMesh;
-    EditorLightingSettings g_editorLightingSettings;
     int g_activeViewportIndex = 3;
     bool g_isOpen = false;
     bool g_isOrthographic[4];
@@ -29,7 +28,6 @@ namespace Editor {
     EditorObjectType g_hoveredObjectType = EditorObjectType::NONE;
     ShadingMode g_shadingModes[4];
     EditorViewportSplitMode g_editorViewportSplitMode = EditorViewportSplitMode::SINGLE;
-    //CameraView g_cameraViews[4];
     
     float g_orthoCameraDistances[4];
     EditorState g_editorState;
@@ -42,10 +40,6 @@ namespace Editor {
         }
         ResetViewports();
         ResetCameras();
-
-
-        g_editorLightingSettings.lightingEnabled = true;
-        g_editorLightingSettings.grassEnabled = true;
     }
 
     void ResetViewports() {
@@ -87,32 +81,38 @@ namespace Editor {
 
     void Update(float deltaTime) {
 
-        if (Input::KeyPressed(HELL_KEY_TAB)) {
-
-            if (!Editor::IsOpen()) {
-
-                // Show editor select menu
-                if (!IsEditorSelectMenuVisible()) {
-                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
-                    ShowEditorSelectMenu();
+        // Toggle editor select menu
+        if (Input::KeyPressed(HELL_KEY_F1)) {
+            Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+            if (!IsEditorSelectMenuVisible()) {
+                ShowEditorSelectMenu();
+                if (!Editor::IsEditorOpen()) {
                     Input::ShowCursor();
                     Input::CenterMouseCursor();
                 }
-                // Close editor select menu
-                else {
-                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
-                    CloseEditorSelectMenu();
+            }
+            else {
+                CloseEditorSelectMenu();
+                if (!Editor::IsEditorOpen()) {
                     Input::DisableCursor();
                 }
             }
-            // Close editor
-            else {
-                Audio::PlayAudio(AUDIO_SELECT, 1.0f);
-                Editor::Close();
-            }
         }
 
-        if (!IsOpen()) return;
+        // Toggle editor
+        if (Input::KeyPressed(HELL_KEY_TAB)) {
+            Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+            Editor::ToggleEditorOpenState();
+            CloseEditorSelectMenu();
+        }
+
+        if (IsEditorSelectMenuVisible()) {
+            ShowEditorSelectMenu();
+        }
+           
+        if (!IsEditorOpen()) {
+            return;
+        }
 
         //static bool runOnce = true;
         //if (runOnce) {
@@ -151,19 +151,31 @@ namespace Editor {
         }
     }
 
-    void OpenEditor(EditorMode mode) {
+    void OpenEditor() {
         Audio::PlayAudio("UI_Select.wav", 1.0f);
         Input::ShowCursor();
         Input::CenterMouseCursor();
         g_isOpen = true;
-        g_editorMode = mode;
     }
 
-    void Close() {
+    void CloseEditor() {
         Audio::PlayAudio("UI_Select.wav", 1.0f);
         Input::DisableCursor();
         g_isOpen = false;
-        g_editorMode = EditorMode::EDITOR_IS_CLOSED;
+    }
+
+    void ToggleEditorOpenState() {
+        g_isOpen = !g_isOpen;
+        if (g_isOpen) {
+            OpenEditor();
+        }
+        else {
+            CloseEditor();
+        }
+    }
+
+    void SetEditorMode(EditorMode editorMode) {
+        g_editorMode = editorMode;
     }
 
     void ShowEditorSelectMenu() {
@@ -192,8 +204,12 @@ namespace Editor {
         return 0;
     }
 
-    bool IsOpen() {
+    bool IsEditorOpen() {
         return g_isOpen;
+    }
+
+    bool IsEditorClosed() {
+        return !g_isOpen;
     }
 
     bool IsEditorSelectMenuVisible() {
@@ -252,11 +268,11 @@ namespace Editor {
 
     std::string EditorObjectTypeToString(const EditorObjectType& type) {
         switch (type) {
-        case EditorObjectType::NONE:        return "None";
-        case EditorObjectType::GAME_OBJECT: return "Game Object";
-        case EditorObjectType::DOOR:        return "Door";
-        case EditorObjectType::WINDOW:      return "Window";
-        case EditorObjectType::CSG:         return "CSG";
+        case EditorObjectType::NONE:        return "NONE";
+        case EditorObjectType::GAME_OBJECT: return "GAME_OBJECT";
+        case EditorObjectType::TREE:        return "TREE";
+        case EditorObjectType::LIGHT:       return "LIGHT";
+        case EditorObjectType::PICK_UP:     return "PICK_UP";
         default:                            return "Unknown";
         }
     }
@@ -333,10 +349,6 @@ namespace Editor {
 
     EditorMode& GetEditorMode() {
         return g_editorMode;
-    }
-
-    EditorLightingSettings& GetLightingSettings() {
-        return g_editorLightingSettings;
     }
 
     float GetVerticalDividerXPos() {

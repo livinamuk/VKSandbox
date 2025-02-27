@@ -1,13 +1,13 @@
 #include "Game.h"
 #include "HellTypes.h"
 
-
 #include "../Renderer/Renderer.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Backend/Backend.h"
 #include "Core/Audio.h"
+#include "Core/JSON.h"
 #include "Editor/Editor.h"
 #include "File/File.h"
 #include "Input/Input.h"
@@ -47,9 +47,8 @@ namespace Game {
 
     void Create() {
 
-
-        //Scene::Init();
-        //Scene::CreateGameObjects();
+        SectorCreateInfo sectorCreateInfo = JSON::LoadSector("res/sectors/TestSector.json");
+        World::LoadSingleSector(sectorCreateInfo);
 
         // Create players
         AddLocalPlayer(glm::vec3(12.82, -4.5f, 18.27f), glm::vec3(-0.13f, -1.46f, 0.0f));
@@ -70,15 +69,6 @@ namespace Game {
     }
 
     void Update() {
-
-        if (Input::KeyPressed(HELL_KEY_SPACE)) {
-            World::CreateHardCodedTestSector();
-        }            
-      
-        if (Input::KeyPressed(HELL_KEY_BACKSPACE)) {
-            SectorData sectorData = World::LoadSectorData("res/sectors/TestSector.json");
-            World::LoadSingleSector(sectorData);
-        }
 
         static double lastTime = glfwGetTime();
         double currentTime = glfwGetTime();

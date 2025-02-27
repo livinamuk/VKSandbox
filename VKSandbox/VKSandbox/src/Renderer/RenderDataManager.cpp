@@ -1,10 +1,11 @@
 #include "RenderDataManager.h"
 #include "HellDefines.h"
-#include "../Camera/Frustum.h"
-#include "../Core/Game.h"
-#include "../Config/Config.h"
-#include "../Editor/Editor.h"
-#include "../Viewport/ViewportManager.h"
+#include "Camera/Frustum.h"
+#include "Core/Game.h"
+#include "Config/Config.h"
+#include "Editor/Editor.h"
+#include "Renderer/Renderer.h"
+#include "Viewport/ViewportManager.h"
 #include <span>
 #include <unordered_map>
 
@@ -15,9 +16,10 @@
 namespace RenderDataManager {
     DrawCommandsSet g_drawCommandsSet;
     RendererData g_rendererData;
-    std::vector<ViewportData> g_viewportData;
-    std::vector<RenderItem> g_instanceData;
+    std::vector<AnimatedGameObject*> g_animatedGameObjectsToSkin;
     std::vector<GPULight> g_gpuLightData;
+    std::vector<RenderItem> g_instanceData;
+    std::vector<ViewportData> g_viewportData;
     uint32_t g_baseSkinnedVertex;
 
     void UpdateViewportFrustums();
@@ -29,8 +31,13 @@ namespace RenderDataManager {
     void CreateDrawCommandsSkinned(DrawCommands& drawCommands, std::vector<RenderItem>& renderItems);
     void CreateMultiDrawIndirectCommands(std::vector<DrawIndexedIndirectCommand>& commands, std::span<RenderItem> renderItems, int playerIndex, int instanceOffset);
     void CreateMultiDrawIndirectCommandsSkinned(std::vector<DrawIndexedIndirectCommand>& commands, std::span<RenderItem> renderItems, int playerIndex, int instanceOffset);
+    
     int EncodeBaseInstance(int playerIndex, int instanceOffset);
     void DecodeBaseInstance(int baseInstance, int& playerIndex, int& instanceOffset);
+   
+    void BeginFrame() {
+        g_animatedGameObjectsToSkin.clear();
+    }
 
     void Update() {
         UpdateViewportData();
@@ -49,7 +56,7 @@ namespace RenderDataManager {
 
 
             glm::mat4 viewMatrix = glm::mat4(1);
-            if (Editor::IsOpen()) {
+            if (Editor::IsEditorOpen()) {
                 viewMatrix = Editor::GetViewportViewMatrix(i);
             }
             else {
@@ -82,7 +89,7 @@ namespace RenderDataManager {
             g_viewportData[i].frustumPlane5 = viewport->GetFrustum().GetPlane(5);
 
             // Flashlight
-            if (Editor::IsOpen()) {
+            if (Editor::IsEditorOpen()) {
                 g_viewportData[i].flashlightModifer = 0;
                 g_viewportData[i].flashlightProjectionView = glm::mat4(1);
                 g_viewportData[i].flashlightDir = glm::vec4(0.0f);
@@ -123,6 +130,7 @@ namespace RenderDataManager {
     }
 
     void UpdateRendererData() {
+        const RendererSettings& rendererSettings = Renderer::GetCurrentRendererSettings();
         const Resolutions& resolutions = Config::GetResolutions();
         g_rendererData.nearPlane = NEAR_PLANE;
         g_rendererData.farPlane = FAR_PLANE;
@@ -132,6 +140,7 @@ namespace RenderDataManager {
         g_rendererData.hairBufferHeight = resolutions.hair.y;
         g_rendererData.splitscreenMode = (int)Game::GetSplitscreenMode();
         g_rendererData.time = Game::GetTotalTime();
+        g_rendererData.rendererOverrideState = (int)rendererSettings.rendererOverrideState;
     }
 
     void SortRenderItems(std::vector<RenderItem>& renderItems) {
@@ -296,6 +305,10 @@ namespace RenderDataManager {
         instanceOffset = baseInstance & ((1 << VIEWPORT_INDEX_SHIFT) - 1);
     }
 
+    void SubmitAnimatedGameObjectForSkinning(AnimatedGameObject* animatedGameObject) {
+        g_animatedGameObjectsToSkin.push_back(animatedGameObject);
+    }
+
     void ResetBaseSkinnedVertex() {
         g_baseSkinnedVertex = 0;
     }
@@ -305,6 +318,10 @@ namespace RenderDataManager {
 
     uint32_t GetBaseSkinnedVertex() {
         return g_baseSkinnedVertex;
+    }
+
+    std::vector<AnimatedGameObject*>& GetAnimatedGameObjectToSkin() {
+        return g_animatedGameObjectsToSkin;
     }
 
     const RendererData& GetRendererData() {

@@ -54,6 +54,10 @@ namespace OpenGLRenderer {
         uiFrameBuffer->ClearAttachment("Color", 0.0f, 0.0f, 0.0f, 1.0f);
         uiFrameBuffer->DrawBuffer("Color");
 
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, BackEnd::GetCurrentWindowWidth(), BackEnd::GetCurrentWindowHeight());
+
         ImGuiStyle& style = ImGui::GetStyle();
         style.FramePadding = ImVec2(10.0f, 10.0f);
         style.ItemSpacing = ImVec2(10.0f, 10.0f);
@@ -79,26 +83,26 @@ namespace OpenGLRenderer {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glEnable(GL_BLEND);
-
-        // Create QUAD if it don't exist
-        if (g_quadVAO2 == 0) {
-            g_quadVAO2 = OpenGLRenderer::CreateQuadVAO();
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glBindSampler(0, g_nearestSampler2);
-        glBindSampler(0, g_linearSampler2);
-        glViewport(0, 0, BackEnd::GetCurrentWindowWidth(), BackEnd::GetCurrentWindowHeight());
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, uiFrameBuffer->GetColorAttachmentHandleByName("Color"));
-        glBindVertexArray(g_quadVAO2);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-        // Cleanup
-        glDisable(GL_BLEND);
-        glBindSampler(0, 0);
+       //glEnable(GL_BLEND);
+       //
+       //// Create QUAD if it don't exist
+       //if (g_quadVAO2 == 0) {
+       //    g_quadVAO2 = OpenGLRenderer::CreateQuadVAO();
+       //}
+       //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+       //glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+       //
+       //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+       //glBindSampler(0, g_nearestSampler2);
+       ////glBindSampler(0, g_linearSampler2);
+       //glViewport(0, 0, BackEnd::GetCurrentWindowWidth(), BackEnd::GetCurrentWindowHeight());
+       //glActiveTexture(GL_TEXTURE0);
+       //glBindTexture(GL_TEXTURE_2D, uiFrameBuffer->GetColorAttachmentHandleByName("Color"));
+       //glBindVertexArray(g_quadVAO2);
+       //glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+       //
+       //// Cleanup
+       //glDisable(GL_BLEND);
+       //glBindSampler(0, 0);
     }
 }

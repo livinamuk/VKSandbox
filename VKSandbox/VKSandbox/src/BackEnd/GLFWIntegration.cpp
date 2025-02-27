@@ -32,7 +32,7 @@ namespace GLFWIntegration {
     int g_currentCursor = GLFW_ARROW_CURSOR;
 
     void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-    void window_focus_callback(GLFWwindow* window, int focused);
+    //void window_focus_callback(GLFWwindow* window, int focused);
 
     bool Init(API api, int windowWidth, int windowHeight, WindowedMode windowedMode) {
         glfwInit();
@@ -84,7 +84,7 @@ namespace GLFWIntegration {
             return false;
         }
         glfwSetFramebufferSizeCallback(g_window, framebuffer_size_callback);
-        glfwSetWindowFocusCallback(g_window, window_focus_callback);
+        //glfwSetWindowFocusCallback(g_window, window_focus_callback);
 
         g_cursorsPtrs[GLFW_ARROW_CURSOR] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
         g_cursorsPtrs[GLFW_IBEAM_CURSOR] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
@@ -120,6 +120,10 @@ namespace GLFWIntegration {
 
     void BeginFrame(API api) {
         glfwPollEvents();
+
+        // Query window focus
+        int focused = glfwGetWindowAttrib(g_window, GLFW_FOCUSED);
+        g_windowHasFocus = (focused != 0);
     }
 
     void EndFrame(API api) {
@@ -244,12 +248,12 @@ namespace GLFWIntegration {
         // Nothing as of yet
     }
 
-    void window_focus_callback(GLFWwindow* /*window*/, int focused) {
-        if (focused) {
-            g_windowHasFocus = true;
-        }
-        else {
-            g_windowHasFocus = false;
-        }
-    }
+    //void window_focus_callback(GLFWwindow* /*window*/, int focused) {
+    //    if (focused) {
+    //        g_windowHasFocus = true;
+    //    }
+    //    else {
+    //        g_windowHasFocus = false;
+    //    }
+    //}
 }

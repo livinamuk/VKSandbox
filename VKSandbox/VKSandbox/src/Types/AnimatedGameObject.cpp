@@ -31,7 +31,7 @@ void AnimatedGameObject::UpdateRenderItems() {
             renderItem.baseSkinnedVertex = RenderDataManager::GetBaseSkinnedVertex() + mesh->baseVertexLocal;
         }
     }
-    RenderDataManager::IncrementBaseSkinnedVertex(m_skinnedModel->m_vertexCount);
+    RenderDataManager::IncrementBaseSkinnedVertex(m_skinnedModel->GetVertexCount());
 }
 
 std::vector<RenderItem>& AnimatedGameObject::GetRenderItems() {
@@ -48,7 +48,7 @@ const int32_t AnimatedGameObject::GetPlayerIndex() {
 
 const uint32_t AnimatedGameObject::GetVerteXCount() {
     if (m_skinnedModel) {
-        return m_skinnedModel->m_vertexCount;
+        return m_skinnedModel->GetVertexCount();
     }
     else {
         return 0;
@@ -63,7 +63,6 @@ void AnimatedGameObject::Update(float deltaTime) {
     if (!m_skinnedModel) return;
 
     if (m_animationMode == AnimationMode::BINDPOSE && m_skinnedModel) {
-        //m_skinnedModel->UpdateBoneTransformsFromBindPose(m_animatedTransforms);
         m_animationLayer.ClearAllAnimationStates();
     }
 
@@ -76,38 +75,25 @@ void AnimatedGameObject::Update(float deltaTime) {
     m_blendFactor = glm::clamp(m_blendFactor, 0.0f, 1.0f);
     m_blendFactor = Util::SmoothStep(m_blendFactor);
 
-    //m_animationStateA.Update(m_skinnedModelIndex, deltaTime);
-    //m_animationStateB.Update(m_skinnedModelIndex, deltaTime);
-
     m_LocalBlendedBoneTransforms.clear();
     m_globalBlendedNodeTransforms.clear();
 
-    for (int i = 0; i < m_skinnedModel->m_NumBones; i++) {
+    for (int i = 0; i < m_skinnedModel->GetBoneCount(); i++) {
         m_LocalBlendedBoneTransforms.push_back(glm::mat4(1));
     }
-    // for (int i = 0; i < m_animationStateA.m_globalNodeTransforms.size(); i++) {
-   //     m_globalBlendedNodeTransforms.push_back(m_animationStateA.m_globalNodeTransforms[i].to_mat4());
-   // }
 
     for (int i = 0; i < m_animationLayer.m_globalBlendedNodeTransforms.size(); i++) {
         m_globalBlendedNodeTransforms.push_back(m_animationLayer.m_globalBlendedNodeTransforms[i]);
     }
 
-    /*
-    if (m_animationStateB.GetAnimationIndex() != -1) {
-        m_globalBlendedNodeTransforms.clear();
-        for (int i = 0; i < m_animationStateB.m_globalNodeTransforms.size(); i++) {
-            AnimatedTransform transform = Util::BlendTransforms(m_animationStateA.m_globalNodeTransforms[i], m_animationStateB.m_globalNodeTransforms[i], m_blendFactor);
-            m_globalBlendedNodeTransforms.push_back(transform.to_mat4());
-        }
-    }*/
-
+    // Clean this abomination up!
     for (int i = 0; i < m_skinnedModel->m_nodes.size(); i++) {
-        const char* NodeName = m_skinnedModel->m_nodes[i].m_name;
-        if (m_skinnedModel->m_BoneMapping.find(NodeName) != m_skinnedModel->m_BoneMapping.end()) {
-            unsigned int boneIndex = m_skinnedModel->m_BoneMapping[NodeName];
+        const std::string& nodeName = m_skinnedModel->m_nodes[i].name;
+        if (m_skinnedModel->m_boneMapping.find(nodeName) != m_skinnedModel->m_boneMapping.end()) {
+            unsigned int boneIndex = m_skinnedModel->m_boneMapping[nodeName];
             if (boneIndex >= 0 && boneIndex < m_globalBlendedNodeTransforms.size()) {
-                m_LocalBlendedBoneTransforms[boneIndex] = m_globalBlendedNodeTransforms[i] * m_skinnedModel->m_nodes[i].m_boneOffset;
+                glm::mat4 boneOffset = m_skinnedModel->m_boneOffsets[boneIndex];
+                m_LocalBlendedBoneTransforms[boneIndex] = m_globalBlendedNodeTransforms[i] * boneOffset;
             }
             else {
                 std::cout << "your animation shit is broken\n";
@@ -178,8 +164,8 @@ void AnimatedGameObject::SetAllMeshMaterials(const std::string& materialName) {
 
 glm::mat4 AnimatedGameObject::GetBindPoseByBoneName(const std::string& name) {
     for (int i = 0; i < m_skinnedModel->m_nodes.size(); i++) {
-        if (m_skinnedModel->m_nodes[i].m_name == name) {
-            return m_skinnedModel->m_nodes[i].m_inverseBindTransform;
+        if (m_skinnedModel->m_nodes[i].name == name) {
+            return m_skinnedModel->m_nodes[i].inverseBindTransform;
         }
     }
     std::cout << "GetBindPoseByBoneName() failed to find name " << name << "\n";
@@ -191,15 +177,42 @@ void AnimatedGameObject::SetAnimationModeToBindPose() {
     m_animationLayer.ClearAllAnimationStates();
 }
 
+void AnimatedGameObject::PlayAnimation(const std::string& animationName, float speed) {
+    AnimationPlaybackParams params = AnimationPlaybackParams::GetDefaultPararms();
+    params.animationSpeed = speed;
+    m_animationMode = AnimationMode::ANIMATION;
+    m_animationLayer.PlayAnimation(animationName, params);
+}
+
 void AnimatedGameObject::PlayAnimation(const std::string& animationName, const AnimationPlaybackParams& playbackParams) {
     m_animationMode = AnimationMode::ANIMATION;
     m_animationLayer.PlayAnimation(animationName, playbackParams);
+}
+
+void AnimatedGameObject::PlayAnimation(const std::vector<std::string>& animationNames, float speed) {
+    AnimationPlaybackParams params = AnimationPlaybackParams::GetDefaultPararms();
+    params.animationSpeed = speed;
+    int rand = std::rand() % animationNames.size();
+    m_animationLayer.PlayAnimation(animationNames[rand], params);
+}
+
+void AnimatedGameObject::PlayAnimation(const std::vector<std::string>& animationNames, const AnimationPlaybackParams& playbackParams) {
+    int rand = std::rand() % animationNames.size();
+    m_animationLayer.PlayAnimation(animationNames[rand], playbackParams);
 }
 
 void AnimatedGameObject::PlayAndLoopAnimation(const std::string& animationName, const AnimationPlaybackParams& playbackParams) {
     m_animationMode = AnimationMode::ANIMATION;
     m_animationLayer.PlayAndLoopAnimation(animationName, playbackParams);
 }
+
+void AnimatedGameObject::PlayAndLoopAnimation(const std::string& animationName, float speed) {
+    AnimationPlaybackParams params = AnimationPlaybackParams::GetDefaultPararms();
+    params.animationSpeed = speed;
+    m_animationMode = AnimationMode::ANIMATION;
+    m_animationLayer.PlayAndLoopAnimation(animationName, params);
+}
+
 
 std::vector<glm::mat4>& AnimatedGameObject::GetLocalBlendedBoneTransforms() {
     return m_LocalBlendedBoneTransforms;
@@ -257,7 +270,7 @@ void AnimatedGameObject::SetSkinnedModel(std::string name) {
         // Store bone indices
         m_boneMapping.clear();
         for (int i = 0; i < m_skinnedModel->m_nodes.size(); i++) {
-            m_boneMapping[m_skinnedModel->m_nodes[i].m_name] = i;
+            m_boneMapping[m_skinnedModel->m_nodes[i].name] = i;
         }
     }
     else {
@@ -327,7 +340,7 @@ void AnimatedGameObject::DisableDrawingForMeshByMeshName(const std::string& mesh
 void AnimatedGameObject::PrintBoneNames() {
     std::cout << m_skinnedModel->GetName() << "\n";
     for (int i = 0; i < m_skinnedModel->m_nodes.size(); i++) {
-        std::cout << "-" << i << " " << m_skinnedModel->m_nodes[i].m_name << "\n";
+        std::cout << "-" << i << " " << m_skinnedModel->m_nodes[i].name << "\n";
     }
 }
 
@@ -418,4 +431,9 @@ glm::mat4 AnimatedGameObject::GetBoneWorldMatrix(const std::string& boneName) {
 
 glm::vec3 AnimatedGameObject::GetBoneWorldPosition(const std::string& boneName) {
     return GetBoneWorldMatrix(boneName)[3];
+}
+
+
+void AnimatedGameObject::SubmitForSkinning() {
+    RenderDataManager::SubmitAnimatedGameObjectForSkinning(this);
 }

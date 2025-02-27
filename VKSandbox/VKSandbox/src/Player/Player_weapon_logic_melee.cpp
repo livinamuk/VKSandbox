@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "Core/Audio.h"
 
-void Player::UpdateMeleeLogic() {
+void Player::UpdateMeleeLogic(float deltaTime) {
     if (PressingFire() && CanFireMelee()) {
         FireMelee();
     }

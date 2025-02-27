@@ -3,7 +3,7 @@
 #include "Core/Game.h"
 #include "Input/Input.h"
 
-void Player::UpdateShotgunGunLogic() {
+void Player::UpdateShotgunGunLogic(float deltaTime) {
     if (PressingFire() && CanFireShotgun()) {
         FireShotgun();
     }

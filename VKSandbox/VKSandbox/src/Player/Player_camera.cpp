@@ -5,8 +5,6 @@
 #include "Input/InputMulti.h"
 #include <glm/gtc/noise.hpp> 
 
-#include "Renderer/Renderer.h"
-
 void Player::UpdateHeadBob(float deltaTime) {
     if (IsMoving()) {
         m_headBobTime += deltaTime;
@@ -48,7 +46,7 @@ void Player::UpdateBreatheBob(float deltaTime) {
 
 void Player::UpdateCamera(float deltaTime) {
     // Mouselook
-    if (!Editor::IsOpen() && m_controlEnabled) {
+    if (!Editor::IsEditorOpen() && m_controlEnabled) {
         float xOffset = (float)InputMulti::GetMouseXOffset(m_mouseIndex);
         float yOffset = (float)InputMulti::GetMouseYOffset(m_mouseIndex);
         m_camera.AddPitch(-yOffset * m_mouseSensitivity);
@@ -69,11 +67,11 @@ void Player::UpdateCamera(float deltaTime) {
 
     glm::mat4 cameraMatrix = viewWeapon->GetAnimatedTransformByBoneName("camera");
     glm::mat4 dmMaster = viewWeapon->GetAnimatedTransformByBoneName("Dm-Master");
-    glm::mat4 cameraBindMatrix;
+    glm::mat4 cameraBindMatrix = glm::mat4(1);
 
     for (int i = 0; i < model->m_nodes.size(); i++) {
-        if (Util::StrCmp(model->m_nodes[i].m_name, "camera")) {
-            cameraBindMatrix = model->m_nodes[i].m_inverseBindTransform;
+        if (model->m_nodes[i].name == "camera") {
+            cameraBindMatrix = model->m_nodes[i].inverseBindTransform;
         }
     }
     m_viewWeaponCameraMatrix = inverse(cameraBindMatrix) * cameraMatrix;

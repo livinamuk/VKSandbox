@@ -13,8 +13,8 @@ namespace HeightMapManager {
     void LoadHeightMapsFromDisk();
 
     void Init() {
-        AllocateMemory(16);
-        LoadHeightMapsFromDisk();
+        //AllocateMemory(16);
+        //LoadHeightMapsFromDisk();
     }
 
     void AllocateMemory(int heightmapCount) {
@@ -25,8 +25,6 @@ namespace HeightMapManager {
             // TODO
         }
     }
-
-    
 
     void LoadHeightMapsFromDisk() {
         std::cout << "\n";

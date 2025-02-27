@@ -107,6 +107,22 @@ namespace Editor {
                 }
                 Gizmo::SetEuler(glm::vec3(0.0f, 0.0f, 0.0f));
             }
+
+            if (GetSelectedObjectType() == EditorObjectType::PICK_UP) {
+                PickUp& pickUp = World::GetPickUps()[GetSelectedObjectIndex()];
+                if (!Gizmo::HasHover()) { // Prevents selection objects behind the gizmo
+                    Gizmo::SetPosition(pickUp.GetPosition());
+                }
+                Gizmo::SetEuler(glm::vec3(0.0f, 0.0f, 0.0f));
+            }
+
+            if (GetSelectedObjectType() == EditorObjectType::TREE) {
+                Tree& tree = World::GetTrees()[GetSelectedObjectIndex()];
+                if (!Gizmo::HasHover()) { // Prevents selection objects behind the gizmo
+                    Gizmo::SetPosition(tree.GetPosition());
+                }
+                Gizmo::SetEuler(glm::vec3(0.0f, 0.0f, 0.0f));
+            }
         }
     }
 
@@ -141,6 +157,20 @@ namespace Editor {
                 Light* light = World::GetLightByIndex(GetSelectedObjectIndex());
                 if (light) {
                     light->SetPosition(Gizmo::GetPosition());
+                }
+            }
+
+            if (GetSelectedObjectType() == EditorObjectType::PICK_UP) {
+                PickUp* pickUp = World::GetPickUpByIndex(GetSelectedObjectIndex());
+                if (pickUp) {
+                    pickUp->SetPosition(Gizmo::GetPosition());
+                }
+            }
+
+            if (GetSelectedObjectType() == EditorObjectType::TREE) {
+                Tree* tree = World::GetTreeByIndex(GetSelectedObjectIndex());
+                if (tree) {
+                    tree->SetPosition(Gizmo::GetPosition());
                 }
             }
         }

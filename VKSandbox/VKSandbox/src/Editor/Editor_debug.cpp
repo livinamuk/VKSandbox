@@ -10,7 +10,7 @@
 namespace Editor {
 
     void UpdateDebug() {
-        if (!IsOpen()) return;
+        if (!IsEditorOpen()) return;
 
         for (int i = 0; i < 4; i++) {
             const Viewport* viewport = ViewportManager::GetViewportByIndex(i);

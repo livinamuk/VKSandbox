@@ -116,6 +116,11 @@ namespace InputMulti {
         RegisterDeviceOfType(HID_USAGE_GENERIC_KEYBOARD, eventWindow);
     }
 
+    void ResetState() {
+        memset(g_keyboardStates, 0, sizeof(g_keyboardStates));
+        memset(g_mouseStates, 0, sizeof(g_mouseStates));
+    }
+
     void Update() {
         MSG msg;
         //	while (GetMessage(&msg, NULL, 0, 0))

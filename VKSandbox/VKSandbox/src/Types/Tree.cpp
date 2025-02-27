@@ -31,6 +31,10 @@ void Tree::SetMousePickIndex(int mousePickIndex) {
     m_mousePickIndex = mousePickIndex;
 }
 
+void Tree::SetPosition(glm::vec3 position) {
+    m_transform.position = position;
+}
+
 void Tree::UpdateRenderItems() {
     m_renderItems.clear();
 
@@ -38,8 +42,8 @@ void Tree::UpdateRenderItems() {
         Mesh* mesh = AssetManager::GetMeshByIndex(m_model->GetMeshIndices()[i]);
         if (mesh) {
             RenderItem renderItem;
-            renderItem.mousePickType = (int)EditorObjectType::GAME_OBJECT;
-            //renderItem.mousePickIndex = m_mousePickIndex;
+            renderItem.mousePickType = (int)EditorObjectType::TREE;
+            renderItem.mousePickIndex = m_mousePickIndex;
             renderItem.modelMatrix = GetModelMatrix();
             renderItem.inverseModelMatrix = glm::inverse(renderItem.modelMatrix);
             renderItem.meshIndex = m_model->GetMeshIndices()[i];

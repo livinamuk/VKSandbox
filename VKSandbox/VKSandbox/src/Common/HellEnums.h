@@ -69,10 +69,9 @@ enum class TextureFilter {
 enum class EditorObjectType {
     NONE = 0,
     GAME_OBJECT,
-    DOOR,
-    WINDOW,
     LIGHT,
-    CSG
+    TREE,
+    PICK_UP
 }; 
 
 enum class Axis {
@@ -127,6 +126,7 @@ enum WeaponAction {
     RELOAD_FROM_EMPTY,
     DRAW_BEGIN,
     DRAWING,
+    DRAWING_FIRST,
     DRAWING_WITH_SHOTGUN_PUMP,
     SPAWNING,
     SHOTGUN_UNLOAD_BEGIN,
@@ -217,6 +217,5 @@ enum struct PickUpType {
 enum struct EditorMode {
     HEIGHTMAP_EDITOR,
     SECTOR_EDITOR,
-    WEAPON_EDITOR,
-    EDITOR_IS_CLOSED
+    WEAPON_EDITOR
 };

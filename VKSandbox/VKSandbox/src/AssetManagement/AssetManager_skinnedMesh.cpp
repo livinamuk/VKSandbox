@@ -5,7 +5,7 @@ namespace AssetManager {
     int g_nextWeightedVertexInsert = 0;
     int g_nextWeightedIndexInsert = 0;
 
-    int AssetManager::CreateSkinnedMesh(std::string name, std::vector<WeightedVertex>& vertices, std::vector<uint32_t>& indices, uint32_t baseVertexLocal, glm::vec3 aabbMin, glm::vec3 aabbMax) {
+    int AssetManager::CreateSkinnedMesh(const std::string& name, std::vector<WeightedVertex>& vertices, std::vector<uint32_t>& indices, uint32_t baseVertexLocal, glm::vec3 aabbMin, glm::vec3 aabbMax) {
         std::vector<SkinnedMesh>& skinnedMeshes = GetSkinnedMeshes();
         std::vector<WeightedVertex>& allVertices = GetWeightedVertices();
         std::vector<uint32_t>& allIndices = GetWeightedIndies();

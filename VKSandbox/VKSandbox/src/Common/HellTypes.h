@@ -270,8 +270,9 @@ struct RendererData {
     float gBufferHeight;
     float hairBufferWidth;
     float hairBufferHeight;
-    int splitscreenMode;
     float time;
+    int splitscreenMode;
+    int rendererOverrideState;
 };
 
 struct Resolutions {
@@ -309,11 +310,6 @@ struct DrawCommandsSet {
 
     DrawCommands skinnedGeometry;
 };
-
-struct RendererSettings {
-    int depthPeelCount = 4;
-};
-
 
 struct AABB {
     AABB() {}
@@ -464,4 +460,25 @@ enum struct TreeType {
     TREE_LARGE_1,
     TREE_LARGE_2,
     UNDEFINED
+};
+
+enum class RendererOverrideState {
+    NONE = 0,
+    BASE_COLOR,
+    NORMALS,
+    RMA,
+    CAMERA_NDOTL,
+    STATE_COUNT,
+};  
+
+struct RendererSettings {
+    int depthPeelCount = 4;
+    bool drawGrass = true;
+    RendererOverrideState rendererOverrideState = RendererOverrideState::NONE;
+};
+
+struct Node {
+    std::string name;
+    int parentIndex;
+    glm::mat4 inverseBindTransform;
 };

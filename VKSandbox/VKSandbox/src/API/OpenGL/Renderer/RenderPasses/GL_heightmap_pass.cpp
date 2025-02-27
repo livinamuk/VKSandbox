@@ -65,7 +65,7 @@ namespace OpenGLRenderer {
 
     void PaintHeightMap() {
         if (!IsMouseRayWorldPositionReadBackReady()) return;
-        if (!Editor::IsOpen()) return;
+        if (!Editor::IsEditorOpen()) return;
         if (Editor::GetEditorMode() != EditorMode::HEIGHTMAP_EDITOR) return;
 
         OpenGLFrameBuffer* heightmapFBO = GetFrameBuffer("HeightMap");

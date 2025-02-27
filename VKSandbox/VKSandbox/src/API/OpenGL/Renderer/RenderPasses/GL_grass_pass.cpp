@@ -3,7 +3,6 @@
 #include "Renderer/Types/GrassMesh.h"
 
 #include "API/OpenGL/GL_backend.h"
-#include "BackEnd/BackEnd.h"
 #include "Config/Config.h"
 #include "Editor/Editor.h"
 #include "Viewport/ViewportManager.h"
@@ -12,7 +11,6 @@
 #include "Input/Input.h"
 #include "Core/Game.h"
 #include "Util/Util.h"
-
 
 struct GrassVertex {
     glm::vec3 position;
@@ -126,15 +124,10 @@ namespace OpenGLRenderer {
         glDispatchCompute(bladeCount, 1, 1);
     }
 
-    void GrassPass() {
-        
-        if (Editor::IsOpen()) {
-            EditorLightingSettings& lightingSettigns = Editor::GetLightingSettings();
-            if (!lightingSettigns.grassEnabled) {
-                return;
-            }
-        }
-        
+    void GrassPass() {        
+        RendererSettings& rendererSettings = Renderer::GetCurrentRendererSettings();
+        if (!rendererSettings.drawGrass) return;
+
         if (Input::KeyPressed(HELL_KEY_X)) {
             CreateGrassGeometry();
         }
@@ -187,11 +180,8 @@ namespace OpenGLRenderer {
         if (optimized) {
             for (int i = 0; i < Game::GetLocalPlayerCount(); i++) {   // CHANGE TO VIEWPORT NOT PLAYER!!!!
 
-
-
                 int viewportIndex = i;
                 
-
                 Viewport* viewport = ViewportManager::GetViewportByIndex(viewportIndex);
                 Frustum& frustum = viewport->GetFrustum();
 
@@ -231,12 +221,6 @@ namespace OpenGLRenderer {
                         }
                     }
                 }
-
-
-
-
-
-
 
                 // Zero out indirect buffer
                 DrawIndexedIndirectCommand initialCmd;

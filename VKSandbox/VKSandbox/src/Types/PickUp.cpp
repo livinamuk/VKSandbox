@@ -26,6 +26,10 @@ void PickUp::SetMousePickIndex(int mousePickIndex) {
     m_mousePickIndex = mousePickIndex;
 }
 
+void PickUp::SetPosition(glm::vec3 position) {
+    m_transform.position = position;
+}
+
 void PickUp::UpdateRenderItems() {
     m_renderItems.clear();    
    
@@ -33,7 +37,7 @@ void PickUp::UpdateRenderItems() {
         Mesh* mesh = AssetManager::GetMeshByIndex(m_model->GetMeshIndices()[i]);
         if (mesh) {
             RenderItem renderItem;
-            renderItem.mousePickType = (int)EditorObjectType::GAME_OBJECT;
+            renderItem.mousePickType = (int)EditorObjectType::PICK_UP;
             renderItem.mousePickIndex = m_mousePickIndex;
             renderItem.modelMatrix = GetModelMatrix();
             renderItem.inverseModelMatrix = glm::inverse(renderItem.modelMatrix);

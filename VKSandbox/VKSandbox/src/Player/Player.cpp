@@ -22,14 +22,15 @@ void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex)
     // fix me: make it some unique ID
     m_playerIndex = viewportIndex;
 
-    World::CreateAnimatedGameObject();
-    m_viewWeaponAnimatedGameObjectIndex = World::GetAnimatedGameObjects().size() - 1;
+    //World::CreateAnimatedGameObject();
+    //m_viewWeaponAnimatedGameObjectIndex = World::GetAnimatedGameObjects().size() - 1;
     AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
     viewWeapon->SetPlayerIndex(viewportIndex);
     viewWeapon->SetExclusiveViewportIndex(viewportIndex);
+    viewWeapon->SetExclusiveViewportIndex(-1);
 
-    World::CreateAnimatedGameObject();
-    m_characterModelAnimatedGameObjectIndex = World::GetAnimatedGameObjects().size() - 1;
+    //World::CreateAnimatedGameObject();
+    //m_characterModelAnimatedGameObjectIndex = World::GetAnimatedGameObjects().size() - 1;
     AnimatedGameObject* characterModel = GetCharacterModelAnimatedGameObject();
     characterModel->SetPlayerIndex(viewportIndex);
 
@@ -45,26 +46,28 @@ void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex)
 }
 
 void Player::Update(float deltaTime) {
-    if (Editor::IsOpen()) {
+    if (Editor::IsEditorOpen()) {
         return;
     }
 
     if (IsAwaitingSpawn()) Respawn();
-
-    
+        
     UpdateMovement(deltaTime);
     UpdateCharacterController();
     UpdateHeadBob(deltaTime);
     UpdateBreatheBob(deltaTime);
     UpdateCamera(deltaTime);
     UpdateFlashlight(deltaTime);
-    UpdateWeaponLogic();       
+    UpdateWeaponLogic(deltaTime);
     UpdateViewWeapon(deltaTime);
+    UpdateAnimatedGameObjects(deltaTime);
+    UpdateWeaponSlide();
     UpdateSpriteSheets(deltaTime);
     UpdateAudio();
     UpdateUI();
     if (Input::KeyPressed(HELL_KEY_K)) {
         m_awaitingSpawn = true;
+        WeaponManager::Init(); // remove me
     }
 
     if (m_infoTextTimer > 0) {
@@ -87,7 +90,6 @@ void Player::Update(float deltaTime) {
 
         PxShape* pxShape = Physics::CreateBoxShape(1.0f, 1.0f, 1.0f, Transform());
         PxRigidDynamic* pxRigid = Physics::CreateRigidDynamic(transform, filterData, pxShape, Transform());
-
     }
 
 
@@ -215,11 +217,13 @@ Camera& Player::GetCamera() {
 }
 
 AnimatedGameObject* Player::GetCharacterModelAnimatedGameObject() {
-    return World::GetAnimatedGameObjectByIndex(m_characterModelAnimatedGameObjectIndex);
+    return &m_characterModelAnimatedGameObject;
+    //return World::GetAnimatedGameObjectByIndex(m_characterModelAnimatedGameObjectIndex);
 }
 
 AnimatedGameObject* Player::GetViewWeaponAnimatedGameObject() {
-    return World::GetAnimatedGameObjectByIndex(m_viewWeaponAnimatedGameObjectIndex);
+    return &m_viewWeaponAnimatedGameObject;
+    //return World::GetAnimatedGameObjectByIndex(m_viewWeaponAnimatedGameObjectIndex);
 }
 
 bool Player::IsDead() {
@@ -263,3 +267,9 @@ void Player::DisplayInfoText(const std::string& text) {
     m_infoTextTimer = 2.0f;
     m_infoText = text;
 }
+
+void Player::UpdateAnimatedGameObjects(float deltaTime) {
+    m_viewWeaponAnimatedGameObject.Update(deltaTime);
+    m_characterModelAnimatedGameObject.Update(deltaTime);
+}
+

@@ -5,12 +5,12 @@
 
 struct Sector {
     void ResetData();
-    void LoadSectorData(SectorData sectorData);
-    void SpawnHouse(HouseData houseData);
+    //void LoadSector(SectorCreateInfo sectorCreateInfo);
+    //void SpawnHouse(HouseData houseData);
 
 private:
     uint32_t m_heightMapIndex = 0;
-    SectorData m_sectorData;
+    SectorCreateInfo m_sectorCreateInfo;
     std::vector<HouseData> m_houseDataList;
     bool m_hasHouse = false;
 };

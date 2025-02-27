@@ -122,11 +122,11 @@ namespace WeaponManager {
         aks74u.muzzleFlashOffset = glm::vec3(0, 0.002, 0.02f);
         aks74u.casingEjectionBoneName = "SlideCatch";
         aks74u.casingEjectionOffset = glm::vec3(0, 0, 0);
-        aks74u.animationCancelPercentages.fire = 18.0f;
-        aks74u.animationCancelPercentages.reload = 80.0f;
-        aks74u.animationCancelPercentages.reloadFromEmpty = 95.0f;
-        aks74u.animationCancelPercentages.draw = 75.0f;
-        aks74u.animationCancelPercentages.adsFire = 18.0f;
+        aks74u.animationCancelFrames.fire = 18.0f;
+        aks74u.animationCancelFrames.reload = 80.0f;
+        aks74u.animationCancelFrames.reloadFromEmpty = 95.0f;
+        aks74u.animationCancelFrames.draw = 75.0f;
+        aks74u.animationCancelFrames.adsFire = 18.0f;
         aks74u.audioFiles.fire.push_back("AKS74U_Fire0.wav");
         aks74u.audioFiles.fire.push_back("AKS74U_Fire1.wav");
         aks74u.audioFiles.fire.push_back("AKS74U_Fire2.wav");
@@ -188,11 +188,11 @@ namespace WeaponManager {
         goldeneGlock.animationNames.draw = "Glock_Draw";
         goldeneGlock.ammoType = "Glock";
         goldeneGlock.magSize = 100;
-        goldeneGlock.animationCancelPercentages.fire = 20.0f;
-        goldeneGlock.animationCancelPercentages.reload = 80.0f;
-        goldeneGlock.animationCancelPercentages.reloadFromEmpty = 95.0f;
-        goldeneGlock.animationCancelPercentages.draw = 75.0f;
-        goldeneGlock.animationCancelPercentages.adsFire = 10.0f;
+        goldeneGlock.animationCancelFrames.fire = 20.0f;
+        goldeneGlock.animationCancelFrames.reload = 80.0f;
+        goldeneGlock.animationCancelFrames.reloadFromEmpty = 95.0f;
+        goldeneGlock.animationCancelFrames.draw = 75.0f;
+        goldeneGlock.animationCancelFrames.adsFire = 10.0f;
         goldeneGlock.audioFiles.fire.push_back("Glock_Fire0.wav");
         goldeneGlock.audioFiles.fire.push_back("Glock_Fire1.wav");
         goldeneGlock.audioFiles.fire.push_back("Glock_Fire2.wav");
@@ -217,6 +217,7 @@ namespace WeaponManager {
         goldeneGlock.pickupModelName = "Glock_Isolated";
         goldeneGlock.pickupConvexMeshModelName = "Glock_Isolated_ConvexMesh";
         goldeneGlock.pickUpMeshMaterials["Glock"] = "Gold";
+        goldeneGlock.emptyReloadRequiresSlideOffset = true;
 
         WeaponInfo& knife = g_weapons.emplace_back();
         knife.name = "Knife";
@@ -296,10 +297,10 @@ namespace WeaponManager {
         smith.casingEjectionBoneName = "Ejection";
         smith.casingEjectionOffset = glm::vec3(-0.066, -0.007, 0.249);
         smith.ammoType = "Tokarev";
-        smith.animationCancelPercentages.draw = 50.0f;
-        smith.animationCancelPercentages.fire = 5.0f;
-        smith.animationCancelPercentages.reload = 80.0f;
-        smith.animationCancelPercentages.reloadFromEmpty = 80.0f;
+        smith.animationCancelFrames.draw = 50.0f;
+        smith.animationCancelFrames.fire = 5.0f;
+        smith.animationCancelFrames.reload = 80.0f;
+        smith.animationCancelFrames.reloadFromEmpty = 80.0f;
         smith.revolverCockFrameNumber = 18;
         smith.relolverStyleReload = true;
 
@@ -309,7 +310,7 @@ namespace WeaponManager {
         tokarev.animationNames.idle = "Tokarev_Idle";
         tokarev.animationNames.walk = "Tokarev_Walk";
         tokarev.animationNames.draw = "Tokarev_Draw";
-        tokarev.animationNames.spawn = "Tokarev_Spawn";
+        tokarev.animationNames.drawFirst = "Tokarev_DrawFirst";
         tokarev.animationNames.reload = "Tokarev_Reload";
         tokarev.animationNames.reloadempty.push_back("Tokarev_ReloadEmpty");
         tokarev.animationNames.fire.push_back("Tokarev_Fire0");
@@ -338,10 +339,10 @@ namespace WeaponManager {
         tokarev.casingEjectionBoneName = "Ejection";
         tokarev.casingEjectionOffset = glm::vec3(-0.066, -0.007, 0.249);
         tokarev.ammoType = "Tokarev";
-        tokarev.animationCancelPercentages.draw = 50.0f;
-        tokarev.animationCancelPercentages.fire = 5.0f;
-        tokarev.animationCancelPercentages.reload = 80.0f;
-        tokarev.animationCancelPercentages.reloadFromEmpty = 80.0f;
+        tokarev.animationCancelFrames.draw = 50.0f;
+        tokarev.animationCancelFrames.fire = 5.0f;
+        tokarev.animationCancelFrames.reload = 80.0f;
+        tokarev.animationCancelFrames.reloadFromEmpty = 80.0f;
 
         tokarev.pistolSlideBoneName = "Slide";
         tokarev.pistolSlideOffset = -5;
@@ -349,6 +350,7 @@ namespace WeaponManager {
         tokarev.pickupConvexMeshModelName = "Tokarev_ConvexMesh";
         tokarev.pickUpMeshMaterials["TokarevBody"] = "Tokarev";
         tokarev.pickUpMeshMaterials["TokarevGripPolymer"] = "TokarevGrip";
+        tokarev.emptyReloadRequiresSlideOffset = true;
 
       
       
@@ -371,11 +373,11 @@ namespace WeaponManager {
         glock.animationNames.walk = "Glock_Walk";
         glock.animationNames.reload = "Glock_Reload";
         glock.animationNames.reloadempty.push_back("Glock_ReloadEmpty");
-        glock.animationNames.fire.push_back("Glock_Fire0");
         glock.animationNames.fire.push_back("Glock_Fire1");
         glock.animationNames.fire.push_back("Glock_Fire2");
+        glock.animationNames.fire.push_back("Glock_Fire3");
         glock.animationNames.draw = "Glock_Draw";
-        glock.animationNames.spawn = "Glock_Spawn";
+        glock.animationNames.drawFirst = "Glock_DrawFirst";
         glock.animationSpeeds.fire = 1.5f;
         glock.audioFiles.fire.push_back("Glock_Fire0.wav");
         glock.audioFiles.fire.push_back("Glock_Fire1.wav");
@@ -391,19 +393,19 @@ namespace WeaponManager {
         glock.damage = 15;
         glock.magSize = 15;
         glock.ammoType = "Glock";
-        glock.animationCancelPercentages.draw = 50.0f;
-        glock.animationCancelPercentages.fire = 25.0f;
-        glock.animationCancelPercentages.reload = 80.0f;
-        glock.animationCancelPercentages.reloadFromEmpty = 80.0f;
-        glock.animationCancelPercentages.draw = 75.0f;
-        glock.animationCancelPercentages.adsFire = 25.0f;
+        glock.animationCancelFrames.draw = 50.0f;
+        glock.animationCancelFrames.fire = 6;
+        glock.animationCancelFrames.adsFire = 6.0f;
+        glock.animationCancelFrames.reload = 40.0f;
+        glock.animationCancelFrames.reloadFromEmpty = 40.0f;
+        glock.animationCancelFrames.draw = 75.0f;
         glock.animationNames.adsIn = "Glock_ADS_In";
         glock.animationNames.adsOut = "Glock_ADS_Out";
         glock.animationNames.adsIdle = "Glock_ADS_Idle";
         glock.animationNames.adsWalk = "Glock_ADS_Walk";
-        glock.animationNames.adsFire.push_back("Glock_ADS_Fire0");
         glock.animationNames.adsFire.push_back("Glock_ADS_Fire1");
         glock.animationNames.adsFire.push_back("Glock_ADS_Fire2");
+        glock.animationNames.adsFire.push_back("Glock_ADS_Fire3");
         glock.pistolSlideBoneName = "Slide";
         glock.pistolSlideOffset = 5;
         glock.reloadMagInFrameNumber = 20;
@@ -411,6 +413,10 @@ namespace WeaponManager {
         glock.pickupModelName = "Glock_Isolated";
         glock.pickupConvexMeshModelName = "Glock_Isolated_ConvexMesh";
         glock.pickUpMeshMaterials["Glock"] = "Glock";
+        glock.emptyReloadRequiresSlideOffset = true;
+        glock.hasADS = true;
+        glock.animationSpeeds.adsIn = 3.0f;
+        glock.animationSpeeds.adsOut = 3.0f;
 
         WeaponInfo& shotgun = g_weapons.emplace_back();
         shotgun.name = "Shotgun";
@@ -451,7 +457,7 @@ namespace WeaponManager {
         shotgun.muzzleFlashBoneName = "Muzzle";
         shotgun.casingEjectionBoneName = "Shell_bone";
         shotgun.casingEjectionForce = 13;
-        shotgun.animationCancelPercentages.fire = 50.0f;
+        shotgun.animationCancelFrames.fire = 50.0f;
         shotgun.pickupModelName = "Shotgun_Isolated";
         shotgun.pickupConvexMeshModelName = "Shotgun_Isolated_ConvexMesh";
         shotgun.pickUpMeshMaterials["Shotgun_Mesh"] = "Shotgun";
@@ -501,7 +507,7 @@ namespace WeaponManager {
         spas.muzzleFlashBoneName = "Muzzle";
         spas.casingEjectionBoneName = "Shell_bone";
         spas.casingEjectionForce = 13;
-        spas.animationCancelPercentages.fire = 50.0f;
+        spas.animationCancelFrames.fire = 50.0f;
         spas.pickupModelName = "SPAS_Isolated";
         spas.pickupConvexMeshModelName = "SPAS_ConvexMesh";
         spas.pickUpMeshMaterials["SPAS12_Main"] = "SPAS_Main";
@@ -605,11 +611,11 @@ namespace WeaponManager {
         p90.muzzleFlashOffset = glm::vec3(0, 0.002, 40.9207f);
         p90.casingEjectionBoneName = "SlideCatch";
         p90.casingEjectionOffset = glm::vec3(0, 0, 0);
-        p90.animationCancelPercentages.fire = 15.0f;
-        p90.animationCancelPercentages.reload = 95.0f;
-        p90.animationCancelPercentages.reloadFromEmpty = 95.0f;
-        p90.animationCancelPercentages.draw = 75.0f;
-        p90.animationCancelPercentages.adsFire = 10.0;
+        p90.animationCancelFrames.fire = 15.0f;
+        p90.animationCancelFrames.reload = 95.0f;
+        p90.animationCancelFrames.reloadFromEmpty = 95.0f;
+        p90.animationCancelFrames.draw = 75.0f;
+        p90.animationCancelFrames.adsFire = 10.0;
         p90.audioFiles.fire.push_back("P90_Fire0.wav");
         p90.audioFiles.fire.push_back("P90_Fire1.wav");
         p90.audioFiles.fire.push_back("P90_Fire2.wav");

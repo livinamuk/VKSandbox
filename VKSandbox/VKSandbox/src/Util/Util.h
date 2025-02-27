@@ -43,6 +43,7 @@ namespace Util {
 
     // Text
     std::string BoolToString(bool b);
+    std::string Vec2ToString(glm::vec2 v);
     std::string Vec3ToString(glm::vec3 v);
     std::string Mat4ToString(glm::mat4 m);
     std::string Lowercase(std::string& str);

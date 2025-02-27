@@ -104,8 +104,8 @@ void AnimationLayer::SkinToBindPose() {
     SkinnedModel* skinnedModel = AssetManager::GetSkinnedModelByIndex(m_skinnedModelIndex);
     for (int i = 0; i < skinnedModel->m_nodes.size(); i++) {
         glm::mat4 nodeTransformation = glm::mat4(1);
-        nodeTransformation = skinnedModel->m_nodes[i].m_inverseBindTransform;
-        unsigned int parentIndex = skinnedModel->m_nodes[i].m_parentIndex;
+        nodeTransformation = skinnedModel->m_nodes[i].inverseBindTransform;
+        unsigned int parentIndex = skinnedModel->m_nodes[i].parentIndex;
         glm::mat4 ParentTransformation = (parentIndex == -1) ? glm::mat4(1) : m_globalBlendedNodeTransforms[parentIndex];
         glm::mat4 GlobalTransformation = ParentTransformation * nodeTransformation;
         m_globalBlendedNodeTransforms[i] = AnimatedTransform(GlobalTransformation).to_mat4();

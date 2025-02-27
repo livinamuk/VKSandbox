@@ -5,11 +5,6 @@
 #include "Types/EditorMesh.h"
 #include <string>
 
-struct EditorLightingSettings {
-    bool lightingEnabled = true;
-    bool grassEnabled = true;
-};
-
 namespace Editor {
     
     void Init();
@@ -25,9 +20,11 @@ namespace Editor {
     void UpdateMouseRays();
     void UpdateCameraInterpolation(float deltaTime);
     void UpdateDebug();
-    void OpenEditor(EditorMode editorMode);
-    void Close();
+    void OpenEditor();
+    void CloseEditor();
+    void ToggleEditorOpenState();
     void ShowEditorSelectMenu();
+    void SetEditorMode(EditorMode editorMode);
     void CloseEditorSelectMenu();
     void SetActiveViewportIndex(int index);
     void SetSelectedObjectIndex(int index);
@@ -47,7 +44,8 @@ namespace Editor {
     int GetHoveredViewportIndex();
     int GetSelectedObjectIndex();
     int GetHoveredObjectIndex();
-    bool IsOpen();
+    bool IsEditorOpen();
+    bool IsEditorClosed();
     bool IsEditorSelectMenuVisible();
     bool IsViewportOrthographic(uint32_t viewportIndex);
     bool EditorIsIdle();
@@ -68,7 +66,6 @@ namespace Editor {
     EditorViewportSplitMode GetEditorViewportSplitMode();
     SelectionRectangleState& GetSelectionRectangleState();
     EditorMode& GetEditorMode();
-    EditorLightingSettings& GetLightingSettings();
 
     EditorMesh& GetEditorMesh(); // BROKEN / 5% IMPLEMENTED
 

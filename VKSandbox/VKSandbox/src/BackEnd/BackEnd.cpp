@@ -24,7 +24,6 @@
 #include "Weapon/WeaponManager.h"
 #include "World/World.h"
 
-
 #include "GLFWIntegration.h"
 
 #define NOMINMAX
@@ -84,6 +83,7 @@ namespace BackEnd {
 
     void BeginFrame() {
         GLFWIntegration::BeginFrame(g_api);
+        RenderDataManager::BeginFrame();
         if (GetAPI() == API::OPENGL) {
             OpenGLBackEnd::BeginFrame();
             OpenGLBackEnd::UpdateTextureBaking();
@@ -92,6 +92,10 @@ namespace BackEnd {
             //VulkanBackEnd::BeginFrame();
         }
         //Physics::ClearCollisionReports();
+
+        if (!GLFWIntegration::WindowHasFocus()) {
+            InputMulti::ResetState();
+        }
     }
 
     void UpdateGame() {
@@ -290,11 +294,15 @@ namespace BackEnd {
         if (Input::KeyPressed(HELL_KEY_G)) {
             BackEnd::ToggleFullscreen();
         }
+        if (Input::KeyPressed(HELL_KEY_Y)) {
+            Audio::PlayAudio(AUDIO_SELECT, 1.00f);
+            Renderer::NextRendererOverrideState();
+        }
         if (Input::KeyPressed(HELL_KEY_GRAVE_ACCENT)) {
             Audio::PlayAudio(AUDIO_SELECT, 1.00f);
             Debug::ToggleDebugText();
         }
-        if (!Editor::IsOpen()) {
+        if (!Editor::IsEditorOpen()) {
             if (Input::KeyPressed(HELL_KEY_V)) {
                 Game::NextSplitScreenMode();
             }
@@ -329,4 +337,3 @@ namespace BackEnd {
         }
     }
 }
-

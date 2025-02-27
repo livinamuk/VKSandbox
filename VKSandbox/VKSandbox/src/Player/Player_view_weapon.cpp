@@ -17,8 +17,8 @@ void Player::UpdateViewWeapon(float deltaTime) {
 
 
     for (int i = 0; i < model->m_nodes.size(); i++) {
-        if (Util::StrCmp(model->m_nodes[i].m_name, "camera")) {
-            cameraBindMatrix = model->m_nodes[i].m_inverseBindTransform;
+        if (model->m_nodes[i].name == "camera") {
+            cameraBindMatrix = model->m_nodes[i].inverseBindTransform;
         }
     }
 
@@ -63,6 +63,7 @@ void Player::UpdateViewWeapon(float deltaTime) {
     }
 
     float weaponScale = 0.001f;
+    //weaponScale = 0.01f;
 
     // Final transform
     Transform transform;

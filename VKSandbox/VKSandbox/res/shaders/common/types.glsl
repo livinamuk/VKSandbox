@@ -37,8 +37,9 @@ struct RendererData {
     float gBufferHeight;
     float hairBufferWidth;
     float hairBufferHeight;
-    int splitscreenMode;
     float time;
+    int splitscreenMode;    
+    int rendererOverrideState;
 };
 
 struct RenderItem {

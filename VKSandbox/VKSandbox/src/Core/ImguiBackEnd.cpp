@@ -30,6 +30,13 @@ namespace ImGuiBackend {
 
         io.Fonts->TexGlyphPadding = 1;
 
+        io.Fonts->Clear();        
+        std::string fontPath = "res/fonts/ttf/ClearSans-Regular.ttf";
+        float fontSize = 30.0f;
+        ImFont* customFont = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), fontSize);
+        io.FontGlobalScale = 1.0f;
+        io.Fonts->Build();
+
         ImGui::GetMainViewport()->Size = io.DisplaySize;
         ImGui::GetMainViewport()->Pos = ImVec2(0, 0);
 
@@ -37,6 +44,11 @@ namespace ImGuiBackend {
     }
 
     void Update() {
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.DisplaySize = ImVec2((float)BackEnd::GetCurrentWindowWidth(), (float)BackEnd::GetCurrentWindowHeight());
+
+
         UpdateImGuiMouseState();
         UpdateImGuiKeyboardState();
         UpdateStyle();
@@ -103,17 +115,10 @@ namespace ImGuiBackend {
     }
 
     void UpdateImGuiMouseState() {
-        const Resolutions& resolutions = Config::GetResolutions();
-        int windowWidth = BackEnd::GetCurrentWindowWidth();
-        int windowHeight = BackEnd::GetCurrentWindowHeight();
-        int fullScreenWidth = BackEnd::GetFullScreenWidth();
-        int fullScreenHeight = BackEnd::GetFullScreenHeight();
         int mouseX = Input::GetMouseX();
         int mouseY = Input::GetMouseY();
-        float scaleX = resolutions.ui.x / (float)windowWidth;
-        float scaleY = resolutions.ui.y / (float)windowHeight;
         ImGuiIO& io = ImGui::GetIO();
-        io.MousePos = ImVec2(mouseX * scaleX, mouseY * scaleY);
+        io.MousePos = ImVec2(mouseX, mouseY);
         io.MouseDown[0] = Input::LeftMouseDown();
         io.MouseDown[1] = Input::GetMouseWheelValue() != 0;
         io.MouseDown[2] = Input::RightMouseDown();
@@ -188,6 +193,10 @@ namespace ImGuiBackend {
         style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.9f, 0.9f, 0.9f, 1.0f);
         style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);   // Red grab
         style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+
+        ImGuiIO& io = ImGui::GetIO();
+        //io.FontGlobalScale = 2.0f; // Scale everything up
     }
 
 

@@ -1,8 +1,10 @@
 #pragma once
 #include "HellTypes.h"
 #include "File/File.h"
+#include "Renderer/Types/Animation.h"
 #include "Renderer/Types/Mesh.hpp"
 #include "Renderer/Types/Model.hpp"
+#include "Renderer/Types/SkinnedMesh.hpp"
 #include "Renderer/Types/SkinnedModel.h"
 #include "Renderer/Types/SpriteSheetTexture.h"
 #include "Renderer/Types/Texture.h"
@@ -52,7 +54,7 @@ namespace AssetManager {
     // Skinned Mesh
     std::vector<SkinnedMesh>& GetSkinnedMeshes();
     SkinnedMesh* GetSkinnedMeshByIndex(int index);
-    int CreateSkinnedMesh(std::string name, std::vector<WeightedVertex>& vertices, std::vector<uint32_t>& indices, uint32_t baseVertexLocal, glm::vec3 aabbMin, glm::vec3 aabbMax);
+    int CreateSkinnedMesh(const std::string& name, std::vector<WeightedVertex>& vertices, std::vector<uint32_t>& indices, uint32_t baseVertexLocal, glm::vec3 aabbMin, glm::vec3 aabbMax);
     int GetSkinnedMeshIndexByName(const std::string& name);
 
     // Textures

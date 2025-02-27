@@ -4,7 +4,7 @@
             "baseMaterial": "LampPost",
             "meshBlendingModes": [],
             "meshMaterials": [],
-            "modelName": "Bench",
+            "modelName": "Bench2",
             "position": [
                 17.239999771118164,
                 -5.0,
@@ -24,28 +24,88 @@
         {
             "baseMaterial": "",
             "meshBlendingModes": [
-                "EyelashUpper_HP|BLENDED",
-                "EyelashLower_HP|BLENDED",
-                "HairScalp|BLENDED",
-                "HairOutta|HAIR_TOP_LAYER",
-                "HairInner|HAIR_UNDER_LAYER"
+                {
+                    "blendingMode": "BLENDED",
+                    "meshName": "EyelashUpper"
+                },
+                {
+                    "blendingMode": "BLENDED",
+                    "meshName": "EyelashLower"
+                },
+                {
+                    "blendingMode": "BLENDED",
+                    "meshName": "HairScalp"
+                },
+                {
+                    "blendingMode": "HAIR_TOP_LAYER",
+                    "meshName": "HairOutta"
+                },
+                {
+                    "blendingMode": "HAIR_UNDER_LAYER",
+                    "meshName": "HairInner"
+                }
             ],
             "meshMaterials": [
-                "Rock|Rock",
-                "BoobTube|BoobTube",
-                "Face|MermaidFace",
-                "Body|MermaidBody",
-                "Arms|MermaidArms",
-                "HairInner|MermaidHair",
-                "HairOutta|MermaidHair",
-                "HairScalp|MermaidScalp",
-                "EyeLeft|MermaidEye",
-                "EyeRight|MermaidEye",
-                "Tail|MermaidTail",
-                "TailFin|MermaidTail",
-                "EyelashUpper_HP|MermaidLashes",
-                "EyelashLower_HP|MermaidLashes",
-                "Nails|Nails"
+                {
+                    "materialName": "Rock",
+                    "meshName": "Rock"
+                },
+                {
+                    "materialName": "BoobTube",
+                    "meshName": "BoobTube"
+                },
+                {
+                    "materialName": "MermaidFace",
+                    "meshName": "Face"
+                },
+                {
+                    "materialName": "MermaidBody",
+                    "meshName": "Body"
+                },
+                {
+                    "materialName": "MermaidArms",
+                    "meshName": "Arms"
+                },
+                {
+                    "materialName": "MermaidHair",
+                    "meshName": "HairInner"
+                },
+                {
+                    "materialName": "MermaidHair",
+                    "meshName": "HairOutta"
+                },
+                {
+                    "materialName": "MermaidScalp",
+                    "meshName": "HairScalp"
+                },
+                {
+                    "materialName": "MermaidEye",
+                    "meshName": "EyeLeft"
+                },
+                {
+                    "materialName": "MermaidEye",
+                    "meshName": "EyeRight"
+                },
+                {
+                    "materialName": "MermaidTail",
+                    "meshName": "Tail"
+                },
+                {
+                    "materialName": "MermaidTail",
+                    "meshName": "TailFin"
+                },
+                {
+                    "materialName": "MermaidLashes",
+                    "meshName": "EyelashUpper"
+                },
+                {
+                    "materialName": "MermaidLashes",
+                    "meshName": "EyelashLower"
+                },
+                {
+                    "materialName": "Nails",
+                    "meshName": "Nails"
+                }
             ],
             "modelName": "Mermaid",
             "position": [
@@ -176,24 +236,6 @@
                 1.0
             ],
             "type": 1
-        },
-        {
-            "position": [
-                33.310001373291016,
-                -4.869999885559082,
-                28.860000610351563
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                1.0,
-                1.0,
-                1.0
-            ],
-            "type": 2
         }
     ]
 }

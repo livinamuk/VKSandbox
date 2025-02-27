@@ -118,11 +118,11 @@ void AnimationState::Update(int skinnedModelIndex, float deltaTime) {
     // Traverse the tree
     for (int i = 0; i < skinnedModel->m_nodes.size(); i++) {
         glm::mat4 nodeTransformation = glm::mat4(1);
-        const char* NodeName = skinnedModel->m_nodes[i].m_name;
+        std::string& nodeName = skinnedModel->m_nodes[i].name;
 
         // Interpolate the node transformation if it's animated
         if (animation) {
-            const AnimatedNode* animatedNode = Util::FindAnimatedNode(animation, NodeName);
+            const AnimatedNode* animatedNode = Util::FindAnimatedNode(animation, nodeName.c_str());
             if (animatedNode) {
                 glm::vec3 translation;
                 glm::quat rotation;
@@ -135,11 +135,11 @@ void AnimationState::Update(int skinnedModelIndex, float deltaTime) {
             }
         }
         else {
-            nodeTransformation = skinnedModel->m_nodes[i].m_inverseBindTransform;
+            nodeTransformation = skinnedModel->m_nodes[i].inverseBindTransform;
         }
 
         // Calculate the world transform for this joint
-        unsigned int parentIndex = skinnedModel->m_nodes[i].m_parentIndex;
+        unsigned int parentIndex = skinnedModel->m_nodes[i].parentIndex;
         glm::mat4 ParentTransformation = (parentIndex == -1) ? glm::mat4(1) : m_globalNodeTransforms[parentIndex].to_mat4();
         glm::mat4 GlobalTransformation = ParentTransformation * nodeTransformation;
         m_globalNodeTransforms[i] = AnimatedTransform(GlobalTransformation);

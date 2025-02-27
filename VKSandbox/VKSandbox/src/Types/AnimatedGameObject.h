@@ -52,7 +52,11 @@ public:
 	void SetRotationX(float rotation);
 	void SetRotationY(float rotation);
 	void SetRotationZ(float rotation);
+    void PlayAnimation(const std::string& animationName, float speed);
 	void PlayAnimation(const std::string& animationName, const AnimationPlaybackParams& playbackParams = AnimationPlaybackParams());
+    void PlayAnimation(const std::vector<std::string>& animationNames, float speed);
+    void PlayAnimation(const std::vector<std::string>& animationNames, const AnimationPlaybackParams& playbackParams);
+    void PlayAndLoopAnimation(const std::string& animationName, float speed);
 	void PlayAndLoopAnimation(const std::string& animationName, const AnimationPlaybackParams& playbackParams = AnimationPlaybackParams());
     void SetAnimationModeToBindPose();
     void SetMeshMaterialByMeshName(const std::string& meshName, const std::string& materialName);
@@ -60,6 +64,7 @@ public:
     void SetMeshToRenderAsGlassByMeshIndex(const std::string& materialName);
     void SetMeshEmissiveColorTextureByMeshName(const std::string& meshName, const std::string& textureName);
 	void SetAllMeshMaterials(const std::string& materialName);
+
 
 	std::string GetName();
 	const glm::mat4 GetModelMatrix();
@@ -156,4 +161,8 @@ public:
 
     int m_ignoredViewportIndex = -1;
     int m_exclusiveViewportIndex = -1;
+
+
+    AnimationLayer& GetAnimationLayer() { return m_animationLayer; }
+    void SubmitForSkinning();
 };

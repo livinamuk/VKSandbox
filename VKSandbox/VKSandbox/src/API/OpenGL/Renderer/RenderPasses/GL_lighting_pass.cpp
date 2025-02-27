@@ -1,8 +1,5 @@
 #include "../GL_renderer.h"
-
 #include "AssetManagement/AssetManager.h"
-#include "Core/Game.h"
-#include "Editor/Editor.h"
 
 namespace OpenGLRenderer {
 
@@ -17,25 +14,6 @@ namespace OpenGLRenderer {
         if (!lightingShader) return;
 
         lightingShader->Use();
-
-        Player* player = Game::GetLocalPlayerByIndex(0);
-
-        // Get me out of here
-        // Get me out of here
-        // Get me out of here
-        lightingShader->SetInt("u_editorLighting", 0);
-        lightingShader->SetInt("u_ambientLightingBoost", 0);
-        if (Editor::IsOpen()) {
-            EditorLightingSettings& lightingSettigns = Editor::GetLightingSettings();
-            if (!lightingSettigns.lightingEnabled) {
-                lightingShader->SetInt("u_editorLighting", 1);
-            }
-            lightingShader->SetInt("u_ambientLightingBoost", 1);
-        }
-        // Get me out of here
-        // Get me out of here
-        // Get me out of here
-
 
         glBindTextureUnit(0, gBuffer->GetColorAttachmentHandleByName("BaseColor"));
         glBindTextureUnit(1, gBuffer->GetColorAttachmentHandleByName("Normal"));

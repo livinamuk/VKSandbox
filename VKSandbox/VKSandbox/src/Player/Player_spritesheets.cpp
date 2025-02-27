@@ -10,6 +10,10 @@ void Player::UpdateSpriteSheets(float deltaTime) {
     if (ViewportIsVisible() && GetCurrentWeaponType() != WeaponType::MELEE) {
         AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
         WeaponInfo* weaponInfo = GetCurrentWeaponInfo();
+        if (!weaponInfo) {
+            std::cout << "Player::UpdateSpriteSheets(float deltaTime) failed: weaponInfo was nullptr!\n";
+            return;
+        }
         glm::vec3 boneWorldPosition = viewWeapon->GetBoneWorldPosition(weaponInfo->muzzleFlashBoneName);
         m_muzzleFlash.SetPosition(boneWorldPosition);
         m_muzzleFlash.Update(deltaTime);

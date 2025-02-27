@@ -40,6 +40,7 @@ namespace AssetManager {
     }
 
     void ExportMissingModels() {
+        //return;
         // Scan for new obj and fbx and export custom model format
         for (FileInfo& fileInfo : Util::IterateDirectory("res/models_raw", { "obj", "fbx" })) {
             std::string assetPath = "res/models/" + fileInfo.name + ".model";

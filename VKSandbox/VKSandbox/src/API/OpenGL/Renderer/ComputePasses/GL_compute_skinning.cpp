@@ -18,11 +18,11 @@ namespace OpenGLRenderer {
         if (!skinningTransforms) return;
 
         // Append all animated transforms into a single buffer
-        std::vector<AnimatedGameObject>& animatedGameObjects = World::GetAnimatedGameObjects();
+        std::vector<AnimatedGameObject*> animatedGameObjects = RenderDataManager::GetAnimatedGameObjectToSkin();
         RenderDataManager::skinningTransforms.clear();
         for (int i = 0; i < animatedGameObjects.size(); i++) {
-            AnimatedGameObject& animatedGameObject = animatedGameObjects[i];
-            std::vector<glm::mat4>& transforms = animatedGameObject.GetLocalBlendedBoneTransforms();
+            AnimatedGameObject* animatedGameObject = animatedGameObjects[i];
+            std::vector<glm::mat4>& transforms = animatedGameObject->GetLocalBlendedBoneTransforms();
             RenderDataManager::skinningTransforms.insert(RenderDataManager::skinningTransforms.end(), transforms.begin(), transforms.end());       
         }
 
@@ -31,8 +31,8 @@ namespace OpenGLRenderer {
                
         // Calculate total amount of vertices to skin and allocate space
         int totalVertexCount = 0;
-        for (AnimatedGameObject& animatedGameObject : animatedGameObjects) {
-            SkinnedModel* skinnedModel = animatedGameObject.m_skinnedModel;
+        for (AnimatedGameObject* animatedGameObject : animatedGameObjects) {
+            SkinnedModel* skinnedModel = animatedGameObject->m_skinnedModel;
             if (!skinnedModel) continue;
             for (int i = 0; i < skinnedModel->GetMeshCount(); i++) {
                 int meshindex = skinnedModel->GetMeshIndices()[i];
@@ -52,8 +52,8 @@ namespace OpenGLRenderer {
         int j = 0;
         uint32_t baseOutputVertex = 0;
         uint32_t baseTransformIndex = 0;
-        for (AnimatedGameObject& animatedGameObject : animatedGameObjects) {
-            SkinnedModel* skinnedModel = animatedGameObject.m_skinnedModel;
+        for (AnimatedGameObject* animatedGameObject : animatedGameObjects) {
+            SkinnedModel* skinnedModel = animatedGameObject->m_skinnedModel;
             if (!skinnedModel) continue;
 
             for (int i = 0; i < skinnedModel->GetMeshCount(); i++) {
@@ -67,7 +67,7 @@ namespace OpenGLRenderer {
                 glDispatchCompute(mesh->vertexCount, 1, 1);
                 baseOutputVertex += mesh->vertexCount;
             }
-            baseTransformIndex += animatedGameObject.GetLocalBlendedBoneTransforms().size();
+            baseTransformIndex += animatedGameObject->GetLocalBlendedBoneTransforms().size();
             j++;
         }
     }

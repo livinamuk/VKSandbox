@@ -1,0 +1,199 @@
+{
+    "GameObjects": [
+        {
+            "baseMaterial": "LampPost",
+            "meshBlendingModes": [],
+            "meshMaterials": [],
+            "modelName": "Bench",
+            "position": [
+                17.239999771118164,
+                -5.0,
+                16.530000686645508
+            ],
+            "rotation": [
+                0.0,
+                -0.4000000059604645,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "baseMaterial": "",
+            "meshBlendingModes": [
+                "EyelashUpper_HP|BLENDED",
+                "EyelashLower_HP|BLENDED",
+                "HairScalp|BLENDED",
+                "HairOutta|HAIR_TOP_LAYER",
+                "HairInner|HAIR_UNDER_LAYER"
+            ],
+            "meshMaterials": [
+                "Rock|Rock",
+                "BoobTube|BoobTube",
+                "Face|MermaidFace",
+                "Body|MermaidBody",
+                "Arms|MermaidArms",
+                "HairInner|MermaidHair",
+                "HairOutta|MermaidHair",
+                "HairScalp|MermaidScalp",
+                "EyeLeft|MermaidEye",
+                "EyeRight|MermaidEye",
+                "Tail|MermaidTail",
+                "TailFin|MermaidTail",
+                "EyelashUpper_HP|MermaidLashes",
+                "EyelashLower_HP|MermaidLashes",
+                "Nails|Nails"
+            ],
+            "modelName": "Mermaid",
+            "position": [
+                19.639999389648438,
+                -4.619999885559082,
+                17.329999923706055
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        }
+    ],
+    "Lights": [
+        {
+            "color": [
+                1.0,
+                0.7799999713897705,
+                0.5289999842643738
+            ],
+            "position": [
+                16.0,
+                -2.2808001041412354,
+                16.0
+            ],
+            "radius": 5.599999904632568,
+            "strength": 4.25,
+            "type": "LAMP_POST"
+        },
+        {
+            "color": [
+                1.0,
+                0.7799999713897705,
+                0.5289999842643738
+            ],
+            "position": [
+                22.8700008392334,
+                -2.2808001041412354,
+                21.1299991607666
+            ],
+            "radius": 5.599999904632568,
+            "strength": 4.25,
+            "type": "LAMP_POST"
+        },
+        {
+            "color": [
+                1.0,
+                0.7799999713897705,
+                0.5289999842643738
+            ],
+            "position": [
+                6.199999809265137,
+                -2.2808001041412354,
+                34.130001068115234
+            ],
+            "radius": 5.599999904632568,
+            "strength": 4.25,
+            "type": "LAMP_POST"
+        }
+    ],
+    "PickUps": [
+        {
+            "position": [
+                16.100000381469727,
+                -4.949999809265137,
+                16.969999313354492
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "type": "SHOTGUN_AMMO_BUCKSHOT"
+        },
+        {
+            "position": [
+                16.5,
+                -4.949999809265137,
+                16.969999313354492
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "type": "SHOTGUN_AMMO_SLUG"
+        }
+    ],
+    "Trees": [
+        {
+            "position": [
+                29.309999465942383,
+                -4.869999885559082,
+                28.860000610351563
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "type": 0
+        },
+        {
+            "position": [
+                31.309999465942383,
+                -4.869999885559082,
+                28.860000610351563
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "type": 1
+        },
+        {
+            "position": [
+                33.310001373291016,
+                -4.869999885559082,
+                28.860000610351563
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "type": 2
+        }
+    ]
+}

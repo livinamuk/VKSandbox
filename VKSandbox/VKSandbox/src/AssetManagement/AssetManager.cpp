@@ -125,6 +125,11 @@ namespace AssetManager {
 
             Renderer::InitMain();
             std::cout << "Assets loaded\n";
+
+
+            //for (Model& model : GetModels()) {
+            //    std::cout << "'" << model.GetName() << "'\n";
+            //}
         }
     }
 

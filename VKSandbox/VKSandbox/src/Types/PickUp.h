@@ -6,7 +6,8 @@
 
 struct PickUp {
     PickUp() = default;
-    PickUp(PickUpCreateInfo createInfo);   
+    PickUp(PickUpCreateInfo createInfo); 
+    void SetPosition(glm::vec3 position);
     void Update(float deltaTime);
     void UpdateRenderItems();
     void SetMousePickIndex(int mousePickIndex);

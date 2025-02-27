@@ -1,11 +1,27 @@
 #include "Editor.h"
 #include "Core/Audio.h"
+#include "Core/JSON.h"
+#include "Renderer/Renderer.h"
+#include "World/World.h"
 #include "Input/Input.h"
 #include "imgui/imgui.h"
 #include <fstream>
 
 namespace Editor {
 
+    enum InsertState {
+        IDLE,
+        INSERTING
+    };
+
+    InsertState g_InsertState;
+
+
+    // "Callbacks"
+    void LoadSector();
+    void SaveSector();
+
+    void InsertTree();
     void ShowFileMenu();
     void Test();
     void CreateEditorSelectMenuUI();
@@ -23,7 +39,7 @@ namespace Editor {
         if (IsEditorSelectMenuVisible()) {
             CreateEditorSelectMenuUI();
         }
-        else if (IsOpen()){
+        if (IsEditorOpen()){
             ShowFileMenu();
             ShowLeftPanel();
         }
@@ -41,19 +57,19 @@ namespace Editor {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
 
-                if (ImGui::MenuItem("  New    ")) { Test(); }
+                if (ImGui::MenuItem("  New        ")) { Test(); }
 
-                if (ImGui::MenuItem("  Open    ")) { std::cout << "Open file dialog\n"; }
+                if (ImGui::MenuItem("  Load        ")) { LoadSector(); }
 
-                if (ImGui::MenuItem("  Save    ")) { std::cout << "Save file\n"; }
+                if (ImGui::MenuItem("  Save        ")) { SaveSector(); }
 
-                if (ImGui::MenuItem("  Exit    ")) { std::cout << "Exit application\n"; }
+                if (ImGui::MenuItem("  Exit        ")) { std::cout << "Exit application\n"; }
 
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Insert")) {
 
-                if (ImGui::MenuItem("  Tree    ")) { Test(); }
+                if (ImGui::MenuItem("  Tree    ")) { InsertTree(); }
 
                 ImGui::EndMenu();
             }
@@ -85,14 +101,20 @@ namespace Editor {
 
         if (ImGui::Button("Heightmap Editor", ImVec2(-FLT_MIN, 40))) {
             Audio::PlayAudio(AUDIO_SELECT, 1.00f);
-            OpenEditor(EditorMode::HEIGHTMAP_EDITOR);
+            SetEditorMode(EditorMode::HEIGHTMAP_EDITOR);
             CloseEditorSelectMenu();
+            if (!IsEditorOpen()) {
+                OpenEditor();
+            }
         }
 
         if (ImGui::Button("Sector Editor", ImVec2(-FLT_MIN, 40))) {
             Audio::PlayAudio(AUDIO_SELECT, 1.00f);
-            OpenEditor(EditorMode::SECTOR_EDITOR);
+            SetEditorMode(EditorMode::SECTOR_EDITOR);
             CloseEditorSelectMenu();
+            if (!IsEditorOpen()) {
+                OpenEditor();
+            }
         }
 
         if (ImGui::Button("Weapon Editor", ImVec2(-FLT_MIN, 40))) {
@@ -116,7 +138,7 @@ namespace Editor {
         float panelHeight = io.DisplaySize.y - EDITOR_FILE_MENU_HEIGHT;
 
         static float propertiesHeight = EDITOR_FILE_MENU_HEIGHT + (panelHeight * 0.35f);
-        float minSize = 50.0f;
+        float minSize = 150.0f;
         float maxSize = panelHeight - minSize;
 
         ImGui::SetNextWindowPos(ImVec2(0, EDITOR_FILE_MENU_HEIGHT), ImGuiCond_Always);
@@ -137,6 +159,74 @@ namespace Editor {
         ImGui::End();
     }
 
+    void RightJustifiedText(const std::string& text, float right_margin) {
+        ImVec2 text_size = ImGui::CalcTextSize(text.c_str());
+        float cursor_x = right_margin - text_size.x;
+        ImGui::SetCursorPosX(cursor_x);
+        ImGui::TextUnformatted(text.c_str());
+    }
+
+    void Vec3Input(const std::string& label, glm::vec3& value) {
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 6));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 3)); 
+
+
+        float padding = 40;
+        float valueMargin = EDITOR_LEFT_PANEL_WIDTH * 0.4f;
+        float labelMargin = valueMargin - 12.0f;
+        float inputFieldWidth = EDITOR_LEFT_PANEL_WIDTH - valueMargin - padding;
+        ImGui::PushItemWidth(inputFieldWidth);
+
+        // X Input
+        RightJustifiedText(label + " X", labelMargin);
+        ImGui::SameLine(valueMargin);
+        ImGui::InputFloat(std::string("##X" + label).c_str(), &value[0], 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_CharsDecimal);
+
+        // Y Input
+        RightJustifiedText("Y", labelMargin);
+        ImGui::SameLine(valueMargin);
+        ImGui::InputFloat(std::string("##Y" + label).c_str(), &value[1], 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_CharsDecimal);
+
+        // Z Input
+        RightJustifiedText("Z", labelMargin);
+        ImGui::SameLine(valueMargin);
+        ImGui::InputFloat(std::string("##Z" + label).c_str(), &value[2], 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_CharsDecimal);
+
+        ImGui::Dummy(ImVec2(0.0f, 1.0f));
+        ImGui::PopStyleVar(3);
+        ImGui::PopItemWidth();
+
+    }
+
+    void StringInput(const std::string& label, const std::string& value) {
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f);
+
+        float padding = 40;
+        float valueMargin = EDITOR_LEFT_PANEL_WIDTH * 0.4f;
+        float labelMargin = valueMargin - 12.0f;
+        float inputFieldWidth = EDITOR_LEFT_PANEL_WIDTH - valueMargin - padding;
+        ImGui::PushItemWidth(inputFieldWidth);
+
+
+        RightJustifiedText(label, labelMargin);
+        ImGui::SameLine(valueMargin);
+        //ImGui::InputFloat("##X", &value[0], 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_CharsDecimal);
+
+        static char nameBuffer[128] = "Default Name";
+
+        float nameInputFieldWidth = 220.0f;
+        //ImGui::PushItemWidth(nameInputFieldWidth);
+        if (ImGui::InputText(std::string("##" + label).c_str(), nameBuffer, IM_ARRAYSIZE(nameBuffer))) {
+            std::string cleanedName = std::string(nameBuffer).c_str();
+            std::cout << "'" << cleanedName << "'\n";
+        }
+
+        ImGui::Dummy(ImVec2(0.0f, 0.0f));
+        ImGui::PopStyleVar(2);
+        ImGui::PopItemWidth();
+    }
 
 
     void ShowPropertiesPanel(float leftPanelWidth, float& propertiesHeight, float panelHeight, float minSize, float maxSize) {
@@ -148,6 +238,8 @@ namespace Editor {
         static int selectedMaterial = 0;
         static std::vector<std::string> materials = { "Material A", "Material B", "Material C" };
 
+        static std::string name0;
+        static std::string name1;
 
         ImGuiIO& io = ImGui::GetIO();
 
@@ -155,31 +247,23 @@ namespace Editor {
             ImGui::Text("Properties");
             ImGui::Separator();
 
-            ImGui::Text("Name:");
-            float nameInputFieldWidth = 220.0f;
-            ImGui::PushItemWidth(nameInputFieldWidth);
-            if (ImGui::InputText("##Name", nameBuffer, IM_ARRAYSIZE(nameBuffer))) {
-                std::string cleanedName = std::string(nameBuffer).c_str();
-                std::cout << "'" << cleanedName << "'\n";
-            }
-            ImGui::PopItemWidth();
+           // ImGui::Text("Name:");
+           // float nameInputFieldWidth = 220.0f;
+           // ImGui::PushItemWidth(nameInputFieldWidth);
+           // if (ImGui::InputText("##Name", nameBuffer, IM_ARRAYSIZE(nameBuffer))) {
+           //     std::string cleanedName = std::string(nameBuffer).c_str();
+           //     std::cout << "'" << cleanedName << "'\n";
+           // }
+           // ImGui::PopItemWidth();
+           //
+           // float inputFieldWidth = 220.0f;
 
-            float inputFieldWidth = 220.0f;
 
-            ImGui::Text("Position:");
-            ImGui::PushItemWidth(inputFieldWidth);
-            ImGui::InputFloat3("##Position", &position.x, "%.3f");
-            ImGui::PopItemWidth();
-
-            ImGui::Text("Rotation:");
-            ImGui::PushItemWidth(inputFieldWidth);
-            ImGui::InputFloat3("##Rotation", &rotation.x, "%.3f");
-            ImGui::PopItemWidth();
-
-            ImGui::Text("Scale:");
-            ImGui::PushItemWidth(inputFieldWidth);
-            ImGui::InputFloat3("##Scale", &scale.x, "%.3f");
-            ImGui::PopItemWidth();
+            StringInput("Name", name0);
+            StringInput("Cunt", name1);
+            Vec3Input("Position", position);
+            Vec3Input("Rotation", rotation);
+            Vec3Input("Scale", scale);
 
 
             ImGui::Text("Material:");
@@ -271,13 +355,13 @@ namespace Editor {
 
 
     void ShowLightingSettings(float panelHeight, float propertiesHeight) {
-        EditorLightingSettings& lightingSettings = GetLightingSettings();
+        RendererSettings& rendererSettings = Renderer::GetCurrentRendererSettings();
 
         if (ImGui::BeginChild("Lighting Settings", ImVec2(0, panelHeight - propertiesHeight - 10), true, ImGuiWindowFlags_HorizontalScrollbar)) {
             ImGui::TextUnformatted("Lighting Settings");
             ImGui::Separator();
-            ImGui::Checkbox("Lighting", &lightingSettings.lightingEnabled);            
-            ImGui::Checkbox("Grass", &lightingSettings.grassEnabled);            
+            //ImGui::Checkbox("Lighting", &lightingSettings.lightingEnabled);            
+            ImGui::Checkbox("Grass", &rendererSettings.drawGrass);
         }
         ImGui::EndChild();
     }
@@ -370,5 +454,17 @@ namespace Editor {
         Audio::PlayAudio("UI_Select.wav", 1.0f);
     }
 
+    void LoadSector() {
+        SectorCreateInfo sectorCreateInfo = JSON::LoadSector("res/sectors/TestSector.json");
+        World::LoadSingleSector(sectorCreateInfo);
+    }
 
+    void SaveSector() {
+        SectorCreateInfo& sectorCreateInfo = World::GetEditorSectorCreateInfo();
+        JSON::SaveSector("res/sectors/TestSector2.json", sectorCreateInfo);
+    }
+
+    void InsertTree() {
+        // nothing
+    }
 }
