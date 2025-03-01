@@ -1,7 +1,8 @@
 #version 430 core
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
-layout(r16f, binding = 0) uniform image2D outputImage;
+//layout(r16f, binding = 0) uniform image2D outputImage;
+layout (binding = 0, r16f) uniform image2DArray heightmapArrayImage;
 
 // 2D Random Gradient Function
 vec2 randomGradient(vec2 p) {
@@ -54,8 +55,10 @@ float fbm(vec2 uv) {
 
 void main() {
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);   
-    ivec2 outputImageSize = imageSize(outputImage);
+    ivec2 outputImageSize = imageSize(heightmapArrayImage).xy;
     vec2 uv_screenspace = vec2(pixelCoords) / vec2(outputImageSize);
+
+    int layerIndex = 0;
 
     vec4 outputColor = vec4(1,0,0,1);
 
@@ -70,5 +73,5 @@ void main() {
 
     outputColor = vec4(height, 0.0, 0.0, 0.0); // Grayscale output
 
-    imageStore(outputImage, pixelCoords, outputColor);
+    imageStore(heightmapArrayImage, ivec3(pixelCoords, layerIndex), outputColor);
 }

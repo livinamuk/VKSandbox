@@ -12,6 +12,8 @@
 #include "Core/Game.h"
 #include "Util/Util.h"
 
+#include "World/HeightMapManager.h"
+
 struct GrassVertex {
     glm::vec3 position;
     glm::vec3 normal;
@@ -171,6 +173,9 @@ namespace OpenGLRenderer {
         glBindTextureUnit(0, heightmapFBO->GetColorAttachmentHandleByName("Color"));
         glBindTextureUnit(1, wipBuffer->GetColorAttachmentHandleByName("WorldSpacePosition"));
         glBindTextureUnit(2, AssetManager::GetTextureByName("Perlin")->GetGLTexture().GetHandle());
+
+        OpenGLTextureArray& heightmapTextureArray = HeightMapManager::GetGLTextureArray();
+        glBindTextureUnit(3, heightmapTextureArray.GetHandle());
 
         // GL State
         SetRasterizerState("GeometryPass_NonBlended");

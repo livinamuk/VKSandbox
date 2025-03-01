@@ -22,6 +22,15 @@ Tree::Tree(TreeCreateInfo createInfo) {
     }
 }
 
+TreeCreateInfo Tree::GetCreateInfo() {
+    TreeCreateInfo createInfo;
+    createInfo.position = m_transform.position;
+    createInfo.rotation = m_transform.rotation;
+    createInfo.scale = m_transform.scale;
+    createInfo.type = (int)(m_treeType);
+    return createInfo;
+}
+
 void Tree::Update(float deltaTime) {
     m_modelMatrix = m_transform.to_mat4();
     UpdateRenderItems();

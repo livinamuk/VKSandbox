@@ -216,6 +216,8 @@ enum struct PickUpType {
 
 enum struct EditorMode {
     HEIGHTMAP_EDITOR,
+    HOUSE_EDITOR,
+    MAP_EDITOR,
     SECTOR_EDITOR,
     WEAPON_EDITOR
 };

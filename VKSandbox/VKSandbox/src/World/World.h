@@ -1,5 +1,5 @@
 #pragma once
-#include "Sector.h"
+#include "Map.h"
 
 #include "HellTypes.h"
 #include "AssetManagement/AssetManager.h"
@@ -16,24 +16,17 @@
 
 namespace World {
     void NewCampainWorld();
+
+    void LoadMap(const std::string& mapName);
+    void LoadSingleSector(const std::string& sectorName);
     void LoadSingleSector(SectorCreateInfo& sectorCreateInfo);
+
+    //void RevertToSavedSector();
+
+
     void LoadDeathMatchMap();
 
     SectorCreateInfo& GetEditorSectorCreateInfo();
-
-
-
-
-
-
-
-
-
-
-
-
-
-    void CreateHardCodedTestSector();
 
 
 
@@ -73,10 +66,11 @@ namespace World {
     std::vector<RenderItem>& GetRenderItemsHairBottomLayer();
     std::vector<RenderItem>& GetSkinnedRenderItems();
 
-    void AddBulletCasing(BulletCasingCreateInfo createInfo);
-    void AddLight(LightCreateInfo createInfo);
-    void AddPickUp(PickUpCreateInfo createInfo);
-    void AddGameObject(GameObjectCreateInfo createInfo);
+    void AddBulletCasing(BulletCasingCreateInfo createInfo, SpawnOffset spawnOffset = SpawnOffset());
+    void AddGameObject(GameObjectCreateInfo createInfo, SpawnOffset spawnOffset = SpawnOffset());
+    void AddLight(LightCreateInfo createInfo, SpawnOffset spawnOffset = SpawnOffset());
+    void AddPickUp(PickUpCreateInfo createInfo, SpawnOffset spawnOffset = SpawnOffset());
+    void AddTree(TreeCreateInfo createInfo, SpawnOffset spawnOffset = SpawnOffset());
 }
 
 /*

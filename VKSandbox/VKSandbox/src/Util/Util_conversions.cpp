@@ -48,39 +48,4 @@ namespace Util {
         if (str == "DO_NOT_RENDER") return BlendingMode::DO_NOT_RENDER;
         return BlendingMode::NONE;
     }
-
-    MeshMaterialInfo StringToMeshMaterialInfo(const std::string& str) {
-        MeshMaterialInfo meshMaterialInfo;
-        size_t delimiterPosition = str.find("|");
-        if (delimiterPosition != std::string::npos) {
-            meshMaterialInfo.meshName = str.substr(0, delimiterPosition);
-            meshMaterialInfo.materialName = str.substr(delimiterPosition + 1);
-            std::cout << str << ": '" << meshMaterialInfo.meshName << "' '" << meshMaterialInfo.materialName << "'\n";
-        }
-        else {
-            std::cout << "Util::StringToMeshMaterialInfo() failed: no delimiter!\n";
-        }
-        return meshMaterialInfo;       
-    }
-
-    std::string MeshMaterialInfoToString(MeshMaterialInfo meshMatrialInfo) {
-        return meshMatrialInfo.meshName + "|" + meshMatrialInfo.materialName;
-    }
-
-    MeshBlendingInfo StringToMeshBlendingMode(const std::string& str) {
-        MeshBlendingInfo meshBlendingInfo;
-        size_t delimiterPosition = str.find("|");
-        if (delimiterPosition != std::string::npos) {
-            meshBlendingInfo.meshName = str.substr(0, delimiterPosition);
-            meshBlendingInfo.blendingMode = StringToBlendingMode(str.substr(delimiterPosition + 1));
-        }
-        else {
-            std::cout << "Util::StringToMeshBlendingInfo() failed: no delimiter!\n";
-        }
-        return meshBlendingInfo;
-    }
-
-    std::string MeshBlendingInfoToString(MeshBlendingInfo meshBlendingInfo) {
-        return meshBlendingInfo.meshName + "|" + BlendingModeToString(meshBlendingInfo.blendingMode);
-    }
 }

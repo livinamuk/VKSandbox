@@ -1,36 +1,17 @@
 #include "World.h"
-
-#define WORLD_SECTOR_WIDTH 6
-#define WORLD_SECTOR_HEIGHT 20
-
-#include "Util.h"
-#include "Core/Audio.h"
-#include "Core/Game.h"
-
+#include "CreateInfo.h"
 #include "HellDefines.h"
+#include "HellTypes.h"
+#include "Util.h"
+
+#include "Core/Audio.h"
 #include "Core/Game.h"
 #include "Input/Input.h"
 #include "Renderer/RenderDataManager.h"
-
-#include "HellTypes.h"
-#include <nlohmann/json.hpp>
-#include <glm/glm.hpp>
-#include "CreateInfo.h"
-#include "Util.h"
-
-#include "Core/JSON.h"
-#include <fstream>
-#include <string>
-#include <iostream>
-
-
-#include "API/OpenGL/Renderer/GL_renderer.h"
+#include "World/MapManager.h"
+#include "World/SectorManager.h"
 
 namespace World {
-
-    //Sector g_sectors[WORLD_SECTOR_WIDTH][WORLD_SECTOR_HEIGHT];
-    SectorCreateInfo g_editorSectorCreateInfo;
-
     std::vector<Light> g_lights;
     std::vector<AnimatedGameObject> g_animatedGameObjects;
     std::vector<BulletCasing> g_bulletCasings;
@@ -46,12 +27,7 @@ namespace World {
     std::vector<RenderItem> g_skinnedRenderItems;
 
     void ResetWorld();
-    void AddLight(LightCreateInfo createInfo);
-    void AddTree(TreeCreateInfo createInfo);
-
-    SectorCreateInfo& GetEditorSectorCreateInfo() {
-        return g_editorSectorCreateInfo;
-    }
+    void AddSectorAtLocation(SectorCreateInfo& sectorCreateInfo, SpawnOffset spawnOffset);
 
     void Update(float deltaTime) {
 
@@ -127,10 +103,6 @@ namespace World {
             renderItem.meshIndex = casing.GetMeshIndex();
         }
 
-
-
-
-        
 
         RenderDataManager::ResetBaseSkinnedVertex();
         for (AnimatedGameObject& animatedGameObject : g_animatedGameObjects) {
@@ -225,21 +197,68 @@ namespace World {
         ResetWorld();
     }
 
+    void LoadMap(const std::string& mapName) {
+        // Try load the map
+        Map* map = MapManager::GetMapByName(mapName);
+        if (map) {
+
+            // It loaded successfully so reset the world...
+            ResetWorld();
+
+            // and iterate over all the sector locations...
+            for (auto& kv : map->GetSectorLocations()) {
+                const ivecXZ& sectorLocation = kv.first;
+                const std::string& sectorName = kv.second;
+
+                // and if they are valid, then load them into the world
+                SectorCreateInfo* sectorCreateInfo = SectorManager::GetSectorCreateInfoByName(sectorName);
+                if (sectorCreateInfo) {
+                    SpawnOffset spawnOffset;
+                    spawnOffset.positionX = sectorLocation.x * SECTOR_SIZE_WORLD_SPACE;
+                    spawnOffset.positionZ = sectorLocation.z * SECTOR_SIZE_WORLD_SPACE;
+                    AddSectorAtLocation(*sectorCreateInfo, spawnOffset);
+                    std::cout << " - [" << sectorLocation.x << "][" << sectorLocation.z << "] " << sectorName << "\n";
+                }
+            }
+            std::cout << "Loaded map: " << mapName << "\n";
+        } 
+        else {
+            std::cout << "World::LoadMap() failed to load " << mapName << "\n";
+        }
+    }
+
+    void LoadSingleSector(const std::string& sectorName) {
+        SectorCreateInfo* sectorCreateInfo = SectorManager::GetSectorCreateInfoByName(sectorName);
+        if (sectorCreateInfo) {
+            LoadSingleSector(*sectorCreateInfo);
+            std::cout << "Loaded sector: " << sectorName << "\n";
+        }
+        else {
+            std::cout << "Failed to load sector: " << sectorName << "\n";
+        }
+    }
+
     void LoadSingleSector(SectorCreateInfo& sectorCreateInfo) {
         ResetWorld();
+        SpawnOffset spawnOffset;
+        spawnOffset.positionX = 0;
+        spawnOffset.positionZ = 0;
+        AddSectorAtLocation(sectorCreateInfo, spawnOffset);
+    }
+
+    void AddSectorAtLocation(SectorCreateInfo& sectorCreateInfo, SpawnOffset spawnOffset) {
         for (LightCreateInfo& createInfo : sectorCreateInfo.lights) {
-            AddLight(createInfo);
+            AddLight(createInfo, spawnOffset);
         }
         for (GameObjectCreateInfo& createInfo : sectorCreateInfo.gameObjects) {
-            AddGameObject(createInfo);
+            AddGameObject(createInfo, spawnOffset);
         }
         for (PickUpCreateInfo& createInfo : sectorCreateInfo.pickUps) {
-            AddPickUp(createInfo);
+            AddPickUp(createInfo, spawnOffset);
         }
         for (TreeCreateInfo& createInfo : sectorCreateInfo.trees) {
-            AddTree(createInfo);
+            AddTree(createInfo, spawnOffset);
         }
-        g_editorSectorCreateInfo = sectorCreateInfo;
     }
 
     void ResetWorld() {
@@ -248,31 +267,35 @@ namespace World {
         g_lights.clear();
         g_pickUps.clear();
         g_trees.clear();
-
-        //for (int x = 0; x < WORLD_SECTOR_WIDTH; x++) {
-        //    for (int y = 0; y < WORLD_SECTOR_HEIGHT; y++) {
-        //        g_sectors[x][y].ResetData();
-        //    }
-        //}
     }
 
-    void AddBulletCasing(BulletCasingCreateInfo createInfo) {
+    void AddBulletCasing(BulletCasingCreateInfo createInfo, SpawnOffset spawnOffset) {
+        createInfo.position.x += spawnOffset.positionX;
+        createInfo.position.z += spawnOffset.positionZ;
         g_bulletCasings.push_back(BulletCasing(createInfo));
     }
 
-    void AddGameObject(GameObjectCreateInfo createInfo) {
+    void AddGameObject(GameObjectCreateInfo createInfo, SpawnOffset spawnOffset) {
+        createInfo.position.x += spawnOffset.positionX;
+        createInfo.position.z += spawnOffset.positionZ;
         g_gameObjects.push_back(GameObject(createInfo));
     }
 
-    void AddLight(LightCreateInfo createInfo) {
+    void AddLight(LightCreateInfo createInfo, SpawnOffset spawnOffset) {
+        createInfo.position.x += spawnOffset.positionX;
+        createInfo.position.z += spawnOffset.positionZ;
         g_lights.push_back(Light(createInfo));
     }
 
-    void AddPickUp(PickUpCreateInfo createInfo) {
+    void AddPickUp(PickUpCreateInfo createInfo, SpawnOffset spawnOffset) {
+        createInfo.position.x += spawnOffset.positionX;
+        createInfo.position.z += spawnOffset.positionZ;
         g_pickUps.push_back(PickUp(createInfo));
     }
 
-    void AddTree(TreeCreateInfo createInfo) {
+    void AddTree(TreeCreateInfo createInfo, SpawnOffset spawnOffset) {
+        createInfo.position.x += spawnOffset.positionX;
+        createInfo.position.z += spawnOffset.positionZ;
         g_trees.push_back(Tree(createInfo));
     }
 

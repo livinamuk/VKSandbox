@@ -36,7 +36,7 @@ namespace AssetManager {
     }
 
     Material* GetDefaultMaterial() {
-        int index = GetMaterialIndexByName("CheckerBoard");
+        int index = GetMaterialIndexByName(DEFAULT_MATERIAL_NAME);
         return GetMaterialByIndex(index);
     }
 

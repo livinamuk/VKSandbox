@@ -9,6 +9,7 @@
 #include "Core/Audio.h"
 #include "Core/JSON.h"
 #include "Editor/Editor.h"
+#include "Imgui/EditorImgui.h"
 #include "File/File.h"
 #include "Input/Input.h"
 #include "Player/Player.h"
@@ -104,7 +105,7 @@ namespace Game {
 
 
         // Editor select menu open?
-        if (Editor::IsEditorSelectMenuVisible()) {
+        if (Editor::IsEditorOpen() || EditorImGui::ImGuiContentIsVisible()) {
             for (Player& player : g_localPlayers) {
                 player.DisableControl();
             }

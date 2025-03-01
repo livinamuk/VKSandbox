@@ -38,6 +38,7 @@ namespace OpenGLRenderer {
     void HeightMapPass();
     void ImGuiPass();
     void LightingPass();
+    void OutlinePass();
     void SkyBoxPass();
     void SpriteSheetPass();
     void TextureReadBackPass();

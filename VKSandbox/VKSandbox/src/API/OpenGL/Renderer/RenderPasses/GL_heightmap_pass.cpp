@@ -8,14 +8,17 @@
 
 #include "API/OpenGL/Types/GL_texture_readback.h"
 #include "BackEnd/BackEnd.h"
-#include "Input/Input.h"
-#include "Tools/ImageTools.h"
-#include "Util/Util.h"
 #include "Editor/Editor.h"
 #include "Editor/Gizmo.h"
+#include "Imgui/ImguiBackEnd.h"
+#include "Input/Input.h"
 #include "World/HeightMapManager.h"
+#include "Tools/ImageTools.h"
+#include "Util/Util.h"
 
 #include "lodepng/lodepng.h"
+
+#include "Core/Audio.h"
 
 namespace OpenGLRenderer {
 
@@ -24,7 +27,7 @@ namespace OpenGLRenderer {
     void PaintHeightMap();
     void GenerateHeightMapVertexData();
     void DrawHeightMap();
-    void SaveHeightMapRGBA8();
+    void SaveHeightMap();
 
     void HeightMapPass() {
         AllocateHeightMapGPUMemoryIfItDoesntExist();
@@ -32,7 +35,18 @@ namespace OpenGLRenderer {
         PaintHeightMap();
         GenerateHeightMapVertexData();
         DrawHeightMap();
-        SaveHeightMapRGBA8();
+
+        if (Editor::IsEditorOpen() && Editor::GetEditorMode() == EditorMode::HEIGHTMAP_EDITOR) {
+
+            if (Input::KeyPressed(HELL_KEY_L)) {                
+                HeightMapData heightMapData = File::LoadHeightMap("TEST.heightmap");
+                OpenGLFrameBuffer* heightmapFBO = GetFrameBuffer("HeightMap");
+                GLuint textureHandle = heightmapFBO->GetColorAttachmentHandleByName("Color");
+            }
+            if (Input::KeyPressed(HELL_KEY_S)) {
+                SaveHeightMap();
+            }
+        }
 
         if (Input::KeyPressed(HELL_KEY_U)) {
             if (Util::RenameFile("res/shit.txt", "res/fuck.txt")) {
@@ -52,14 +66,15 @@ namespace OpenGLRenderer {
         static bool runOnce = true;
         if (!runOnce) return;
         runOnce = false;
+        return;
 
-        OpenGLFrameBuffer* heightmapFBO = GetFrameBuffer("HeightMap");
+        OpenGLTextureArray& heightmapTextureArray = HeightMapManager::GetGLTextureArray();
         OpenGLShader* shader = GetShader("HeightMapImageGeneration");
 
         shader->Use();
 
-        glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16F);
-        glDispatchCompute((heightmapFBO->GetWidth() + 7) / 8, (heightmapFBO->GetHeight() + 7) / 8, 1);
+        glBindImageTexture(0, heightmapTextureArray.GetHandle(), 0, GL_TRUE, 0, GL_READ_WRITE, GL_R16F);
+        glDispatchCompute(HEIGHT_MAP_SIZE / 16, HEIGHT_MAP_SIZE / 16, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 
@@ -67,6 +82,7 @@ namespace OpenGLRenderer {
         if (!IsMouseRayWorldPositionReadBackReady()) return;
         if (!Editor::IsEditorOpen()) return;
         if (Editor::GetEditorMode() != EditorMode::HEIGHTMAP_EDITOR) return;
+        if (ImGuiBackend::ImGuiOwnsMouse()) return;
 
         OpenGLFrameBuffer* heightmapFBO = GetFrameBuffer("HeightMap");
         OpenGLShader* shader = GetShader("HeightMapPaint");
@@ -92,7 +108,11 @@ namespace OpenGLRenderer {
             shader->SetFloat("u_strength", strength);
             shader->SetFloat("u_noiseStrength", noiseStrength);
 
-            glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16F);
+            //glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16F);
+
+            OpenGLTextureArray& heightmapTextureArray = HeightMapManager::GetGLTextureArray();
+            glBindImageTexture(0, heightmapTextureArray.GetHandle(), 0, GL_TRUE, 0, GL_READ_ONLY, GL_R16F);
+
             glDispatchCompute(maxBrushSize, maxBrushSize, 1);
         }
 
@@ -103,25 +123,15 @@ namespace OpenGLRenderer {
         OpenGLFrameBuffer* heightmapFBO = GetFrameBuffer("HeightMap");
         OpenGLHeightMapMesh& heightMapMesh = OpenGLBackEnd::GetHeightMapMesh();
         OpenGLShader* shader = GetShader("HeightMapVertexGeneration");
+        
+        int layerIndex = 0;
 
         shader->Use();
+        shader->SetInt("u_layerIndex", layerIndex);
 
-        glBindImageTexture(0, heightmapFBO->GetColorAttachmentHandleByName("Color"), 0, GL_FALSE, 0, GL_READ_ONLY, GL_R16F);
-
-        // Array version: untested...
-        OpenGLTextureArray& heightmapTextureArray = HeightMapManager::GetGLTextureArray();
-        int layerIndex = 0;
-        glBindImageTexture(1, heightmapTextureArray.GetHandle(), 0, GL_TRUE, layerIndex, GL_READ_ONLY, GL_R16F);
-        //glBindImageTexture(1, heightmapTextureArray.GetHandle(), 0, GL_FALSE, layerIndex, GL_READ_ONLY, GL_R16F); // single layer only?
-        glFinish();
-
-        // Test heightmap array
-        //OpenGLTextureArray& textureArray = HeightMapManager::GetGLTextureArray();
-        //glActiveTexture(GL_TEXTURE3);
-        //glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray.GetHandle());
-        //uniform sampler2DArray heightmapArray;
-
-
+        OpenGLTextureArray& heightmapTextureArray = HeightMapManager::GetGLTextureArray();        
+        glBindImageTexture(0, heightmapTextureArray.GetHandle(), 0, GL_TRUE, layerIndex, GL_READ_ONLY, GL_R16F);
+      
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, heightMapMesh.GetVBO());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, heightMapMesh.GetEBO());
         glDispatchCompute((HEIGHT_MAP_SIZE + 15) / 16, (HEIGHT_MAP_SIZE + 15) / 16, 1);
@@ -174,69 +184,27 @@ namespace OpenGLRenderer {
         OpenGLBackEnd::ReadBackHeightmapMeshData();
     }
 
-    void SaveHeightMap2() {
-        static OpenGLTextureReadBack readback;
-        static bool savedFile = false;
+    void SaveHeightMap() {
+        Audio::PlayAudio(AUDIO_SELECT, 1.00f);
 
-        if (Input::KeyPressed(HELL_KEY_Y)) {
-            OpenGLFrameBuffer* heightmapFBO = GetFrameBuffer("HeightMap");
-            GLuint fboHandle = heightmapFBO->GetHandle();
-            GLuint attachment = heightmapFBO->GetColorAttachmentSlotByName("Color");
-            int xOffset = 0;
-            int yOffset = 0;
-            int width = heightmapFBO->GetWidth();
-            int height = heightmapFBO->GetHeight();
-            readback.IssueDataRequest(fboHandle, attachment, xOffset, yOffset, width, height, GL_R16F);
-            //savedFile = false;
-        }
-        if (readback.IsRequestInProgress()) {
-            readback.Update();
-        }
-        if (readback.IsResultReady() && !savedFile) {
-            ImageTools::SaveBitmap("heightmap_export.bmp", readback.GetUint16Data().data(), readback.GetWidth(), readback.GetHeight(), GL_R16F);
-            //ImageTools::SaveHeightMapR16F("heightmap_export.png", readback.GetUint16Data().data(), readback.GetWidth(), readback.GetHeight());
-            std::cout << "saved r16f file\n";
-            readback.Reset();
-            //savedFile = true;
-        }
+        OpenGLTextureArray& heightmapTextureArray = HeightMapManager::GetGLTextureArray();
+
+        GLuint textureHandle = heightmapTextureArray.GetHandle();
+        GLuint width = heightmapTextureArray.GetWidth();
+        GLuint height = heightmapTextureArray.GetHeight();
+        int layerIndex = 0;
+        size_t dataSize = width * height * sizeof(float);
+
+        HeightMapData heightMapData;
+        heightMapData.name = "TEST";
+        heightMapData.width = width;
+        heightMapData.height = height;
+        heightMapData.data.resize(heightMapData.width * heightMapData.height);
+
+        // Readback
+        glGetTextureSubImage(textureHandle, 0, 0, 0, layerIndex, width, height, 1, GL_RED, GL_FLOAT, dataSize, heightMapData.data.data());
+
+        // Write file
+        File::SaveHeightMap(heightMapData);
     }
-
-
-#include "stb_image_write.h"
-
-    void SaveHeightMapRGBA8() {
-        if (Input::KeyPressed(HELL_KEY_Y)) {
-            OpenGLFrameBuffer* heightmapFBO = GetFrameBuffer("HeightMap");
-            GLuint textureHandle = heightmapFBO->GetColorAttachmentHandleByName("Color");
-            int width = heightmapFBO->GetWidth();
-            int height = heightmapFBO->GetHeight();
-            std::string filename = "HEIGHTMAP_RGBA8.png";
-
-            glBindTexture(GL_TEXTURE_2D, textureHandle);
-
-            // Allocate buffer for RGBA8 data
-            std::vector<uint8_t> rawData(width * height * 4); // 4 channels (RGBA)
-
-            // Read pixels from the currently bound texture
-            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawData.data());
-
-            // Verify min/max values (only checking the R channel for debug)
-            uint8_t minVal = 255, maxVal = 0;
-            for (size_t i = 0; i < rawData.size(); i += 4) { // Step 4 since RGBA
-                uint8_t r = rawData[i]; // Red channel
-                minVal = std::min(minVal, r);
-                maxVal = std::max(maxVal, r);
-            }
-            std::cout << "[SaveTextureRGBA8] Min R: " << (int)minVal << ", Max R: " << (int)maxVal << "\n";
-
-            // Save as PNG using stb_image_write
-            if (stbi_write_png(filename.c_str(), width, height, 4, rawData.data(), width * 4)) {
-                std::cout << "[SaveTextureRGBA8] Saved RGBA8 PNG successfully: " << filename << "\n";
-            }
-            else {
-                std::cerr << "[SaveTextureRGBA8] Error saving PNG file!\n";
-            }
-        }
-    }
-
 }

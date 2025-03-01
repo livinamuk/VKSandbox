@@ -17,6 +17,14 @@ PickUp::PickUp(PickUpCreateInfo createInfo) {
     }
 }
 
+PickUpCreateInfo PickUp::GetCreateInfo() {
+    PickUpCreateInfo createInfo;
+    createInfo.position = m_transform.position;
+    createInfo.rotation = m_transform.rotation;
+    createInfo.pickUpType = Util::PickUpTypeToString(m_pickUpType);
+    return createInfo;
+}
+
 void PickUp::Update(float deltaTime) {
     m_modelMatrix = m_transform.to_mat4();
     UpdateRenderItems();

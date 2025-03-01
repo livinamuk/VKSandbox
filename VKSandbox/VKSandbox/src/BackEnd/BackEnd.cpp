@@ -11,9 +11,10 @@
 #include "Core/Audio.h"
 #include "Core/Debug.h"
 #include "Core/Game.h"
-#include "Core/ImGuiBackend.h"
 #include "Editor/Editor.h"
 #include "Editor/Gizmo.h"
+#include "ImGui/EditorImgui.h"
+#include "ImGui/ImGuiBackend.h"
 #include "Input/Input.h"
 #include "Input/InputMulti.h"
 #include "Physics/Physics.h"
@@ -72,6 +73,7 @@ namespace BackEnd {
         Gizmo::Init();
         ViewportManager::Init();
         Editor::Init();
+        EditorImGui::Init();
         WeaponManager::Init();
         Physics::Init();
         ImGuiBackend::Init();
@@ -96,13 +98,29 @@ namespace BackEnd {
         if (!GLFWIntegration::WindowHasFocus()) {
             InputMulti::ResetState();
         }
+
+        // Show and hide mouse cursor based on Editor and EditorImgui elements visibility
+        if (EditorImGui::ImGuiContentIsVisible()) {
+            Input::ShowCursor();
+            if (!Editor::IsEditorOpen() && !EditorImGui::ImGuiContentWasVisibleLastFrame()) {
+                Input::CenterMouseCursor();
+            }
+        }
+        else if (Editor::IsEditorOpen()) {
+            Input::ShowCursor();
+        }
+        else {
+            Input::DisableCursor();
+        }
     }
 
     void UpdateGame() {
 
         const Resolutions& resolutions = Config::GetResolutions();
 
+        ImGuiBackend::Update();
         ViewportManager::Update();
+        EditorImGui::Update();
         Editor::Update(Game::GetDeltaTime());
         Game::Update();
         World::Update(Game::GetDeltaTime());
@@ -126,7 +144,6 @@ namespace BackEnd {
         UIBackEnd::EndFrame();
         Debug::EndFrame();
         InputMulti::ResetMouseOffsets();
-        ImGuiBackend::Update();
     }
 
     void UpdateSubSystems() {
@@ -285,6 +302,11 @@ namespace BackEnd {
     }
 
     void UpdateLazyKeypresses() {
+
+        if (EditorImGui::HasKeyboardFocus()) {
+            return;
+        }
+
         if (Input::KeyPressed(HELL_KEY_H)) {
             Renderer::HotloadShaders();
         }

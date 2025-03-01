@@ -54,10 +54,11 @@ namespace Util {
     std::string WeaponActionToString(const WeaponAction& weaponAction);
     std::string ImageDataTypeToString(const ImageDataType& imageDataType);
     std::string EditorModeToString(const EditorMode& editorMode);
-
-    // File
     const char* CopyConstChar(const char* text);
     bool StrCmp(const char* queryA, const char* queryB);
+
+    // File
+    int GetFileSize(const std::string& filepath);
     std::string GetFilename(const std::string& filepath);
     std::string GetFileName(const std::string& filepath);
     std::string RemoveFileExtension(const std::string& filename);
@@ -96,13 +97,12 @@ namespace Util {
     std::string LightTypeToString(LightType type);
     std::string PickUpTypeToString(PickUpType type);
     std::string BlendingModeToString(BlendingMode mode);
-    std::string MeshMaterialInfoToString(MeshMaterialInfo meshMatrialInfo);
-    std::string MeshBlendingInfoToString(MeshBlendingInfo meshBlendingInfo);
     LightType StringToLightType(const std::string& str);
     PickUpType StringToPickUpType(const std::string& str);
     BlendingMode StringToBlendingMode(const std::string& str);
-    MeshMaterialInfo StringToMeshMaterialInfo(const std::string& str);
-    MeshBlendingInfo StringToMeshBlendingMode(const std::string& str);
+
+    // Time
+    double GetCurrentTime();
 
     // Debug Info
     void PrintDebugInfo(TextureData& textureData);

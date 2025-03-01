@@ -19,20 +19,10 @@ void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex)
     m_camera.SetEulerRotation(rotation);
     m_viewportIndex = viewportIndex;
 
-    // fix me: make it some unique ID
-    m_playerIndex = viewportIndex;
-
-    //World::CreateAnimatedGameObject();
-    //m_viewWeaponAnimatedGameObjectIndex = World::GetAnimatedGameObjects().size() - 1;
     AnimatedGameObject* viewWeapon = GetViewWeaponAnimatedGameObject();
-    viewWeapon->SetPlayerIndex(viewportIndex);
     viewWeapon->SetExclusiveViewportIndex(viewportIndex);
-    viewWeapon->SetExclusiveViewportIndex(-1);
 
-    //World::CreateAnimatedGameObject();
-    //m_characterModelAnimatedGameObjectIndex = World::GetAnimatedGameObjects().size() - 1;
     AnimatedGameObject* characterModel = GetCharacterModelAnimatedGameObject();
-    characterModel->SetPlayerIndex(viewportIndex);
 
     SpriteSheetObjectCreateInfo createInfo;
     createInfo.textureName = "MuzzleFlash_4x5";
@@ -42,7 +32,6 @@ void Player::Init(glm::vec3 position, glm::vec3 rotation, int32_t viewportIndex)
     m_muzzleFlash.Init(createInfo);
     
     CreateCharacterController(m_position);
-
 }
 
 void Player::Update(float deltaTime) {

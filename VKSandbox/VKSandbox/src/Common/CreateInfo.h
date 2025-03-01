@@ -39,9 +39,7 @@ struct GameObjectCreateInfo {
     glm::vec3 rotation = glm::vec3(0.0f);
     glm::vec3 scale = glm::vec3(1.0f);
     std::string modelName = "";
-    std::string baseMaterial = "";
-    std::vector<MeshMaterialInfo> meshMaterialInfo;
-    std::vector<MeshBlendingInfo> meshBlendingInfo;
+    std::vector<MeshRenderingInfo> meshRenderingInfoSet;
 };
 
 struct TreeCreateInfo {
@@ -52,6 +50,8 @@ struct TreeCreateInfo {
 };
 
 struct SectorCreateInfo {
+    std::string sectorName;
+    std::string heightMapName;
     std::vector<GameObjectCreateInfo> gameObjects;
     std::vector<LightCreateInfo> lights;
     std::vector<PickUpCreateInfo> pickUps;

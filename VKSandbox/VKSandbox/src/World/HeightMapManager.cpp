@@ -1,5 +1,6 @@
 #include "HeightMapManager.h"
 #include "Backend/Backend.h"
+#include "File/File.h"
 #include "Tools/ImageTools.h"
 #include "Util.h"
 #include <glad/glad.h>
@@ -13,8 +14,8 @@ namespace HeightMapManager {
     void LoadHeightMapsFromDisk();
 
     void Init() {
-        //AllocateMemory(16);
-        //LoadHeightMapsFromDisk();
+        AllocateMemory(16);
+        LoadHeightMapsFromDisk();
     }
 
     void AllocateMemory(int heightmapCount) {
@@ -27,21 +28,18 @@ namespace HeightMapManager {
     }
 
     void LoadHeightMapsFromDisk() {
-        std::cout << "\n";
-        for (FileInfo& fileInfo : Util::IterateDirectory("res/height_maps/256x256")) {
-            TextureData textureData = ImageTools::LoadUncompressedTextureData(fileInfo.path);
-            Util::PrintDebugInfo(textureData);
+        std::vector<FileInfo> files = Util::IterateDirectory("res/height_maps/");
+
+        // Iterate all found files and upload the data to the gpu
+        for (int i = 0; i < files.size(); i++) {
+            HeightMapData heightMapData = File::LoadHeightMap(files[i].name + ".heightmap");
 
             if (BackEnd::GetAPI() == API::OPENGL) {
-                g_glTextureArray.LoadTextureData(textureData, g_heightmapCount++);
+                g_glTextureArray.SetLayerDataR16(i, heightMapData.data);
             }
             else if (BackEnd::GetAPI() == API::OPENGL) {
                 // TODO
             }
-
-            std::cout << "Loaded " << fileInfo.name << "\n";
-            Util::PrintDebugInfo(textureData);
-            std::cout << "\n";
         }
     }
 

@@ -59,15 +59,18 @@ void OpenGLFrameBuffer::CreateDepthAttachment(GLenum internalFormat, GLenum minF
     glTextureParameteri(m_depthAttachment.handle, GL_TEXTURE_MAG_FILTER, magFilter);
     glTextureParameteri(m_depthAttachment.handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTextureParameteri(m_depthAttachment.handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glNamedFramebufferTexture(m_handle, GL_DEPTH_STENCIL_ATTACHMENT, m_depthAttachment.handle, 0);
+    glNamedFramebufferTexture(m_handle, GL_DEPTH_ATTACHMENT, m_depthAttachment.handle, 0);
     std::string debugLabel = "Texture (FBO: " + std::string(m_name) + " Tex: Depth)";
     glObjectLabel(GL_TEXTURE, m_depthAttachment.handle, static_cast<GLsizei>(debugLabel.length()), debugLabel.c_str());
+}
+
+void OpenGLFrameBuffer::BindDepthAttachmentFrom(const OpenGLFrameBuffer& srcFrameBuffer) {
+    glNamedFramebufferTexture(m_handle, GL_DEPTH_ATTACHMENT, srcFrameBuffer.m_depthAttachment.handle, 0);
 }
 
 bool OpenGLFrameBuffer::StrCmp(const char* queryA, const char* queryB) {
     return std::strcmp(queryA, queryB) == 0;
 }
-
 
 void OpenGLFrameBuffer::DrawBuffers(std::vector<const char*> attachmentNames) {
     std::vector<GLuint> attachments;

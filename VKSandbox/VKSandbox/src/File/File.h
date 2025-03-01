@@ -3,6 +3,11 @@
 #include <string>
 
 namespace File {
+    // Heightmaps
+    HeightMapData LoadHeightMap(const std::string filename);
+    void SaveHeightMap(const HeightMapData& heightmapData);
+    void PrintHeightMapHeader(HeightMapHeader header);
+
     // Models
     void ExportModel(const ModelData& modelData);
     ModelData ImportModel(const std::string& filepath);

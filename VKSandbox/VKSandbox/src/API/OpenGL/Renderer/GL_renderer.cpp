@@ -67,13 +67,17 @@ namespace OpenGLRenderer {
         g_frameBuffers["GBuffer"].CreateAttachment("FinalLighting", GL_RGBA16F);
         g_frameBuffers["GBuffer"].CreateAttachment("WorldSpacePosition", GL_RGBA32F);
         g_frameBuffers["GBuffer"].CreateAttachment("Emissive", GL_RGBA8);
-        g_frameBuffers["GBuffer"].CreateDepthAttachment(GL_DEPTH32F_STENCIL8);
+        g_frameBuffers["GBuffer"].CreateDepthAttachment(GL_DEPTH_COMPONENT32F);
 
         g_frameBuffers["WIP"] = OpenGLFrameBuffer("WIP", resolutions.gBuffer);
         g_frameBuffers["WIP"].CreateAttachment("WorldSpacePosition", GL_RGBA32F);
 
+        g_frameBuffers["Outline"] = OpenGLFrameBuffer("Outline", resolutions.gBuffer);
+        g_frameBuffers["Outline"].CreateAttachment("Mask", GL_R8);
+        g_frameBuffers["Outline"].CreateAttachment("Result", GL_R8);
+
         g_frameBuffers["Hair"] = OpenGLFrameBuffer("Hair", resolutions.hair);
-        g_frameBuffers["Hair"].CreateDepthAttachment(GL_DEPTH32F_STENCIL8);
+        g_frameBuffers["Hair"].CreateDepthAttachment(GL_DEPTH_COMPONENT32F);
         g_frameBuffers["Hair"].CreateAttachment("Lighting", GL_RGBA16F);
         g_frameBuffers["Hair"].CreateAttachment("ViewspaceDepth", GL_R32F);
         g_frameBuffers["Hair"].CreateAttachment("ViewspaceDepthPrevious", GL_R32F);
@@ -171,6 +175,7 @@ namespace OpenGLRenderer {
         g_shaders["ComputeSkinning"] = OpenGLShader({ "GL_compute_skinning.comp" });
         g_shaders["EditorMesh"] = OpenGLShader({ "GL_editor_mesh.vert", "GL_editor_mesh.frag" });
         g_shaders["EmissiveComposite"] = OpenGLShader({ "GL_emissive_composite.comp" });
+        g_shaders["GBuffer"] = OpenGLShader({ "GL_GBuffer.vert", "GL_gBuffer.frag" });
         g_shaders["Gizmo"] = OpenGLShader({ "GL_gizmo.vert", "GL_gizmo.frag" });
         g_shaders["Grass"] = OpenGLShader({ "GL_grass.vert", "GL_grass.frag" });
         g_shaders["GrassGeometryGeneration"] = OpenGLShader({ "GL_grass_geometry_generation.comp" });
@@ -184,7 +189,9 @@ namespace OpenGLRenderer {
         g_shaders["HeightMapImageGeneration"] = OpenGLShader({ "GL_heightmap_image_generation.comp" });
         g_shaders["HeightMapPaint"] = OpenGLShader({ "GL_heightmap_paint.comp" });
         g_shaders["Lighting"] = OpenGLShader({ "GL_lighting.comp" });
-        g_shaders["GBuffer"] = OpenGLShader({ "GL_GBuffer.vert", "GL_gBuffer.frag" });
+        g_shaders["Outline"] = OpenGLShader({ "GL_outline.comp" });
+        g_shaders["OutlineComposite"] = OpenGLShader({ "GL_outline_composite.comp" });
+        g_shaders["OutlineMask"] = OpenGLShader({ "GL_outline_mask.vert", "GL_outline_mask.frag" });
         g_shaders["ShadowMapGeometry"] = OpenGLShader({ "GL_shadow_map_geometry.vert", "GL_shadow_map.frag" });
         g_shaders["ShadowMapHeightMap"] = OpenGLShader({ "GL_shadow_map_heightmap.vert", "GL_shadow_map.frag" });
         g_shaders["SolidColor"] = OpenGLShader({ "GL_solid_color.vert", "GL_solid_color.frag" });
@@ -240,6 +247,7 @@ namespace OpenGLRenderer {
         LightingPass();
         EmissivePass();
         HairPass();
+        OutlinePass();
         SpriteSheetPass();
         EditorPass();
         DebugPass();

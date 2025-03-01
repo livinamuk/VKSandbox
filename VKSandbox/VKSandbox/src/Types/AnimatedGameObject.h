@@ -24,7 +24,6 @@ struct AnimatedGameObject {
 
 private:
     std::vector<RenderItem> m_renderItems;
-    int32_t m_playerIndex = -1;
 
 public:
     std::unordered_map<std::string, unsigned int> m_boneMapping;
@@ -36,8 +35,6 @@ public:
     const size_t GetAnimatedTransformCount();
     void UpdateRenderItems();
     std::vector<RenderItem>& GetRenderItems();
-    void SetPlayerIndex(int32_t index);
-    const int32_t GetPlayerIndex();
     const uint32_t GetVerteXCount();
     std::vector<uint32_t> m_skinnedBufferIndices;
     int GetBoneIndex(const std::string& boneName);

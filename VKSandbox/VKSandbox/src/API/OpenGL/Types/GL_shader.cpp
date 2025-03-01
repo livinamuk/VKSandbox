@@ -174,6 +174,21 @@ void OpenGLShader::SetVec4(const std::string& name, float x, float y, float z, f
     glUniform4f(m_uniformLocations[name], x, y, z, w);
 }
 
+void OpenGLShader::SetIVec2(const std::string& name, const glm::ivec2& value) {
+    if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
+        m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
+    }
+    // Use the integer uniform function
+    glUniform2i(m_uniformLocations[name], value.x, value.y);
+}
+
+void OpenGLShader::SetIVec2Array(const std::string& name, const std::vector<glm::ivec2>& data) {
+    if (m_uniformLocations.find(name) == m_uniformLocations.end()) {
+        m_uniformLocations[name] = glGetUniformLocation(m_handle, name.c_str());
+    }
+    glUniform2iv(m_uniformLocations[name], static_cast<GLsizei>(data.size()), reinterpret_cast<const int*>(data.data()));
+}
+
 int OpenGLShader::GetHandle() {
     return m_handle;
 }

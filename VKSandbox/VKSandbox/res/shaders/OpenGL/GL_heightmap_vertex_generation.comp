@@ -2,8 +2,7 @@
 
 layout (local_size_x = 16, local_size_y = 16) in;
 
-layout (r16f, binding = 0) uniform readonly image2D heightmap;
-layout (binding = 1, r16f) readonly uniform image2DArray heightmapArrayImage;
+layout (binding = 0, r16f) readonly uniform image2DArray heightmapArrayImage;
 
 struct Vertex {
     float position[3];
@@ -20,70 +19,12 @@ layout (binding = 6, std430) buffer IndexBuffer {
     uint indices[];
 };
 
-void main2() {
-    ivec2 imageSize = imageSize(heightmap);
-    int width = imageSize.x;
-    int depth = imageSize.y;
-
-    uint x = gl_GlobalInvocationID.x;
-    uint z = gl_GlobalInvocationID.y;
-
-    if (x >= width || z >= depth) return;
-
-    uint index = z * width + x;
-
-    // Read height from the heightmap
-    int layerIndex = 0;
-    float height = imageLoad(heightmapArrayImage, ivec3(x, z, layerIndex)).r; 
-    // Set vertex attributes
-    vertices[index].position[0] = float(x);
-    vertices[index].position[1] = height;
-    vertices[index].position[2] = float(z);
-
-    vertices[index].uv[0] = float(x) / float(width - 1);
-    vertices[index].uv[1] = float(z) / float(depth - 1);
-
-    // Read neighboring heights
-    float left  = imageLoad(heightmapArrayImage, ivec3(max(x - 1, 0), z, layerIndex)).r;
-    float right = imageLoad(heightmapArrayImage, ivec3(min(x + 1, width - 1), z, layerIndex)).r;
-    float down  = imageLoad(heightmapArrayImage, ivec3(x, max(z - 1, 0), layerIndex)).r;
-    float up    = imageLoad(heightmapArrayImage, ivec3(x, min(z + 1, depth - 1), layerIndex)).r;
-
-    // Use a finite-difference approximation with a 0.5 factor
-    vec3 dx = vec3(1.0, 0.5 * (right - left), 0.0);
-    vec3 dz = vec3(0.0, 0.5 * (up - down), 1.0);
-
-    // Compute the norma
-    vec3 normal = normalize(cross(dz, dx));
-
-    vertices[index].normal[0] = normal.x;
-    vertices[index].normal[1] = normal.y;
-    vertices[index].normal[2] = normal.z;
-
-    // Tangents
-    vec3 tangent = normalize(vec3(1.0, right - left, 0.0));
-
-    vertices[index].tangent[0] = tangent.x;
-    vertices[index].tangent[1] = tangent.y;
-    vertices[index].tangent[2] = tangent.z;
-
-    // Generate indices
-    if (x < width - 1 && z < depth - 1) {
-        uint i = (z * (width - 1) + x) * 6;
-        indices[i] = index;
-        indices[i + 1] = index + width;
-        indices[i + 2] = index + 1;
-        indices[i + 3] = index + 1;
-        indices[i + 4] = index + width;
-        indices[i + 5] = index + width + 1; 
-    }
-}
-
+uniform int u_layerIndex;
 
 void main() {
-    ivec2 imageSize = imageSize(heightmap);
-    int width = imageSize.x;
-    int depth = imageSize.y;
+    ivec2 dimensions = imageSize(heightmapArrayImage).xy;
+    int width = dimensions.x;
+    int depth = dimensions.y;
 
     uint x = gl_GlobalInvocationID.x;
     uint z = gl_GlobalInvocationID.y;
@@ -93,8 +34,7 @@ void main() {
     uint index = z * width + x;
 
     // Read height from the heightmap
-    float height = imageLoad(heightmap, ivec2(x, z)).r;
-
+    float height = imageLoad(heightmapArrayImage, ivec3(x, z, u_layerIndex)).r; 
     // Set vertex attributes
     vertices[index].position[0] = float(x);
     vertices[index].position[1] = height;
@@ -104,10 +44,10 @@ void main() {
     vertices[index].uv[1] = float(z) / float(depth - 1);
 
     // Read neighboring heights
-    float left  = imageLoad(heightmap, ivec2(max(x - 1, 0), z)).r;
-    float right = imageLoad(heightmap, ivec2(min(x + 1, width - 1), z)).r;
-    float down  = imageLoad(heightmap, ivec2(x, max(z - 1, 0))).r;
-    float up    = imageLoad(heightmap, ivec2(x, min(z + 1, depth - 1))).r;
+    float left  = imageLoad(heightmapArrayImage, ivec3(max(x - 1, 0), z, u_layerIndex)).r;
+    float right = imageLoad(heightmapArrayImage, ivec3(min(x + 1, width - 1), z, u_layerIndex)).r;
+    float down  = imageLoad(heightmapArrayImage, ivec3(x, max(z - 1, 0), u_layerIndex)).r;
+    float up    = imageLoad(heightmapArrayImage, ivec3(x, min(z + 1, depth - 1), u_layerIndex)).r;
 
     // Use a finite-difference approximation with a 0.5 factor
     vec3 dx = vec3(1.0, 0.5 * (right - left), 0.0);

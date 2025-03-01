@@ -1,5 +1,6 @@
 #pragma once
 #include "JSON.h"
+#include "AssetManagement/AssetManager.h"
 #include "Util.h"
 #include <fstream>
 
@@ -8,17 +9,17 @@ namespace nlohmann {
         j = json::array({ v.x, v.y, v.z });
     }
 
-    void to_json(nlohmann::json& j, const MeshBlendingInfo& info) {
-        j = nlohmann::json{
-            {"meshName", info.meshName},
-            {"blendingMode", Util::BlendingModeToString(info.blendingMode)}
-        };
-    }
+    void to_json(nlohmann::json& j, const MeshRenderingInfo& info) {
+        Material* material = AssetManager::GetMaterialByIndex(info.materialIndex);
+        Mesh* mesh = AssetManager::GetMeshByIndex(info.meshIndex);
 
-    void to_json(nlohmann::json& j, const MeshMaterialInfo& info) {
+        if (!material) return;
+        if (!mesh) return;
+
         j = nlohmann::json{
-            {"meshName", info.meshName},
-            {"materialName", info.materialName}
+            {"meshName", mesh->GetName()},
+            {"materialName", material ? material->m_name : DEFAULT_MATERIAL_NAME },
+            {"blendingMode", Util::BlendingModeToString(info.blendingMode)}
         };
     }
 
@@ -28,29 +29,64 @@ namespace nlohmann {
         v.z = j.at(2).get<float>();
     }
 
-    void from_json(const nlohmann::json& j, MeshBlendingInfo& info) {
-        j.at("meshName").get_to(info.meshName);
-        std::string modeStr;
-        j.at("blendingMode").get_to(modeStr);
-        info.blendingMode = Util::StringToBlendingMode(modeStr);
-    }
+    void from_json(const nlohmann::json& j, MeshRenderingInfo& info) {
+        std::string meshName;
+        std::string materialName;
+        std::string blendingModeString;
 
-    void from_json(const nlohmann::json& j, MeshMaterialInfo& info) {
-        j.at("meshName").get_to(info.meshName);
-        j.at("materialName").get_to(info.materialName);
+        j.at("meshName").get_to(meshName);
+        j.at("materialName").get_to(materialName);
+        j.at("blendingMode").get_to(blendingModeString);
+
+        info.meshIndex = AssetManager::GetMeshIndexByName(meshName);
+        info.materialIndex = AssetManager::GetMaterialIndexByName(materialName);
+        info.blendingMode = Util::StringToBlendingMode(blendingModeString);
     }
 }
 
 namespace JSON {
 
-    SectorCreateInfo LoadSector(const std::string& filepath) {
-
+    bool LoadJsonFromFile(nlohmann::json& json, const std::string filepath) {
+        // Open the file
         std::ifstream file(filepath);
+        if (!file) {
+            std::cout << "JSON::LoadJsonFromFile() failed to open file: " << filepath << "\n";
+            return false;
+        }
+
+        // Read the entire file into a string stream
         std::stringstream buffer;
         buffer << file.rdbuf();
+        file.close();
+
+        // Try to parse the JSON
+        try {
+            json = nlohmann::json::parse(buffer.str());
+            return true;
+        }
+        catch (const nlohmann::json::parse_error& e) {
+            std::cerr << "JSON::LoadJsonFromFile() failed to parse the file " << filepath << ": " << e.what() << "\n";
+            return false;
+        }
+
+    }
+
+    SectorCreateInfo LoadSector(const std::string& filepath) {
+        SectorCreateInfo info;
+
+        // Try to parse the JSON
+        nlohmann::json json;
+        if (!LoadJsonFromFile(json, filepath)) {
+            std::cerr << "JSON::LoadSector() failed to open file: " << filepath << "\n";
+            return info;
+        }
+
+        FileInfo fileInfo = Util::GetFileInfoFromPath(filepath);
 
         SectorCreateInfo sectorCreateInfo;
-        nlohmann::json json = nlohmann::json::parse(buffer.str());
+        sectorCreateInfo.sectorName = fileInfo.name;
+
+        sectorCreateInfo.heightMapName = json.value("HeightMapName", "None");
 
         // Load Game Objects
         for (auto& jsonObject : json["GameObjects"]) {
@@ -59,9 +95,7 @@ namespace JSON {
             createInfo.rotation = jsonObject["rotation"];
             createInfo.scale = jsonObject["scale"];
             createInfo.modelName = jsonObject["modelName"];
-            createInfo.baseMaterial = jsonObject["baseMaterial"];
-            createInfo.meshMaterialInfo = jsonObject["meshMaterials"];
-            createInfo.meshBlendingInfo = jsonObject["meshBlendingModes"];
+            createInfo.meshRenderingInfoSet = jsonObject["meshRenderingInfo"];
         }
 
         // Load lights
@@ -107,9 +141,7 @@ namespace JSON {
                 { "rotation", createInfo.rotation },
                 { "scale", createInfo.scale },
                 { "modelName", createInfo.modelName },
-                { "baseMaterial", createInfo.baseMaterial },
-                { "meshMaterials", createInfo.meshMaterialInfo },
-                { "meshBlendingModes", createInfo.meshBlendingInfo },
+                { "meshRenderingInfo", createInfo.meshRenderingInfoSet },
             });
         }
 
@@ -123,7 +155,6 @@ namespace JSON {
                 { "strength", createInfo.strength }
             });
         }
-
 
         // Save PickUps
         for (const PickUpCreateInfo& createInfo : sectorCreateInfo.pickUps) {

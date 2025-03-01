@@ -1,6 +1,16 @@
 #include "Util.h"
+#include <fstream>
+#include <string>
 
 namespace Util {  
+    int GetFileSize(const std::string& filepath) {
+        std::ifstream file(filepath, std::ios::binary | std::ios::ate);
+        if (!file) {
+            return -1; 
+        }
+        return static_cast<int>(file.tellg());
+    }
+
     bool FileExists(const std::string_view name) {
         struct stat buffer;
         return (stat(name.data(), &buffer) == 0);

@@ -39,6 +39,7 @@ public:
     void CleanUp();
     void CreateAttachment(const char* name, GLenum internalFormat, GLenum minFilter = GL_LINEAR, GLenum magFilter = GL_LINEAR);
     void CreateDepthAttachment(GLenum internalFormat, GLenum minFilter = GL_LINEAR, GLenum magFilter = GL_LINEAR, GLint wrap = GL_CLAMP_TO_EDGE, glm::vec4 borderColor = glm::vec4(1.0f));
+    void BindDepthAttachmentFrom(const OpenGLFrameBuffer& srcFrameBuffer);
     void Bind();
     void SetViewport();
     void DrawBuffers(std::vector<const char*> attachmentNames);

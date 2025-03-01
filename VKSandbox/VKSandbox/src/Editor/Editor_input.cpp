@@ -3,6 +3,8 @@
 #include "BackEnd/BackEnd.h"
 #include "Config/Config.h"
 #include "Core/Audio.h"
+#include "ImGui/EditorImgui.h"
+#include "ImGui/ImGuiBackEnd.h"
 #include "Input/Input.h"
 #include "Viewport/ViewportManager.h"
 #include "UI/UIBackEnd.h"
@@ -33,36 +35,38 @@ namespace Editor {
         }
 
         // Toggle viewport types
-        for (int i = 0; i < 4; i++) {
-            Viewport* viewport = ViewportManager::GetViewportByIndex(i);
-            if (viewport->IsHovered()) {
-                if (Input::KeyPressed(HELL_KEY_NUMPAD_1)) {
-                    SetViewportView(i, Gizmo::GetPosition(), CameraView::FRONT);
-                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
-                }
-                if (Input::KeyPressed(HELL_KEY_NUMPAD_3)) {
-                    SetViewportView(i, Gizmo::GetPosition(), CameraView::BACK);
-                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
-                }
-                if (Input::KeyPressed(HELL_KEY_NUMPAD_4)) {
-                    SetViewportView(i, Gizmo::GetPosition(), CameraView::LEFT);
-                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
-                }
-                if (Input::KeyPressed(HELL_KEY_NUMPAD_6)) {
-                    SetViewportView(i, Gizmo::GetPosition(), CameraView::RIGHT);
-                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
-                }
-                if (Input::KeyPressed(HELL_KEY_NUMPAD_5)) {
-                    SetViewportView(i, Gizmo::GetPosition(), CameraView::TOP);
-                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
-                }
-                if (Input::KeyPressed(HELL_KEY_NUMPAD_2)) {
-                    SetViewportView(i, Gizmo::GetPosition(), CameraView::BOTTOM);
-                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
-                }
-                if (Input::KeyPressed(HELL_KEY_C)) {
-                    SetViewportView(i, Gizmo::GetPosition(), GetCameraViewByIndex(i));
-                    Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+        if (!EditorImGui::HasKeyboardFocus()) {
+            for (int i = 0; i < 4; i++) {
+                Viewport* viewport = ViewportManager::GetViewportByIndex(i);
+                if (viewport->IsHovered()) {
+                    if (Input::KeyPressed(HELL_KEY_NUMPAD_1)) {
+                        SetViewportView(i, Gizmo::GetPosition(), CameraView::FRONT);
+                        Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+                    }
+                    if (Input::KeyPressed(HELL_KEY_NUMPAD_3)) {
+                        SetViewportView(i, Gizmo::GetPosition(), CameraView::BACK);
+                        Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+                    }
+                    if (Input::KeyPressed(HELL_KEY_NUMPAD_4)) {
+                        SetViewportView(i, Gizmo::GetPosition(), CameraView::LEFT);
+                        Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+                    }
+                    if (Input::KeyPressed(HELL_KEY_NUMPAD_6)) {
+                        SetViewportView(i, Gizmo::GetPosition(), CameraView::RIGHT);
+                        Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+                    }
+                    if (Input::KeyPressed(HELL_KEY_NUMPAD_5)) {
+                        SetViewportView(i, Gizmo::GetPosition(), CameraView::TOP);
+                        Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+                    }
+                    if (Input::KeyPressed(HELL_KEY_NUMPAD_2)) {
+                        SetViewportView(i, Gizmo::GetPosition(), CameraView::BOTTOM);
+                        Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+                    }
+                    if (Input::KeyPressed(HELL_KEY_C)) {
+                        SetViewportView(i, Gizmo::GetPosition(), GetCameraViewByIndex(i));
+                        Audio::PlayAudio(AUDIO_SELECT, 1.0f);
+                    }
                 }
             }
         }
@@ -200,7 +204,7 @@ namespace Editor {
         SelectionRectangleState& rectangleState = GetSelectionRectangleState();
 
         // Begin drag
-        if (Input::LeftMousePressed() && EditorIsIdle() && EditorWasIdleLastFrame()) {
+        if (Input::LeftMousePressed() && EditorIsIdle() && EditorWasIdleLastFrame() && !ImGuiBackend::ImGuiOwnsMouse()) {
             SetEditorState(EditorState::DRAGGING_SELECT_RECT);
             rectangleState.beginX = mappedMouseX;
             rectangleState.beginY = mappedMouseY;

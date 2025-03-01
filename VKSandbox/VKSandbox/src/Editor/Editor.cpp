@@ -6,6 +6,8 @@
 #include "Config/Config.h"
 #include "Core/Audio.h"
 #include "Core/Debug.h"
+#include "Imgui/EditorImgui.h"
+#include "Imgui/ImguiBackEnd.h"
 #include "Input/Input.h"
 #include "Renderer/Renderer.h"
 #include "Viewport/ViewportManager.h"
@@ -18,7 +20,6 @@ namespace Editor {
     bool g_isOpen = false;
     bool g_isOrthographic[4];
     bool g_editorStateWasIdleLastFrame = true;
-    bool g_editorSelectMenuVisible = false;
     float g_OrthographicSizes[4];
     float g_verticalDividerXPos = 0.2f;
     float g_horizontalDividerYPos = 0.2f;
@@ -28,7 +29,11 @@ namespace Editor {
     EditorObjectType g_hoveredObjectType = EditorObjectType::NONE;
     ShadingMode g_shadingModes[4];
     EditorViewportSplitMode g_editorViewportSplitMode = EditorViewportSplitMode::SINGLE;
-    
+
+    std::string g_currentHeightMapName = "";
+    std::string g_currentMapName = "";
+    std::string g_currentSectorName = "";
+
     float g_orthoCameraDistances[4];
     EditorState g_editorState;
     SelectionRectangleState g_viewportSelectionRectangleState;
@@ -48,11 +53,11 @@ namespace Editor {
 
         // Center the viewport splits
         float editorWidth = resolutions.ui.x - EDITOR_LEFT_PANEL_WIDTH;
-        float editorHeight = resolutions.ui.y - EDITOR_FILE_MENU_HEIGHT;
+        float editorHeight = resolutions.ui.y - ImGuiBackend::GetFileMenuHeight();
         float editorWidthNormalized = editorWidth / resolutions.ui.x;
         float editorHeightNormalized = editorHeight / resolutions.ui.y;
         float panelRightEdgeNormalized = EDITOR_LEFT_PANEL_WIDTH / resolutions.ui.x;
-        float fileMenuHeightNormalized = EDITOR_FILE_MENU_HEIGHT / resolutions.ui.y;
+        float fileMenuHeightNormalized = ImGuiBackend::GetFileMenuHeight() / resolutions.ui.y;
         g_verticalDividerXPos = panelRightEdgeNormalized + (editorWidthNormalized * 0.5f);
         g_horizontalDividerYPos = fileMenuHeightNormalized + (editorHeightNormalized * 0.5f);
 
@@ -81,35 +86,13 @@ namespace Editor {
 
     void Update(float deltaTime) {
 
-        // Toggle editor select menu
-        if (Input::KeyPressed(HELL_KEY_F1)) {
-            Audio::PlayAudio(AUDIO_SELECT, 1.0f);
-            if (!IsEditorSelectMenuVisible()) {
-                ShowEditorSelectMenu();
-                if (!Editor::IsEditorOpen()) {
-                    Input::ShowCursor();
-                    Input::CenterMouseCursor();
-                }
-            }
-            else {
-                CloseEditorSelectMenu();
-                if (!Editor::IsEditorOpen()) {
-                    Input::DisableCursor();
-                }
-            }
-        }
-
         // Toggle editor
         if (Input::KeyPressed(HELL_KEY_TAB)) {
             Audio::PlayAudio(AUDIO_SELECT, 1.0f);
             Editor::ToggleEditorOpenState();
-            CloseEditorSelectMenu();
+            EditorImGui::CloseAnyOpenContent();
         }
 
-        if (IsEditorSelectMenuVisible()) {
-            ShowEditorSelectMenu();
-        }
-           
         if (!IsEditorOpen()) {
             return;
         }
@@ -178,14 +161,6 @@ namespace Editor {
         g_editorMode = editorMode;
     }
 
-    void ShowEditorSelectMenu() {
-        g_editorSelectMenuVisible = true;
-    }
-
-    void CloseEditorSelectMenu() {
-        g_editorSelectMenuVisible = false;
-    }
-
     void SetActiveViewportIndex(int index) {
         g_activeViewportIndex = index;
     }
@@ -210,10 +185,6 @@ namespace Editor {
 
     bool IsEditorClosed() {
         return !g_isOpen;
-    }
-
-    bool IsEditorSelectMenuVisible() {
-        return g_editorSelectMenuVisible;
     }
 
     bool EditorIsIdle() {
@@ -268,12 +239,12 @@ namespace Editor {
 
     std::string EditorObjectTypeToString(const EditorObjectType& type) {
         switch (type) {
-        case EditorObjectType::NONE:        return "NONE";
-        case EditorObjectType::GAME_OBJECT: return "GAME_OBJECT";
-        case EditorObjectType::TREE:        return "TREE";
-        case EditorObjectType::LIGHT:       return "LIGHT";
-        case EditorObjectType::PICK_UP:     return "PICK_UP";
-        default:                            return "Unknown";
+            case EditorObjectType::NONE:        return "NONE";
+            case EditorObjectType::GAME_OBJECT: return "GAME_OBJECT";
+            case EditorObjectType::TREE:        return "TREE";
+            case EditorObjectType::LIGHT:       return "LIGHT";
+            case EditorObjectType::PICK_UP:     return "PICK_UP";
+            default:                            return "Unknown";
         }
     }
 
@@ -337,7 +308,7 @@ namespace Editor {
         else {
             std::cout << "Editor::SetViewportOrthoSize(uint32_t viewportIndex, float size) failed. " << viewportIndex << " out of range of editor viewport count 4\n";
         }
-    }    
+    }
 
     EditorState GetEditorState() {
         return g_editorState;
@@ -380,5 +351,15 @@ namespace Editor {
         }
     }
 
+    std::string GetCurrentHeightMapName() {
+        return g_currentHeightMapName;
+    }
 
+    std::string GetCurrentMapName() {
+        return g_currentMapName;
+    }
+
+    std::string GetCurrentSectorName() {
+        return g_currentSectorName;
+    }
 }

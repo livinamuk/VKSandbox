@@ -38,14 +38,6 @@ std::vector<RenderItem>& AnimatedGameObject::GetRenderItems() {
     return m_renderItems;
 }
 
-void AnimatedGameObject::SetPlayerIndex(int32_t index) {
-    m_playerIndex = index;
-}
-
-const int32_t AnimatedGameObject::GetPlayerIndex() {
-    return m_playerIndex;
-}
-
 const uint32_t AnimatedGameObject::GetVerteXCount() {
     if (m_skinnedModel) {
         return m_skinnedModel->GetVertexCount();

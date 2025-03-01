@@ -7,6 +7,7 @@ layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
 layout(binding = 0) uniform sampler2D HeightMapTexture;
 layout(binding = 1) uniform sampler2D WorldPositionTexture;
+layout(binding = 3) uniform sampler2DArray HeightMapArrayTexture;
 
 uniform int gridSize;
 uniform vec3 offset;
@@ -127,6 +128,10 @@ void main() {
     vec2 texelSize = 1.0 / textureSize(HeightMapTexture, 0);
     normalizedCoords += texelSize * 0.5;
     float height = texture(HeightMapTexture, normalizedCoords).r;
+
+    
+    height = texture(HeightMapArrayTexture, vec3(normalizedCoords, 0)).r; 
+
     float posY = HEIGHTMAP_BEGIN_Y + (height * HEIGHTMAP_SCALE_Y);
     
     float rr = Rand(vec2(gid.y, gid.x));

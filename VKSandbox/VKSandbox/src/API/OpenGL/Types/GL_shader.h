@@ -38,6 +38,8 @@ public:
     void SetVec2(const std::string& name, float x, float y);
     void SetVec3(const std::string& name, float x, float y, float z);
     void SetVec4(const std::string& name, float x, float y, float z, float w);
+    void SetIVec2(const std::string& name, const glm::ivec2& value);
+    void SetIVec2Array(const std::string& name, const std::vector<glm::ivec2>& data);
     int GetHandle();
 private:
     std::vector<std::string> m_shaderPaths;

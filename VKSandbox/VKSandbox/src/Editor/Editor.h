@@ -6,9 +6,7 @@
 #include <string>
 
 namespace Editor {
-    
     void Init();
-    void UpdateImGui();
     void ResetCameras();
     void ResetViewports();
     void Update(float deltaTime);
@@ -46,7 +44,6 @@ namespace Editor {
     int GetHoveredObjectIndex();
     bool IsEditorOpen();
     bool IsEditorClosed();
-    bool IsEditorSelectMenuVisible();
     bool IsViewportOrthographic(uint32_t viewportIndex);
     bool EditorIsIdle();
     bool EditorWasIdleLastFrame();
@@ -68,6 +65,10 @@ namespace Editor {
     EditorMode& GetEditorMode();
 
     EditorMesh& GetEditorMesh(); // BROKEN / 5% IMPLEMENTED
+
+    std::string GetCurrentHeightMapName();
+    std::string GetCurrentMapName();
+    std::string GetCurrentSectorName();
 
     // Dividers
     bool IsVerticalDividerHovered();

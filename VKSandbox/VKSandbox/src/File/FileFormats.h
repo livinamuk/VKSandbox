@@ -3,6 +3,8 @@
 #include <vector>
 #include <map>
 
+inline const char HEIGHT_MAP_SIGNATURE[] = "HELL_HEIGHT_MAP";
+
 #pragma pack(push, 1)
 struct ModelHeader {
     char signature[10];     // "HELL_MODEL" 10 bytes
@@ -41,6 +43,13 @@ struct SkinnedMeshHeader {
     uint32_t localBaseVertex;
     glm::vec3 aabbMin;
     glm::vec3 aabbMax;
+};
+
+struct HeightMapHeader {
+    char signature[32];
+    char name[256];
+    uint32_t width;
+    uint32_t height;
 };
 #pragma pack(pop)
 
@@ -87,4 +96,11 @@ struct SkinnedModelData {
     const uint32_t GetMeshCount() const { return meshes.size(); };
     const uint32_t GetNodeCount() const { return nodes.size(); };
     const uint32_t GetBoneCount() const { return boneOffsets.size(); };
+};
+
+struct HeightMapData {
+    std::string name;
+    uint32_t width;
+    uint32_t height;
+    std::vector<float> data;
 };

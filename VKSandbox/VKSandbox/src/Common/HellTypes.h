@@ -445,13 +445,9 @@ struct PhysXRayResult {
     //ObjectType objectType;
 };
 
-struct MeshMaterialInfo {
-    std::string meshName;
-    std::string materialName;
-};
-
-struct MeshBlendingInfo {
-    std::string meshName;
+struct MeshRenderingInfo {
+    uint32_t meshIndex;
+    uint32_t materialIndex;
     BlendingMode blendingMode;
 };
 
@@ -481,4 +477,41 @@ struct Node {
     std::string name;
     int parentIndex;
     glm::mat4 inverseBindTransform;
+};
+
+struct SpawnOffset {
+    float positionX;
+    float positionZ;
+};
+
+struct ivecXZ {
+    int x;
+    int z;
+
+    ivecXZ() : x(0), z(0) {}
+    ivecXZ(int x, int z) : x(x), z(z) {}
+
+    bool operator==(const ivecXZ& other) const {
+        return x == other.x && z == other.z;
+    }
+
+    bool operator!=(const ivecXZ& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(const ivecXZ& other) const {
+        return (x < other.x) || (x == other.x && z < other.z);
+    }
+
+    bool operator>(const ivecXZ& other) const {
+        return other < *this;
+    }
+
+    bool operator<=(const ivecXZ& other) const {
+        return !(other < *this);
+    }
+
+    bool operator>=(const ivecXZ& other) const {
+        return !(*this < other);
+    }
 };

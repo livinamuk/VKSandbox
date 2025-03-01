@@ -5,6 +5,7 @@
 #include "BackEnd/BackEnd.h"
 #include "Config/Config.h"
 #include "Core/Game.h"
+#include "Imgui/ImguiBackEnd.h"
 #include "Input/Input.h"
 #include "Editor/Editor.h"
 #include "Renderer/Renderer.h"
@@ -29,9 +30,12 @@ namespace ViewportManager {
         if (Editor::IsEditorOpen()) {
             float splitX = Editor::GetVerticalDividerXPos();
             float splitY = Editor::GetHorizontalDividerYPos();
+                      
+            float editorPanelRightEdgeNormalized = EDITOR_LEFT_PANEL_WIDTH / BackEnd::GetCurrentWindowWidth();
+            float fileMenuBottomNormalized = (float)ImGuiBackend::GetFileMenuHeight() / (float)BackEnd::GetCurrentWindowHeight();
 
-            float beginX = EDITOR_LEFT_PANEL_WIDTH / resolutions.ui.x;
-            float beginY = EDITOR_FILE_MENU_HEIGHT / resolutions.ui.y;
+            float beginX = editorPanelRightEdgeNormalized;
+            float beginY = fileMenuBottomNormalized;
 
             // 4 way split
             if (Editor::GetEditorViewportSplitMode() == EditorViewportSplitMode::FOUR_WAY_SPLIT) {

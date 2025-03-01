@@ -1,241 +1,237 @@
 {
-    "GameObjects": [
+  "GameObjects": [
+    {
+      "meshRenderingInfo": [
         {
-            "baseMaterial": "LampPost",
-            "meshBlendingModes": [],
-            "meshMaterials": [],
-            "modelName": "Bench2",
-            "position": [
-                17.239999771118164,
-                -5.0,
-                16.530000686645508
-            ],
-            "rotation": [
-                0.0,
-                -0.4000000059604645,
-                0.0
-            ],
-            "scale": [
-                1.0,
-                1.0,
-                1.0
-            ]
-        },
-        {
-            "baseMaterial": "",
-            "meshBlendingModes": [
-                {
-                    "blendingMode": "BLENDED",
-                    "meshName": "EyelashUpper"
-                },
-                {
-                    "blendingMode": "BLENDED",
-                    "meshName": "EyelashLower"
-                },
-                {
-                    "blendingMode": "BLENDED",
-                    "meshName": "HairScalp"
-                },
-                {
-                    "blendingMode": "HAIR_TOP_LAYER",
-                    "meshName": "HairOutta"
-                },
-                {
-                    "blendingMode": "HAIR_UNDER_LAYER",
-                    "meshName": "HairInner"
-                }
-            ],
-            "meshMaterials": [
-                {
-                    "materialName": "Rock",
-                    "meshName": "Rock"
-                },
-                {
-                    "materialName": "BoobTube",
-                    "meshName": "BoobTube"
-                },
-                {
-                    "materialName": "MermaidFace",
-                    "meshName": "Face"
-                },
-                {
-                    "materialName": "MermaidBody",
-                    "meshName": "Body"
-                },
-                {
-                    "materialName": "MermaidArms",
-                    "meshName": "Arms"
-                },
-                {
-                    "materialName": "MermaidHair",
-                    "meshName": "HairInner"
-                },
-                {
-                    "materialName": "MermaidHair",
-                    "meshName": "HairOutta"
-                },
-                {
-                    "materialName": "MermaidScalp",
-                    "meshName": "HairScalp"
-                },
-                {
-                    "materialName": "MermaidEye",
-                    "meshName": "EyeLeft"
-                },
-                {
-                    "materialName": "MermaidEye",
-                    "meshName": "EyeRight"
-                },
-                {
-                    "materialName": "MermaidTail",
-                    "meshName": "Tail"
-                },
-                {
-                    "materialName": "MermaidTail",
-                    "meshName": "TailFin"
-                },
-                {
-                    "materialName": "MermaidLashes",
-                    "meshName": "EyelashUpper"
-                },
-                {
-                    "materialName": "MermaidLashes",
-                    "meshName": "EyelashLower"
-                },
-                {
-                    "materialName": "Nails",
-                    "meshName": "Nails"
-                }
-            ],
-            "modelName": "Mermaid",
-            "position": [
-                19.639999389648438,
-                -4.619999885559082,
-                17.329999923706055
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                1.0,
-                1.0,
-                1.0
-            ]
+          "blendingMode": "NONE",
+          "materialName": "LampPost",
+          "meshName": "Bench"
         }
-    ],
-    "Lights": [
+      ],
+      "modelName": "Bench2",
+      "position": [
+        17.239999771118164,
+        -5.0,
+        16.530000686645508
+      ],
+      "rotation": [
+        0.0,
+        -0.4000000059604645,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "meshRenderingInfo": [
         {
-            "color": [
-                1.0,
-                0.7799999713897705,
-                0.5289999842643738
-            ],
-            "position": [
-                16.0,
-                -2.2808001041412354,
-                16.0
-            ],
-            "radius": 5.599999904632568,
-            "strength": 4.25,
-            "type": "LAMP_POST"
+          "blendingMode": "NONE",
+          "materialName": "MermaidArms",
+          "meshName": "Arms"
         },
         {
-            "color": [
-                1.0,
-                0.7799999713897705,
-                0.5289999842643738
-            ],
-            "position": [
-                22.8700008392334,
-                -2.2808001041412354,
-                21.1299991607666
-            ],
-            "radius": 5.599999904632568,
-            "strength": 4.25,
-            "type": "LAMP_POST"
+          "blendingMode": "NONE",
+          "materialName": "MermaidBody",
+          "meshName": "Body"
         },
         {
-            "color": [
-                1.0,
-                0.7799999713897705,
-                0.5289999842643738
-            ],
-            "position": [
-                6.199999809265137,
-                -2.2808001041412354,
-                34.130001068115234
-            ],
-            "radius": 5.599999904632568,
-            "strength": 4.25,
-            "type": "LAMP_POST"
+          "blendingMode": "NONE",
+          "materialName": "BoobTube",
+          "meshName": "BoobTube"
+        },
+        {
+          "blendingMode": "BLENDED",
+          "materialName": "MermaidLashes",
+          "meshName": "EyelashLower"
+        },
+        {
+          "blendingMode": "BLENDED",
+          "materialName": "MermaidLashes",
+          "meshName": "EyelashUpper"
+        },
+        {
+          "blendingMode": "NONE",
+          "materialName": "MermaidEye",
+          "meshName": "EyeLeft"
+        },
+        {
+          "blendingMode": "NONE",
+          "materialName": "MermaidEye",
+          "meshName": "EyeRight"
+        },
+        {
+          "blendingMode": "NONE",
+          "materialName": "MermaidFace",
+          "meshName": "Face"
+        },
+        {
+          "blendingMode": "HAIR_UNDER_LAYER",
+          "materialName": "MermaidHair",
+          "meshName": "HairInner"
+        },
+        {
+          "blendingMode": "HAIR_TOP_LAYER",
+          "materialName": "MermaidHair",
+          "meshName": "HairOutta"
+        },
+        {
+          "blendingMode": "BLENDED",
+          "materialName": "MermaidScalp",
+          "meshName": "HairScalp"
+        },
+        {
+          "blendingMode": "NONE",
+          "materialName": "Nails",
+          "meshName": "Nails"
+        },
+        {
+          "blendingMode": "NONE",
+          "materialName": "Rock",
+          "meshName": "Rock"
+        },
+        {
+          "blendingMode": "NONE",
+          "materialName": "MermaidTail",
+          "meshName": "Tail"
+        },
+        {
+          "blendingMode": "NONE",
+          "materialName": "MermaidTail",
+          "meshName": "TailFin"
         }
-    ],
-    "PickUps": [
-        {
-            "position": [
-                16.100000381469727,
-                -4.949999809265137,
-                16.969999313354492
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "type": "SHOTGUN_AMMO_BUCKSHOT"
-        },
-        {
-            "position": [
-                16.5,
-                -4.949999809265137,
-                16.969999313354492
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "type": "SHOTGUN_AMMO_SLUG"
-        }
-    ],
-    "Trees": [
-        {
-            "position": [
-                29.309999465942383,
-                -4.869999885559082,
-                28.860000610351563
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                1.0,
-                1.0,
-                1.0
-            ],
-            "type": 0
-        },
-        {
-            "position": [
-                31.309999465942383,
-                -4.869999885559082,
-                28.860000610351563
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                1.0,
-                1.0,
-                1.0
-            ],
-            "type": 1
-        }
-    ]
+      ],
+      "modelName": "Mermaid",
+      "position": [
+        19.639999389648438,
+        -4.619999885559082,
+        17.329999923706055
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "Lights": [
+    {
+      "color": [
+        1.0,
+        0.7799999713897705,
+        0.5289999842643738
+      ],
+      "position": [
+        16.0,
+        -2.2808001041412354,
+        16.0
+      ],
+      "radius": 5.599999904632568,
+      "strength": 4.25,
+      "type": "LAMP_POST"
+    },
+    {
+      "color": [
+        1.0,
+        0.7799999713897705,
+        0.5289999842643738
+      ],
+      "position": [
+        22.8700008392334,
+        -2.2808001041412354,
+        21.1299991607666
+      ],
+      "radius": 5.599999904632568,
+      "strength": 4.25,
+      "type": "LAMP_POST"
+    },
+    {
+      "color": [
+        1.0,
+        0.7799999713897705,
+        0.5289999842643738
+      ],
+      "position": [
+        6.199999809265137,
+        -2.2808001041412354,
+        34.130001068115234
+      ],
+      "radius": 5.599999904632568,
+      "strength": 4.25,
+      "type": "LAMP_POST"
+    }
+  ],
+  "PickUps": [
+    {
+      "position": [
+        16.100000381469727,
+        -4.949999809265137,
+        16.969999313354492
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "type": "SHOTGUN_AMMO_BUCKSHOT"
+    },
+    {
+      "position": [
+        16.5,
+        -4.949999809265137,
+        16.969999313354492
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "type": "SHOTGUN_AMMO_SLUG"
+    }
+  ],
+  "Trees": [
+    {
+      "position": [
+        40.0528564453125,
+        -4.869999885559082,
+        12.307205200195313
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": 0
+    },
+    {
+      "position": [
+        35.5328369140625,
+        -4.869999885559082,
+        11.140487670898438
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": 1
+    }
+  ]
 }

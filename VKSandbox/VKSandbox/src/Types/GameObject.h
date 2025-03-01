@@ -6,12 +6,12 @@
 struct GameObject {
     GameObject() = default;
     GameObject(GameObjectCreateInfo createInfo);
+    GameObjectCreateInfo GetCreateInfo();
 
     std::string m_name;
     Model* m_model = nullptr;
     Transform m_transform;
-    std::vector<BlendingMode> m_meshBlendingModes;
-    std::vector<int> m_meshMaterialIndices;
+    std::vector<MeshRenderingInfo> m_meshRenderingInfoSet;
 
     void SetName(const std::string& name);
     void SetPosition(glm::vec3 position);
@@ -19,7 +19,6 @@ struct GameObject {
     void SetRotationY(float rotation);
     void SetScale(glm::vec3 scale);
     void SetModel(const std::string& name);
-    void SetMeshMaterials(const std::string& materialName);
     void SetMeshMaterialByMeshName(const std::string& meshName, const std::string& materialName);
     void SetMeshBlendingMode(const std::string& meshName, BlendingMode blendingMode);
     void SetMeshBlendingModes(BlendingMode blendingMode);

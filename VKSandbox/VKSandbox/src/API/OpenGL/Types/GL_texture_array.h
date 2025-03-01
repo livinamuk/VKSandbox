@@ -3,7 +3,7 @@
 
 struct OpenGLTextureArray {
     void AllocateMemory(uint32_t width, uint32_t height, uint32_t internalFormat, uint32_t mipmapLevelCount, uint32_t count);
-    void LoadTextureData(TextureData& textureData, uint32_t arrayIndex);
+    void SetLayerDataR16(uint32_t layerIndex, const std::vector<float>& data);
     void GenerateMipmaps();
     void SetWrapMode(TextureWrapMode wrapMode);
     void SetMinFilter(TextureFilter filter);

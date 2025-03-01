@@ -1,6 +1,7 @@
 #pragma once
 
 #define UNDEFINED_STRING "UNDEFINED_STRING"
+#define DEFAULT_MATERIAL_NAME "CheckerBoard"
 #define TIME_WRAP 10000.0f
 
 #define NEAR_PLANE 0.0025f
@@ -46,10 +47,7 @@
 #define HELL_CURSOR_VRESIZE         0x00036006
 
 // Editor
-#define EDITOR_FILE_MENU_HEIGHT 40.0f
 #define EDITOR_LEFT_PANEL_WIDTH 400.0f
-
-
 
 // Fix this shit
 
@@ -80,6 +78,8 @@
 #define HEIGHTMAP_BEGIN_Y -5.0f
 #define HEIGHTMAP_SCALE_Y 25.0f
 #define HEIGHTMAP_SCALE_XZ 0.25f
+
+#define SECTOR_SIZE_WORLD_SPACE (float(HEIGHT_MAP_SIZE) * float(HEIGHTMAP_SCALE_XZ))
 
 #define PLAYER_CAPSULE_HEIGHT 0.4f
 #define PLAYER_CAPSULE_RADIUS 0.15f

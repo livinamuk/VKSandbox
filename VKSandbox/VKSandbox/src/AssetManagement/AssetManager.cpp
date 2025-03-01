@@ -1,15 +1,20 @@
 ﻿#pragma once
 #include "AssetManager.h"
+
 #include "AssetManagement/BakeQueue.h"
 #include "API/OpenGL/GL_backend.h"
 #include "API/Vulkan/VK_backend.h"
 #include "BackEnd/Backend.h"
 #include "File/AssimpImporter.h"
-#include "Tools/ImageTools.h"
 #include "Renderer/Renderer.h"
 #include "UI/UIBackEnd.h"
+#include "Tools/ImageTools.h"
 #include "Util/Util.h"
+
 #include "World/HeightMapManager.h"
+#include "World/MapManager.h"
+#include "World/SectorManager.h"
+
 #include <unordered_map>
 #include <future>
 #include <mutex>
@@ -111,7 +116,11 @@ namespace AssetManager {
             BuildMaterials();
             BuildIndexMaps(); // but also required after BuildMaterials()... FIX! maybe just add to the index map when you create these objects.
             BuildSpriteSheetTextures();
+
             HeightMapManager::Init();
+            MapManager::Init();
+            SectorManager::Init();
+
             if (BackEnd::GetAPI() == API::OPENGL) {
                 OpenGLBackEnd::CleanUpBakingPBOs();
                 OpenGLBackEnd::UploadVertexData(g_vertices, g_indices);
