@@ -38,7 +38,7 @@ vec3 microfacetBRDF(in vec3 L, in vec3 V, vec3 N, in vec3 baseColor, in float me
     float NoL = clamp(dot(N, L), 0.0, 1.0);
     float NoH = clamp(dot(N, H), 0.0, 1.0);
     float VoH = clamp(dot(V, H), 0.0, 1.0);
-    vec3 F0 = vec3(0.04); 
+    vec3 F0 = vec3(0.04 * fresnelReflect); 
     F0 = mix(F0, baseColor, metallic);
     float NDF = DistributionGGX(N, H, roughness);   
     float G   = GeometrySmith(N, V, L, roughness);      

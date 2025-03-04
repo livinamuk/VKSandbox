@@ -7,12 +7,13 @@ struct EditorButton;
 
 struct FileMenuNode {
     FileMenuNode() = default;
-    FileMenuNode(const std::string& text, std::function<void()> callback = nullptr, bool addPadding = true);
-    FileMenuNode& AddChild(const std::string& text, std::function<void()> callback = nullptr, bool addPadding = true);
+    FileMenuNode(const std::string& text, std::function<void()> callback = nullptr, const std::string& shortcut = "", bool addPadding = true);
+    FileMenuNode& AddChild(const std::string& text, std::function<void()> callback = nullptr, const std::string& shortcut = "", bool addPadding = true);
     void CreateImguiElement();
 
     private:
     std::string m_text;
+    std::string m_shortcut = "";
     std::function<void()> m_callback = nullptr;
     std::vector<FileMenuNode> m_children;
 };

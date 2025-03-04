@@ -10,6 +10,7 @@ namespace RenderDataManager {
     const RendererData& GetRendererData();
     const std::vector<GPULight>& GetGPULightData();
     const std::vector<RenderItem>& GetInstanceData();
+    const std::vector<RenderItem>& GetOutlineRenderItems();
     const std::vector<ViewportData>& GetViewportData();
     const DrawCommandsSet& GetDrawInfoSet();
 
@@ -23,5 +24,9 @@ namespace RenderDataManager {
 
     int EncodeBaseInstance(int playerIndex, int instanceOffset);
     void DecodeBaseInstance(int baseInstance, int& playerIndex, int& instanceOffset);
+
+    // Submissions
+    void SubmitForOutlineRendering(const RenderItem& renderItem);
+    void SubmitForOutlineRendering(const std::vector<RenderItem>& renderItems);
 
 }

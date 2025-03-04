@@ -46,7 +46,6 @@ namespace OpenGLRenderer {
     constexpr unsigned int g_depthMapResolution = 4096;
 
     void LoadShaders();
-    void CascadedShadowMappingPass();
 
     IndirectBuffer g_indirectBuffer;
 
@@ -89,6 +88,11 @@ namespace OpenGLRenderer {
 
         g_frameBuffers["UI"] = OpenGLFrameBuffer("UI", resolutions.ui);
         g_frameBuffers["UI"].CreateAttachment("Color", GL_RGBA8, GL_NEAREST, GL_NEAREST);
+
+        g_frameBuffers["World"] = OpenGLFrameBuffer("World", 1, 1);
+        g_frameBuffers["World"].CreateAttachment("HeightMap", GL_R16F);
+
+        g_frameBuffers["HeightMapBlitBuffer"] = OpenGLFrameBuffer("HeightMapBlitBuffer", HEIGHT_MAP_SIZE, HEIGHT_MAP_SIZE);
 
         g_frameBuffers["HeightMap"] = OpenGLFrameBuffer("HeightMap", HEIGHT_MAP_SIZE, HEIGHT_MAP_SIZE);
         g_frameBuffers["HeightMap"].CreateAttachment("Color", GL_R16F);
@@ -185,11 +189,12 @@ namespace OpenGLRenderer {
         g_shaders["HairLayerComposite"] = OpenGLShader({ "GL_hair_layer_composite.comp" });
         g_shaders["HairLighting"] = OpenGLShader({ "GL_hair_lighting.vert", "GL_hair_lighting.frag" });
         g_shaders["HeightMapColor"] = OpenGLShader({ "GL_heightmap_color.vert", "GL_heightmap_color.frag" });
-        g_shaders["HeightMapVertexGeneration"] = OpenGLShader({ "GL_heightmap_vertex_generation.comp" });
         g_shaders["HeightMapImageGeneration"] = OpenGLShader({ "GL_heightmap_image_generation.comp" });
+        g_shaders["HeightMapPhysxTextureGeneration"] = OpenGLShader({ "GL_heightmap_physx_texture_generation.comp" });
+        g_shaders["HeightMapVertexGeneration"] = OpenGLShader({ "GL_heightmap_vertex_generation.comp" });
         g_shaders["HeightMapPaint"] = OpenGLShader({ "GL_heightmap_paint.comp" });
         g_shaders["Lighting"] = OpenGLShader({ "GL_lighting.comp" });
-        g_shaders["Outline"] = OpenGLShader({ "GL_outline.comp" });
+        g_shaders["Outline"] = OpenGLShader({ "GL_outline.vert", "GL_outline.frag" });
         g_shaders["OutlineComposite"] = OpenGLShader({ "GL_outline_composite.comp" });
         g_shaders["OutlineMask"] = OpenGLShader({ "GL_outline_mask.vert", "GL_outline_mask.frag" });
         g_shaders["ShadowMapGeometry"] = OpenGLShader({ "GL_shadow_map_geometry.vert", "GL_shadow_map.frag" });
@@ -262,21 +267,23 @@ namespace OpenGLRenderer {
         // Blit to swapchain
         OpenGLRenderer::BlitToDefaultFrameBuffer(&finalImageBuffer, "Color", GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-        OpenGLFrameBuffer& heightmapFramebuffer = g_frameBuffers["HeightMap"]; 
+        OpenGLFrameBuffer& worldFramebuffer = g_frameBuffers["World"];
         BlitRect srcRect;
         srcRect.x0 = 0;
         srcRect.y0 = 0;
-        srcRect.x1 = heightmapFramebuffer.GetWidth();
-        srcRect.y1 = heightmapFramebuffer.GetHeight();
+        srcRect.x1 = worldFramebuffer.GetWidth();
+        srcRect.y1 = worldFramebuffer.GetHeight();
 
         BlitRect dstRect = srcRect;
-        dstRect.x1 = heightmapFramebuffer.GetWidth() * 3;
-        dstRect.y1 = heightmapFramebuffer.GetHeight() * 3;
+        dstRect.x1 = worldFramebuffer.GetWidth() * 1.0f;
+        dstRect.y1 = worldFramebuffer.GetHeight() * 1.0f;
                  
         UIPass();
         ImGuiPass();  
         
         //OpenGLRenderer::BlitToDefaultFrameBuffer(&heightmapFramebuffer, "Color", srcRect, dstRect, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+        OpenGLRenderer::BlitToDefaultFrameBuffer(&worldFramebuffer, "HeightMap", srcRect, dstRect, GL_COLOR_BUFFER_BIT, GL_LINEAR);
     }
 
     void ClearRenderTargets() {

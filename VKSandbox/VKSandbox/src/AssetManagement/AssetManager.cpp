@@ -10,6 +10,7 @@
 #include "UI/UIBackEnd.h"
 #include "Tools/ImageTools.h"
 #include "Util/Util.h"
+#include "World/World.h"
 
 #include "World/HeightMapManager.h"
 #include "World/MapManager.h"
@@ -120,6 +121,7 @@ namespace AssetManager {
             HeightMapManager::Init();
             MapManager::Init();
             SectorManager::Init();
+            World::Init();
 
             if (BackEnd::GetAPI() == API::OPENGL) {
                 OpenGLBackEnd::CleanUpBakingPBOs();

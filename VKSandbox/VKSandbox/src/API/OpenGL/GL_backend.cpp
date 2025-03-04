@@ -199,6 +199,12 @@ namespace OpenGLBackEnd {
         }
     }
 
+   // void AllocateHeightMapVertexBufferSpace(int heightmapCount) {
+   //
+   //     g_heightMapMesh.
+   //
+   // }
+
     void SetMousePickHandles(GLuint frameBufferHandle, GLuint attachmentSlot) {
         g_frameBufferHandle = frameBufferHandle;
         g_mousePickAttachmentSlot = attachmentSlot;
@@ -498,42 +504,42 @@ namespace OpenGLBackEnd {
         }    std::cout << "\n\n\n";
     }
 
-    void ReadBackHeightmapMeshData() {
-        int indexCount = (HEIGHT_MAP_SIZE - 1) * (HEIGHT_MAP_SIZE - 1) * 6;
-        int vertexCount = HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE;
-        int vertexBufferSize = HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE * sizeof(Vertex);
-        int indexBufferSize = (HEIGHT_MAP_SIZE - 1) * (HEIGHT_MAP_SIZE - 1) * 6 * sizeof(uint32_t);
-
-        g_heightMapVerticesReadBackPBO.UpdateState();
-
-        if (!g_heightMapVerticesReadBackPBO.IsSyncComplete()) {
-            return; // Wait for sync
-        }
-
-        // Bind PBO to store vertex buffer data
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, g_heightMapVerticesReadBackPBO.GetHandle());
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_heightMapMesh.GetVBO());
-
-        // Copy the vertex buffer data into the PBO
-        glCopyBufferSubData(GL_SHADER_STORAGE_BUFFER, GL_PIXEL_PACK_BUFFER, 0, 0, vertexBufferSize);
-
-        // Sync and map buffer to access data
-        g_heightMapVerticesReadBackPBO.SyncStart();
-        const Vertex* mappedBuffer = reinterpret_cast<const Vertex*>(g_heightMapVerticesReadBackPBO.GetPersistentBuffer());
-
-        if (mappedBuffer) {
-            for (int i = 0; i < vertexCount; i++) {
-                const Vertex& v = mappedBuffer[i];
-                glm::vec3 pos = v.position;
-                pos.y *= 10;
-                //Renderer::DrawPoint(pos, GREEN);
-            }
-        }
-
-        // Unbind
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-    }
+    //void ReadBackHeightmapMeshData() {
+    //    int indexCount = (HEIGHT_MAP_SIZE - 1) * (HEIGHT_MAP_SIZE - 1) * 6;
+    //    int vertexCount = HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE;
+    //    int vertexBufferSize = HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE * sizeof(Vertex);
+    //    int indexBufferSize = (HEIGHT_MAP_SIZE - 1) * (HEIGHT_MAP_SIZE - 1) * 6 * sizeof(uint32_t);
+    //
+    //    g_heightMapVerticesReadBackPBO.UpdateState();
+    //
+    //    if (!g_heightMapVerticesReadBackPBO.IsSyncComplete()) {
+    //        return; // Wait for sync
+    //    }
+    //
+    //    // Bind PBO to store vertex buffer data
+    //    glBindBuffer(GL_PIXEL_PACK_BUFFER, g_heightMapVerticesReadBackPBO.GetHandle());
+    //    glBindBuffer(GL_SHADER_STORAGE_BUFFER, g_heightMapMesh.GetVBO());
+    //
+    //    // Copy the vertex buffer data into the PBO
+    //    glCopyBufferSubData(GL_SHADER_STORAGE_BUFFER, GL_PIXEL_PACK_BUFFER, 0, 0, vertexBufferSize);
+    //
+    //    // Sync and map buffer to access data
+    //    g_heightMapVerticesReadBackPBO.SyncStart();
+    //    const Vertex* mappedBuffer = reinterpret_cast<const Vertex*>(g_heightMapVerticesReadBackPBO.GetPersistentBuffer());
+    //
+    //    if (mappedBuffer) {
+    //        for (int i = 0; i < vertexCount; i++) {
+    //            const Vertex& v = mappedBuffer[i];
+    //            glm::vec3 pos = v.position;
+    //            pos.y *= 10;
+    //            //Renderer::DrawPoint(pos, GREEN);
+    //        }
+    //    }
+    //
+    //    // Unbind
+    //    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    //    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    //}
 
     GLuint GetVertexDataVAO() { return g_vertexDataVAO; }
     GLuint GetVertexDataVBO() { return g_vertexDataVBO; }

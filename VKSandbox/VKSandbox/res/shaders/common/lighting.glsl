@@ -122,3 +122,10 @@ vec3 ApplyCookie(mat4 LightViewProj, vec3 worldPos, vec3 lightPos, vec3 lightCol
     float cookieFactor = texture(cookieTexture, clampedUV).r;
     return lightColor * cookieFactor * fadeFactor * distanceFactor;
 }
+
+//vec3 GetDirectionalLighting(vec3 WorldPos, vec3 Normal, vec3 baseColor, float roughness, float metallic, vec3 viewPos, vec3 lightDir, vec3 lightColor, float strength, float fresnelReflect) {
+//	vec3 viewDir = normalize(viewPos - WorldPos);
+//	float irradiance = max(dot(lightDir, Normal), 0.0) * strength;
+//	vec3 brdf = microfacetBRDF(lightDir, viewDir, Normal, baseColor, metallic, fresnelReflect, roughness);
+//    return brdf * irradiance * clamp(lightColor, 0, 1);
+//}

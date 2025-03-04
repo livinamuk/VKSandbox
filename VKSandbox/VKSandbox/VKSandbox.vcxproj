@@ -137,6 +137,7 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\API\OpenGL\Renderer\ComputePasses\GL_compute_skinning.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\GL_renderer_util.cpp" />
+    <ClCompile Include="src\API\OpenGL\Renderer\Utility\GL_height_map_utility.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_debug_pass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_editor_pass.cpp" />
     <ClCompile Include="src\API\OpenGL\Renderer\RenderPasses\GL_emissive_pass.cpp" />
@@ -190,6 +191,9 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\AssetManagement\BakeQueue.cpp" />
     <ClCompile Include="src\Callbacks\Callbacks.cpp" />
+    <ClCompile Include="src\Editor\Editors\Editor_height_map.cpp" />
+    <ClCompile Include="src\Editor\Editors\Editor_map.cpp" />
+    <ClCompile Include="src\Editor\Editors\Editor_sector.cpp" />
     <ClCompile Include="src\Imgui\ImguiBackEnd.cpp" />
     <ClCompile Include="src\Core\JSON.cpp" />
     <ClCompile Include="src\Imgui\EditorImgui.cpp" />
@@ -270,7 +274,6 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClCompile Include="src\Util\Util_math.cpp" />
     <ClCompile Include="src\Util\Util_mesh.cpp" />
     <ClCompile Include="src\Viewport\ViewportManager.cpp" />
-    <ClCompile Include="src\World\Map.cpp" />
     <ClCompile Include="src\World\MapManager.cpp" />
     <ClCompile Include="src\World\Sector.cpp" />
     <ClCompile Include="src\World\SectorManager.cpp" />
@@ -316,6 +319,7 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <None Include="res\shaders\OpenGL\GL_hair_lighting.frag" />
     <None Include="res\shaders\OpenGL\GL_hair_lighting.vert" />
     <None Include="res\shaders\OpenGL\gl_height-map_image_generation.comp" />
+    <None Include="res\shaders\OpenGL\GL_heightmap_physx_texture_generation.comp" />
     <None Include="res\shaders\OpenGL\GL_lighting.comp" />
     <None Include="res\shaders\OpenGL\GL_outline.frag" />
     <None Include="res\shaders\OpenGL\GL_outline.vert" />
@@ -451,7 +455,6 @@ copy /Y "$(ProjectDir)vendor\DLLs\PVDRuntime_64.dll" "$(TargetDir)PVDRuntime_64.
     <ClInclude Include="src\Common\HellTypes.h" />
     <ClInclude Include="src\Util\Util.h" />
     <ClInclude Include="src\Viewport\ViewportManager.h" />
-    <ClInclude Include="src\World\Map.h" />
     <ClInclude Include="src\World\MapManager.h" />
     <ClInclude Include="src\World\Sector.h" />
     <ClInclude Include="src\World\SectorManager.h" />

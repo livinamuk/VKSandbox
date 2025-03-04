@@ -1,4 +1,4 @@
-#version 450
+﻿#version 450
 
 layout (local_size_x = 16, local_size_y = 16) in;
 
@@ -19,62 +19,235 @@ layout (binding = 6, std430) buffer IndexBuffer {
     uint indices[];
 };
 
+// Uniforms
 uniform int u_layerIndex;
+uniform int u_layerIndexN;
+uniform int u_layerIndexS;
+uniform int u_layerIndexE;
+uniform int u_layerIndexW;
+uniform int u_chunkIndexX;
+uniform int u_chunkIndexZ;
+uniform int u_mapCellX;
+uniform int u_mapCellZ;
+uniform int u_heightMapIndex;
 
-void main() {
-    ivec2 dimensions = imageSize(heightmapArrayImage).xy;
-    int width = dimensions.x;
-    int depth = dimensions.y;
+    void main() {
+        // For a single chunk: 33x33 vertices
+        int chunkWidth = 33;
+        int chunkDepth = 33;
 
-    uint x = gl_GlobalInvocationID.x;
-    uint z = gl_GlobalInvocationID.y;
+        // Early out if invocation is outside the chunk's vertex range.
+        ivec2 gid = ivec2(gl_GlobalInvocationID.xy);
+        if (gid.x >= chunkWidth || gid.y >= chunkDepth) {
+            return;
+        }
 
-    if (x >= width || z >= depth) return;
+        // Local coordinates within this chunk
+        int localX = gid.x; // range [0..32]
+        int localZ = gid.y; // range [0..32]
 
-    uint index = z * width + x;
+        // The chunk is 32 quads wide => chunkWidth=33
+        // The entire heightmap is 256x256 texels
+        const int MAP_SIZE = 256;     // or get from imageSize(heightmapArrayImage).x
 
-    // Read height from the heightmap
-    float height = imageLoad(heightmapArrayImage, ivec3(x, z, u_layerIndex)).r; 
-    // Set vertex attributes
-    vertices[index].position[0] = float(x);
-    vertices[index].position[1] = height;
-    vertices[index].position[2] = float(z);
+        // Convert the (chunkX, chunkY) to a single chunk index
+        int chunkIndex = u_chunkIndexZ * 8 + u_chunkIndexX;
 
-    vertices[index].uv[0] = float(x) / float(width - 1);
-    vertices[index].uv[1] = float(z) / float(depth - 1);
+        // Each chunk has 33*33 = 1089 vertices
+        int verticesPerChunk = 33 * 33;
+        int verticesPerHeightMap = verticesPerChunk * 8 * 8;
+    
 
-    // Read neighboring heights
-    float left  = imageLoad(heightmapArrayImage, ivec3(max(x - 1, 0), z, u_layerIndex)).r;
-    float right = imageLoad(heightmapArrayImage, ivec3(min(x + 1, width - 1), z, u_layerIndex)).r;
-    float down  = imageLoad(heightmapArrayImage, ivec3(x, max(z - 1, 0), u_layerIndex)).r;
-    float up    = imageLoad(heightmapArrayImage, ivec3(x, min(z + 1, depth - 1), u_layerIndex)).r;
+        int baseVertex = chunkIndex * verticesPerChunk + (u_heightMapIndex * verticesPerHeightMap);
 
-    // Use a finite-difference approximation with a 0.5 factor
-    vec3 dx = vec3(1.0, 0.5 * (right - left), 0.0);
-    vec3 dz = vec3(0.0, 0.5 * (up - down), 1.0);
+        // Local index within the chunk's vertex array
+        int localIndex = localZ * 33 + localX;
 
-    // Compute the norma
+        // Global vertex index in the big buffer
+        int vIdx = baseVertex + localIndex;
+
+        // Each chunk covers 32 quads horizontally, so each chunk covers 32 texels in the world
+        int CHUNK_SIZE = MAP_SIZE / 8; // 32
+
+        // Compute the "world" coordinates in the heightmap
+        // These range from 0..255 across the entire map
+        int x = u_chunkIndexX * CHUNK_SIZE + localX; 
+        int z = u_chunkIndexZ * CHUNK_SIZE + localZ;
+
+        // -------------------------------------------------------------------------
+        // 1) Sample Height from the heightmap
+
+int tileX = x;
+int tileZ = z;
+int layer  = u_layerIndex;
+
+// WEST edge
+if (tileX < 0) {
+    if (u_layerIndexW != -1) {
+        tileX = 255;              // The far edge of the west tile
+        layer = u_layerIndexW;    // Switch to the west neighbor
+    } else {
+        tileX = 0;                // Clamp if no west tile
+        layer = u_layerIndex;
+    }
+}
+// EAST edge
+else if (tileX > 255) {
+    if (u_layerIndexE != -1) {
+        tileX = 0;                // The near edge of the east tile
+        layer = u_layerIndexE;
+    } else {
+        tileX = 255;              // Clamp
+        layer = u_layerIndex;
+    }
+}
+
+// SOUTH edge
+if (tileZ < 0) {
+    if (u_layerIndexS != -1) {
+        tileZ = 255;              // The far edge of the south tile
+        layer = u_layerIndexS;
+    } else {
+        tileZ = 0;
+        layer = u_layerIndex;
+    }
+}
+// NORTH edge
+else if (tileZ > 255) {
+    if (u_layerIndexN != -1) {
+        tileZ = 0;                // The near edge of the north tile
+        layer = u_layerIndexN;
+    } else {
+        tileZ = 255;
+        layer = u_layerIndex;
+    }
+}
+
+// Finally sample the chosen layer at (tileX, tileZ).
+float heightVal = imageLoad(heightmapArrayImage, ivec3(tileX, tileZ, layer)).r;
+
+        float worldX = x + (u_mapCellX * 256);
+        float worldZ = z + (u_mapCellZ * 256);
+
+        // -------------------------------------------------------------------------
+        // 2) Vertex Position
+        // Store the final position in world space (or heightmap space).
+        vertices[vIdx].position[0] = float(worldX);
+        vertices[vIdx].position[1] = heightVal;
+        vertices[vIdx].position[2] = float(worldZ);
+
+        // -------------------------------------------------------------------------
+        // 3) UV Coordinates
+        // Map [0..255] => [0..1]
+        vertices[vIdx].uv[0] = float(x) / float(MAP_SIZE - 1);
+        vertices[vIdx].uv[1] = float(z) / float(MAP_SIZE - 1);
+
+        // -------------------------------------------------------------------------
+        // 4) Normals & Tangents
+        // For neighbor sampling, clamp to [0..255].
+
+    // For neighbor sampling:
+    int xLeft   = x - 1;
+    int xRight  = x + 1;
+    int zDown   = z - 1;
+    int zUp     = z + 1;
+
+    int layerLeft  = u_layerIndex;
+    int layerRight = u_layerIndex;
+    int layerDown  = u_layerIndex;
+    int layerUp    = u_layerIndex;
+
+    // If xLeft < 0, sample from west tile if it exists; otherwise clamp.
+    if (xLeft < 0) {
+        if (u_layerIndexW != -1) {
+            xLeft = 255;                 // The far edge of the west tile
+            layerLeft = u_layerIndexW;
+        } else {
+            xLeft = 0;                   // Clamp to current tile
+            layerLeft = u_layerIndex;
+        }
+    }
+
+    // If xRight > 255, sample from east tile if it exists; otherwise clamp.
+    if (xRight > 255) {
+        if (u_layerIndexE != -1) {
+            xRight = 0;                  // The near edge of the east tile
+            layerRight = u_layerIndexE;
+        } else {
+            xRight = 255;                // Clamp
+            layerRight = u_layerIndex;
+        }
+    }
+
+    // If zDown < 0, sample from south tile if it exists; otherwise clamp.
+    if (zDown < 0) {
+        if (u_layerIndexS != -1) {
+            zDown = 255;
+            layerDown = u_layerIndexS;
+        } else {
+            zDown = 0;
+            layerDown = u_layerIndex;
+        }
+    }
+
+    // If zUp > 255, sample from north tile if it exists; otherwise clamp.
+    if (zUp > 255) {
+        if (u_layerIndexN != -1) {
+            zUp = 0;
+            layerUp = u_layerIndexN;
+        } else {
+            zUp = 255;
+            layerUp = u_layerIndex;
+        }
+    }
+
+    // Now sample the correct tile/layer for each neighbor:
+    float leftH  = imageLoad(heightmapArrayImage, ivec3(xLeft,  z,      layerLeft )).r;
+    float rightH = imageLoad(heightmapArrayImage, ivec3(xRight, z,      layerRight)).r;
+    float downH  = imageLoad(heightmapArrayImage, ivec3(x,      zDown,  layerDown )).r;
+    float upH    = imageLoad(heightmapArrayImage, ivec3(x,      zUp,    layerUp   )).r;
+
+
+
+    // Central difference
+    vec3 dx = vec3(1.0, 0.5 * (rightH - leftH), 0.0);
+    vec3 dz = vec3(0.0, 0.5 * (upH - downH), 1.0);
     vec3 normal = normalize(cross(dz, dx));
+    vertices[vIdx].normal[0] = normal.x;
+    vertices[vIdx].normal[1] = normal.y;
+    vertices[vIdx].normal[2] = normal.z;
 
-    vertices[index].normal[0] = normal.x;
-    vertices[index].normal[1] = normal.y;
-    vertices[index].normal[2] = normal.z;
+    // Tangent (approximate as direction of +X in heightmap)
+    vec3 tangent = normalize(vec3(1.0, rightH - leftH, 0.0));
+    vertices[vIdx].tangent[0] = tangent.x;
+    vertices[vIdx].tangent[1] = tangent.y;
+    vertices[vIdx].tangent[2] = tangent.z;
 
-    // Tangents
-    vec3 tangent = normalize(vec3(1.0, right - left, 0.0));
+    // -------------------------------------------------------------------------
+    // 5) Indices (only if localX < 32 && localY < 32 => a valid quad)
+    
+    if (localX < 32 && localZ < 32) {
+        // We have 32*32 quads = 1024 quads per chunk => 1024 * 6 = 6144 indices
+        
+        int indicesPerChunk = 32 * 32 * 6; // 6144
+        int indicesPerHeightMap = indicesPerChunk * 8 * 8;
+        int baseIndex = chunkIndex * indicesPerChunk + (indicesPerHeightMap * u_heightMapIndex);
 
-    vertices[index].tangent[0] = tangent.x;
-    vertices[index].tangent[1] = tangent.y;
-    vertices[index].tangent[2] = tangent.z;
+        // Quad index in row-major order inside the chunk
+        int quadIndex = localZ * 32 + localX;  // range [0..1023]
+        int iOffset   = baseIndex + quadIndex * 6;
 
-    // Generate indices
-    if (x < width - 1 && z < depth - 1) {
-        uint i = (z * (width - 1) + x) * 6;
-        indices[i] = index;
-        indices[i + 1] = index + width;
-        indices[i + 2] = index + 1;
-        indices[i + 3] = index + 1;
-        indices[i + 4] = index + width;
-        indices[i + 5] = index + width + 1; 
+        // The four vertices of this quad
+        uint v0 = uint(vIdx);
+        uint v1 = uint(vIdx + 33);   // next row
+        uint v2 = uint(vIdx + 1);    // next column
+        uint v3 = uint(vIdx + 33 + 1);
+
+        indices[iOffset + 0] = v0;
+        indices[iOffset + 1] = v1;
+        indices[iOffset + 2] = v2;
+        indices[iOffset + 3] = v2;
+        indices[iOffset + 4] = v1;
+        indices[iOffset + 5] = v3;
     }
 }

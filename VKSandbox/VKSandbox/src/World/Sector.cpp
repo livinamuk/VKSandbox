@@ -1,5 +1,5 @@
-#include "Sector.h"
+/*#include "Sector.h"
 
 void Sector::ResetData() {
 
-}
+}*/

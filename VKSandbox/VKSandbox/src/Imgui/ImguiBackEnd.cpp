@@ -181,7 +181,7 @@ namespace ImGuiBackend {
         style.ScrollbarRounding = 0.0f;
         style.TabRounding = 0.0f;
         style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-        style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
+        style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.4f, 0.4f, 0.4f, 1.00f);
         
         // Window
         style.Colors[ImGuiCol_WindowBg] = ImVec4(0.18f, 0.18f, 0.18f, 1.00f); 

@@ -56,11 +56,11 @@ namespace EditorImGui {
 
     void AddEditorMenuNode(FileMenu& fileMenu) {
         FileMenuNode& editor = fileMenu.AddMenuNode("Editor");
-        editor.AddChild("House", &Callbacks::OpenHouseMapEditor);
-        editor.AddChild("Height Map", &Callbacks::OpenHeightMapEditor);
-        editor.AddChild("Map", &Callbacks::OpenMapEditor);
-        editor.AddChild("Sector", &Callbacks::OpenSectorEditor);
-        editor.AddChild("Weapons", &Callbacks::OpenWeaponsEditor);
+        editor.AddChild("House", &Callbacks::OpenHouseMapEditor, "F4");
+        editor.AddChild("Height Map", &Callbacks::OpenHeightMapEditor, "F5");
+        editor.AddChild("Map", &Callbacks::OpenMapEditor, "F6");
+        editor.AddChild("Sector", &Callbacks::OpenSectorEditor, "F7");
+        editor.AddChild("Weapons", &Callbacks::OpenWeaponsEditor, "F8");
     }
 
     void Init() {
@@ -90,18 +90,18 @@ namespace EditorImGui {
             FileMenu& fileMenu = CreateFileMenu("HeightMapEditor");
             FileMenuNode& file = fileMenu.AddMenuNode("File", nullptr);
 
-            file.AddChild("New", []() { ShowNewFileWindow("NewHeightMap"); });
-            file.AddChild("Open", []() { ShowOpenFileWindow("OpenHeightMap"); });
+            file.AddChild("New", []() { ShowNewFileWindow("NewHeightMap"); }, "F2");
+            file.AddChild("Open", []() { ShowOpenFileWindow("OpenHeightMap"); }, "F3");
             file.AddChild("Save", nullptr);
             file.AddChild("Revert", nullptr);
             file.AddChild("Delete", nullptr);
             file.AddChild("Duplicate", nullptr);
-            file.AddChild("Quit", &Callbacks::QuitProgram);
+            file.AddChild("Quit", &Callbacks::QuitProgram, "Esc");
 
             AddEditorMenuNode(fileMenu);
 
             FileMenuNode& run = fileMenu.AddMenuNode("Run");
-            run.AddChild("New Run", nullptr);
+            run.AddChild("New Run", nullptr, "F1");
             run.AddChild("Test Height Map", nullptr);
         }
 
@@ -109,18 +109,18 @@ namespace EditorImGui {
             FileMenu& fileMenu = CreateFileMenu("MapEditor");
             FileMenuNode& file = fileMenu.AddMenuNode("File", nullptr);
 
-            file.AddChild("New", []() { ShowNewFileWindow("NewMap"); });
-            file.AddChild("Open", []() { ShowOpenFileWindow("OpenMap"); });
+            file.AddChild("New", []() { ShowNewFileWindow("NewMap"); }, "F2");
+            file.AddChild("Open", []() { ShowOpenFileWindow("OpenMap"); }, "F3");
             file.AddChild("Save", nullptr);
             file.AddChild("Revert", nullptr);
             file.AddChild("Delete", nullptr);
             file.AddChild("Duplicate", nullptr);
-            file.AddChild("Quit", &Callbacks::QuitProgram);
+            file.AddChild("Quit", &Callbacks::QuitProgram, "Esc");
 
             AddEditorMenuNode(fileMenu);
 
             FileMenuNode& run = fileMenu.AddMenuNode("Run");
-            run.AddChild("New Run", nullptr);
+            run.AddChild("New Run", nullptr, "F1");
             run.AddChild("Test Map", &Callbacks::TestCurrentMap);
         }
 
@@ -129,13 +129,13 @@ namespace EditorImGui {
             FileMenu& fileMenu = CreateFileMenu("SectorEditor");
             FileMenuNode& file = fileMenu.AddMenuNode("File", nullptr);
 
-            file.AddChild("New", []() { ShowNewFileWindow("NewSector"); });
-            file.AddChild("Open", []() { ShowOpenFileWindow("OpenSector"); });
+            file.AddChild("New", []() { ShowNewFileWindow("NewSector"); }, "F2");
+            file.AddChild("Open", []() { ShowOpenFileWindow("OpenSector"); }, "F3");
             file.AddChild("Save", nullptr);
             file.AddChild("Revert", nullptr);
             file.AddChild("Delete", nullptr);
             file.AddChild("Duplicate", nullptr);
-            file.AddChild("Quit", &Callbacks::QuitProgram);
+            file.AddChild("Quit", &Callbacks::QuitProgram, "Esc");
 
             AddEditorMenuNode(fileMenu);
 
@@ -164,13 +164,14 @@ namespace EditorImGui {
             ammo.AddChild("Tokarev", nullptr);
 
             FileMenuNode& run = fileMenu.AddMenuNode("Run");
-            run.AddChild("New Run", nullptr);
+            run.AddChild("New Run", nullptr, "F1");
             run.AddChild("Test Sector", nullptr);
         }
 
     }
 
     void Update() {
+
         //if (Input::KeyPressed(HELL_KEY_K)) {
         //    Init();
         //}

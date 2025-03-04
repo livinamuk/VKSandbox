@@ -26,8 +26,22 @@ namespace World {
     std::vector<RenderItem> g_renderItemsHairBottomLayer;
     std::vector<RenderItem> g_skinnedRenderItems;
 
-    void ResetWorld();
+    std::string g_currentMapName = "";
+
     void AddSectorAtLocation(SectorCreateInfo& sectorCreateInfo, SpawnOffset spawnOffset);
+
+    void Init() {
+        LoadMap("TestMap");
+    }
+
+    void BeginFrame() {
+        for (GameObject& gameObject : g_gameObjects) {
+            gameObject.BeginFrame();
+        }
+        for (Tree& tree : g_trees) {
+            tree.BeginFrame();
+        }
+    }
 
     void Update(float deltaTime) {
 
@@ -44,6 +58,14 @@ namespace World {
 
         for (GameObject& gameObject : g_gameObjects) {
             gameObject.UpdateRenderItems();
+
+            // Selected outline?
+            if (gameObject.IsSelected()) {
+                RenderDataManager::SubmitForOutlineRendering(gameObject.GetRenderItems());
+                RenderDataManager::SubmitForOutlineRendering(gameObject.GetRenderItemsHairTopLayer());
+                RenderDataManager::SubmitForOutlineRendering(gameObject.GetRenderItemsHairBottomLayer());
+                break;
+            }
         }
         for (AnimatedGameObject& animatedGameObject : g_animatedGameObjects) {
             animatedGameObject.Update(deltaTime);
@@ -64,11 +86,18 @@ namespace World {
             g_renderItems.insert(g_renderItems.end(), pickUp.GetRenderItems().begin(), pickUp.GetRenderItems().end());
         }
 
+        // Trees
         mousePickIndex = 0;
         for (Tree& tree : g_trees) {
             tree.SetMousePickIndex(mousePickIndex++);
             tree.Update(deltaTime);
             g_renderItems.insert(g_renderItems.end(), tree.GetRenderItems().begin(), tree.GetRenderItems().end());
+        
+            // Selected outline?
+            if (tree.IsSelected()) {
+                RenderDataManager::SubmitForOutlineRendering(tree.GetRenderItems());
+            }
+        
         }
 
         // Update each GameObject and collect render items
@@ -198,34 +227,36 @@ namespace World {
     }
 
     void LoadMap(const std::string& mapName) {
-        // Try load the map
-        Map* map = MapManager::GetMapByName(mapName);
-        if (map) {
+        MapCreateInfo* mapCreateInfo = MapManager::GetMapCreateInfoByName(mapName);
 
-            // It loaded successfully so reset the world...
-            ResetWorld();
-
-            // and iterate over all the sector locations...
-            for (auto& kv : map->GetSectorLocations()) {
-                const ivecXZ& sectorLocation = kv.first;
-                const std::string& sectorName = kv.second;
-
-                // and if they are valid, then load them into the world
-                SectorCreateInfo* sectorCreateInfo = SectorManager::GetSectorCreateInfoByName(sectorName);
-                if (sectorCreateInfo) {
-                    SpawnOffset spawnOffset;
-                    spawnOffset.positionX = sectorLocation.x * SECTOR_SIZE_WORLD_SPACE;
-                    spawnOffset.positionZ = sectorLocation.z * SECTOR_SIZE_WORLD_SPACE;
-                    AddSectorAtLocation(*sectorCreateInfo, spawnOffset);
-                    std::cout << " - [" << sectorLocation.x << "][" << sectorLocation.z << "] " << sectorName << "\n";
-                }
-            }
-            std::cout << "Loaded map: " << mapName << "\n";
-        } 
-        else {
+        // Handle failed map load
+        if (!mapCreateInfo) {
             std::cout << "World::LoadMap() failed to load " << mapName << "\n";
+            return;
         }
-    }
+
+        g_currentMapName = mapName;
+
+        // It loaded successfully so reset the world...
+        ResetWorld();
+
+        // and iterate over all the sector locations...
+        for (auto& kv : mapCreateInfo->sectorLocations) {
+            const ivecXZ& sectorLocation = kv.first;
+            const std::string& sectorName = kv.second;
+
+            // and if they are valid, then load them into the world
+            SectorCreateInfo* sectorCreateInfo = SectorManager::GetSectorCreateInfoByName(sectorName);
+            if (sectorCreateInfo) {
+                SpawnOffset spawnOffset;
+                spawnOffset.positionX = sectorLocation.x * SECTOR_SIZE_WORLD_SPACE;
+                spawnOffset.positionZ = sectorLocation.z * SECTOR_SIZE_WORLD_SPACE;
+                AddSectorAtLocation(*sectorCreateInfo, spawnOffset);
+                std::cout << " - [" << sectorLocation.x << "][" << sectorLocation.z << "] " << sectorName << "\n";
+            }
+        }
+        std::cout << "Loaded map: " << mapName << "\n";
+    } 
 
     void LoadSingleSector(const std::string& sectorName) {
         SectorCreateInfo* sectorCreateInfo = SectorManager::GetSectorCreateInfoByName(sectorName);
@@ -234,6 +265,7 @@ namespace World {
             std::cout << "Loaded sector: " << sectorName << "\n";
         }
         else {
+            World::ResetWorld();
             std::cout << "Failed to load sector: " << sectorName << "\n";
         }
     }
@@ -297,6 +329,10 @@ namespace World {
         createInfo.position.x += spawnOffset.positionX;
         createInfo.position.z += spawnOffset.positionZ;
         g_trees.push_back(Tree(createInfo));
+    }
+
+    MapCreateInfo* GetCurrentMapCreateInfo() {
+        return MapManager::GetMapCreateInfoByName(g_currentMapName); 
     }
 
     std::vector<AnimatedGameObject>& GetAnimatedGameObjects()   { return g_animatedGameObjects; }

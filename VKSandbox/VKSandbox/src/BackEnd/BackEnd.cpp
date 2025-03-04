@@ -79,6 +79,7 @@ namespace BackEnd {
         ImGuiBackend::Init();
 
 
+
         glfwShowWindow(static_cast<GLFWwindow*>(BackEnd::GetWindowPointer()));
         return true;
     }
@@ -112,6 +113,8 @@ namespace BackEnd {
         else {
             Input::DisableCursor();
         }
+
+        World::BeginFrame();
     }
 
     void UpdateGame() {

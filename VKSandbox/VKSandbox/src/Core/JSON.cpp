@@ -23,6 +23,18 @@ namespace nlohmann {
         };
     }
 
+    void to_json(nlohmann::json& j, const std::map<ivecXZ, std::string>& mapData) {
+        nlohmann::json arr = nlohmann::json::array();
+        for (const auto& m : mapData) {
+            nlohmann::json item;
+            item["name"] = m.second;   // sector name
+            item["x"] = m.first.x;     // x coordinate
+            item["z"] = m.first.z;     // z coordinate
+            arr.push_back(item);
+        }
+        j = arr;
+    }
+
     void from_json(const nlohmann::json& j, glm::vec3& v) {
         v.x = j.at(0).get<float>();
         v.y = j.at(1).get<float>();
@@ -41,6 +53,17 @@ namespace nlohmann {
         info.meshIndex = AssetManager::GetMeshIndexByName(meshName);
         info.materialIndex = AssetManager::GetMaterialIndexByName(materialName);
         info.blendingMode = Util::StringToBlendingMode(blendingModeString);
+    }
+
+    void from_json(const nlohmann::json& j, std::map<ivecXZ, std::string>& mapData) {
+        mapData.clear();
+        for (const auto& item : j) {
+            int x = item.at("x").get<int>();
+            int z = item.at("z").get<int>();
+            std::string sectorName = item.at("name").get<std::string>();
+            ivecXZ key(x, z);
+            mapData[key] = sectorName;
+        }
     }
 }
 
@@ -175,6 +198,21 @@ namespace JSON {
             });
         }
 
+        JSON::SaveToFile(json, filepath);
+    }
+
+    MapCreateInfo LoadMap(const std::string& filepath) {
+        MapCreateInfo mapCreateInfo;
+
+        return mapCreateInfo;
+    }
+
+    void SaveMap(const std::string& filepath, MapCreateInfo& mapCreateInfo) {
+        nlohmann::json json;
+        json["Name"] = mapCreateInfo.name;
+        json["Width"] = mapCreateInfo.width;
+        json["Depth"] = mapCreateInfo.depth;
+        json["SectorLocations"] = mapCreateInfo.sectorLocations;
         JSON::SaveToFile(json, filepath);
     }
 

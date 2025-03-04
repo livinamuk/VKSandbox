@@ -195,7 +195,6 @@ namespace OpenGLRenderer {
 
                 float yThreshold = 1.0f;
                 float grassTileSize = GRASS_TILE_WORLDSPACE_SIZE;
-                float y = HEIGHTMAP_BEGIN_Y;
 
                 struct GrassTileData {
                     float xOffset = 0;
@@ -209,8 +208,8 @@ namespace OpenGLRenderer {
                     for (int z = 0; z < 8; z++) {
                         float xOffset = x * GRASS_TILE_WORLDSPACE_SIZE;
                         float zOffset = z * GRASS_TILE_WORLDSPACE_SIZE;
-                        glm::vec3 tileBoundsMin = glm::vec3(xOffset, y - yThreshold, zOffset);
-                        glm::vec3 tileBoundsMax = glm::vec3(xOffset + grassTileSize, y + yThreshold, zOffset + grassTileSize);
+                        glm::vec3 tileBoundsMin = glm::vec3(xOffset, -yThreshold, zOffset);
+                        glm::vec3 tileBoundsMax = glm::vec3(xOffset + grassTileSize, yThreshold, zOffset + grassTileSize);
                         AABB tileAabb = AABB(tileBoundsMin, tileBoundsMax);
                         if (frustum.IntersectsAABB(tileAabb)) {
 

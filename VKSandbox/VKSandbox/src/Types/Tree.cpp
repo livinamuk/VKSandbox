@@ -31,6 +31,18 @@ TreeCreateInfo Tree::GetCreateInfo() {
     return createInfo;
 }
 
+void Tree::BeginFrame() {
+    m_isSelected = false;
+}
+
+void Tree::MarkAsSelected() {
+    m_isSelected = true;
+}
+
+bool Tree::IsSelected() {
+    return m_isSelected;
+}
+
 void Tree::Update(float deltaTime) {
     m_modelMatrix = m_transform.to_mat4();
     UpdateRenderItems();

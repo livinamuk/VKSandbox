@@ -16,6 +16,7 @@ Viewport::Viewport(const glm::vec2& position, const glm::vec2& size, bool isOrth
     m_perspectiveMatrix(glm::mat4(1.0f)),
     m_orthographicMatrix(glm::mat4(1.0f)),
     m_viewportMode(ShadingMode::SHADED) {
+
     UpdateProjectionMatrices();
 }
 

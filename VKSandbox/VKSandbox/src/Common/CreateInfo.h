@@ -1,5 +1,6 @@
 #pragma once
 #include "HellTypes.h"
+#include <map>
 
 struct LightCreateInfo {
     glm::vec3 position = glm::vec3(0.0f);
@@ -61,5 +62,12 @@ struct SectorCreateInfo {
     //std::vector<InteractTextCreateInfo> interactTexts;
     //std::vector<HouseLocation> houseLocations;
     //glm::vec3 mermaidsLocation;
-    //std::string heightMapName;
+};
+
+struct MapCreateInfo {
+    std::string name;
+    uint32_t width = 4;
+    uint32_t depth = 4;
+    ivecXZ spawnCoords = ivecXZ(0, 0);
+    std::map<ivecXZ, std::string> sectorLocations;
 };

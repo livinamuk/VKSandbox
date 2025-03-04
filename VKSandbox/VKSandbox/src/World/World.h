@@ -1,6 +1,4 @@
 #pragma once
-#include "Map.h"
-
 #include "HellTypes.h"
 #include "AssetManagement/AssetManager.h"
 #include "Core/Debug.h"
@@ -17,6 +15,7 @@
 namespace World {
     void NewCampainWorld();
 
+    void Init();
     void LoadMap(const std::string& mapName);
     void LoadSingleSector(const std::string& sectorName);
     void LoadSingleSector(SectorCreateInfo& sectorCreateInfo);
@@ -26,13 +25,13 @@ namespace World {
 
     void LoadDeathMatchMap();
 
-    SectorCreateInfo& GetEditorSectorCreateInfo();
+    //SectorCreateInfo& GetEditorSectorCreateInfo();
 
+    MapCreateInfo* GetCurrentMapCreateInfo();
 
-
-
+    void BeginFrame();
     void Update(float deltaTime);
-
+    void ResetWorld();
 
 
 

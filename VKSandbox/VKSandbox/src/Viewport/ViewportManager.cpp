@@ -67,9 +67,12 @@ namespace ViewportManager {
                 g_viewports[3].Hide();
             }
             for (int i = 0; i < 4; i++) {
+                float orthoNear = 0.1f;
+                float orthoFar = 1000.0f;
+
                 g_viewports[i].SetViewportMode(Editor::GetViewportModeByIndex(i));
                 Editor::IsViewportOrthographic(i)
-                    ? g_viewports[i].SetOrthographic(g_viewports[i].GetOrthoSize(), NEAR_PLANE, FAR_PLANE)
+                    ? g_viewports[i].SetOrthographic(g_viewports[i].GetOrthoSize(), orthoNear, orthoFar)
                     : g_viewports[i].SetPerspective(1.0f, NEAR_PLANE, FAR_PLANE);
             }
         }

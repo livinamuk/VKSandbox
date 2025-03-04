@@ -51,6 +51,7 @@ public:
     void ClearAttachmenSubRegionInt(const char* attachmentName, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLint r, GLint g = 0.0f, GLint b = 0.0f, GLint a = 0.0f);
     void ClearAttachmenSubRegionUInt(const char* attachmentName, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLuint r, GLuint g = 0.0f, GLuint b = 0.0f, GLuint a = 0.0f);
     void ClearDepthAttachment();
+    void Resize(int width, int height);
     GLuint GetHandle() const;
     GLuint GetWidth() const;
     GLuint GetHeight() const;

@@ -1,0 +1,42 @@
+{
+    "Depth": 4,
+    "Name": "TestMap",
+    "SectorLocations": [
+        {
+            "name": "TestSector",
+            "x": 0,
+            "z": 1
+        },
+        {
+            "name": "TestSector",
+            "x": 1,
+            "z": 0
+        },
+        {
+            "name": "TestSector",
+            "x": 1,
+            "z": 1
+        },
+        {
+            "name": "TestSector",
+            "x": 1,
+            "z": 3
+        },
+        {
+            "name": "TestSector",
+            "x": 2,
+            "z": 1
+        },
+        {
+            "name": "TestSector",
+            "x": 2,
+            "z": 2
+        },
+        {
+            "name": "TestSector",
+            "x": 2,
+            "z": 3
+        }
+    ],
+    "Width": 3
+}

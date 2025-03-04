@@ -24,7 +24,8 @@ namespace Callbacks {
     }
 
     void OpenMap(const std::string& filename) {
-        std::cout << "OpenMap() callback: " << filename << "\n";
+        World::LoadMap(filename);
+        //Editor::SetCurrentMapName(filename);
     }
 
 
@@ -63,12 +64,7 @@ namespace Callbacks {
         }
     }
     void OpenMapEditor() {
-        if (Editor::GetEditorMode() != EditorMode::MAP_EDITOR) {
-            Editor::SetEditorMode(EditorMode::MAP_EDITOR);
-            if (Editor::IsEditorClosed()) {
-                Editor::OpenEditor();
-            }
-        }
+        Editor::OpenMapEditor();
     }
 
     void OpenSectorEditor() {
@@ -77,6 +73,7 @@ namespace Callbacks {
             if (Editor::IsEditorClosed()) {
                 Editor::OpenEditor();
             }
+            World::LoadSingleSector(Editor::GetCurrentSectorName());
         }
     }
 

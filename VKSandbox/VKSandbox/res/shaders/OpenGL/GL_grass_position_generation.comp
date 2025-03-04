@@ -132,7 +132,7 @@ void main() {
     
     height = texture(HeightMapArrayTexture, vec3(normalizedCoords, 0)).r; 
 
-    float posY = HEIGHTMAP_BEGIN_Y + (height * HEIGHTMAP_SCALE_Y);
+    float posY = height * HEIGHTMAP_SCALE_Y;
     
     float rr = Rand(vec2(gid.y, gid.x));
     float amt = 0.05;

@@ -6,8 +6,9 @@
 
 #include <Imgui/imgui.h>
 
-FileMenuNode::FileMenuNode(const std::string& text, std::function<void()> callback, bool addPadding) {
+FileMenuNode::FileMenuNode(const std::string& text, std::function<void()> callback, const std::string& shortcut, bool addPadding) {
     m_callback = callback;
+    m_shortcut = shortcut;
     if (addPadding) {
         m_text = "   " + text + "        ";
     }
@@ -16,14 +17,15 @@ FileMenuNode::FileMenuNode(const std::string& text, std::function<void()> callba
     }
 }
 
-FileMenuNode& FileMenuNode::AddChild(const std::string& text, std::function<void()> callback, bool addPadding)
-{
-    m_children.emplace_back(text, callback, addPadding);
+FileMenuNode& FileMenuNode::AddChild(const std::string& text, std::function<void()> callback, const std::string& shortcut, bool addPadding) {
+
+    m_children.emplace_back(text, callback, shortcut, addPadding);
     return m_children.back();
 }
 
-void FileMenuNode::CreateImguiElement()
-{
+void FileMenuNode::CreateImguiElement() {
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, ImGui::GetStyle().ItemInnerSpacing.y));
+
     // If this node has children, treat it as a submenu.
     if (!m_children.empty()) {
         if (ImGui::BeginMenu(m_text.c_str())) {
@@ -35,22 +37,22 @@ void FileMenuNode::CreateImguiElement()
     }
     else {
         // No children? Then it's a leaf item.
-        if (ImGui::MenuItem(m_text.c_str())) {
+        if (ImGui::MenuItem(m_text.c_str(), m_shortcut.c_str())) {
             if (m_callback) {
                 m_callback();
             }
         }
     }
+
+    ImGui::PopStyleVar();
 }
 
-FileMenuNode& FileMenu::AddMenuNode(const std::string& text, std::function<void()> callback, bool addPadding)
-{
-    m_menuNodes.emplace_back(text, callback, addPadding);
+FileMenuNode& FileMenu::AddMenuNode(const std::string& text, std::function<void()> callback, bool addPadding) {
+    m_menuNodes.emplace_back(text, callback, "", addPadding);
     return m_menuNodes.back();
 }
 
-void FileMenu::CreateImguiElements()
-{
+void FileMenu::CreateImguiElements() {
     if (ImGui::BeginMainMenuBar()) {
         ImGuiBackend::RecordFileMenuHeight(ImGui::GetWindowSize().y);
         for (auto& node : m_menuNodes) {

@@ -119,6 +119,19 @@ void GameObject::PrintMeshNames() {
     }
 }
 
+
+void GameObject::BeginFrame() {
+    m_selected = false;
+}
+
+void GameObject::MarkAsSelected() {
+    m_selected = true;
+}
+
+bool GameObject::IsSelected() {
+    return m_selected;
+}
+
 void GameObject::UpdateRenderItems() {
     m_renderItems.clear();
     m_renderItemsBlended.clear();
@@ -181,22 +194,22 @@ const glm::vec3 GameObject::GetObjectCenterOffsetFromOrigin() {
     return GetObjectCenter() - glm::vec3(GetModelMatrix()[3]);
 }
 
-std::vector<RenderItem>& GameObject::GetRenderItems() {
+const std::vector<RenderItem>& GameObject::GetRenderItems() {
     return m_renderItems;
 }
 
-std::vector<RenderItem>& GameObject::GetRenderItemsBlended() {
+const std::vector<RenderItem>& GameObject::GetRenderItemsBlended() {
     return m_renderItemsBlended;
 }
 
-std::vector<RenderItem>& GameObject::GetRenderItemsAlphaDiscarded() {
+const std::vector<RenderItem>& GameObject::GetRenderItemsAlphaDiscarded() {
     return m_renderItemsAlphaDiscarded;
 }
 
-std::vector<RenderItem>& GameObject::GetRenderItemsHairTopLayer() {
+const std::vector<RenderItem>& GameObject::GetRenderItemsHairTopLayer() {
     return m_renderItemsHairTopLayer;
 }
 
-std::vector<RenderItem>& GameObject::GetRenderItemsHairBottomLayer() {
+const std::vector<RenderItem>& GameObject::GetRenderItemsHairBottomLayer() {
     return m_renderItemsHairBottomLayer;
 }

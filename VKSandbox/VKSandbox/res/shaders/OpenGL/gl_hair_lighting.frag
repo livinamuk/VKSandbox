@@ -91,7 +91,7 @@ void main() {
 		vec3 spotLightDir = normalize(spotLightPos - (ViewPos - CameraForward));
         spotLightDir = FlashlightDir.xyz;
         vec3 spotLightColor = vec3(0.9, 0.95, 1.1);
-        float fresnelReflect = 0.9;
+        float fresnelReflect = 1.0;
         float spotLightRadius = 50.0;
         float spotLightStregth = 3.0;        
         float innerAngle = cos(radians(0.0 * FlashlightModifer));

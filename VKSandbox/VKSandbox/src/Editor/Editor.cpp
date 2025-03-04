@@ -1,5 +1,6 @@
 #include "Editor.h"
 #include "HellDefines.h"
+#include "Callbacks/Callbacks.h"
 #include "Gizmo.h"
 #include "BackEnd/BackEnd.h"
 #include "Camera/Camera.h"
@@ -31,7 +32,7 @@ namespace Editor {
     EditorViewportSplitMode g_editorViewportSplitMode = EditorViewportSplitMode::SINGLE;
 
     std::string g_currentHeightMapName = "";
-    std::string g_currentMapName = "";
+    //std::string g_currentMapName = "";
     std::string g_currentSectorName = "";
 
     float g_orthoCameraDistances[4];
@@ -93,6 +94,10 @@ namespace Editor {
             EditorImGui::CloseAnyOpenContent();
         }
 
+        if (Input::KeyPressed(HELL_KEY_F6)) {
+            Callbacks::OpenMapEditor();
+        }
+
         if (!IsEditorOpen()) {
             return;
         }
@@ -121,6 +126,11 @@ namespace Editor {
         UpdateDebug();
         UpdateCameraInterpolation(deltaTime);
         Gizmo::Update();
+
+
+        if (GetEditorMode() == EditorMode::MAP_EDITOR) {
+            UpdateMapEditor();
+        }
 
         if (Input::KeyPressed(HELL_KEY_Q)) {
             if (GetEditorViewportSplitMode() == EditorViewportSplitMode::SINGLE) {
@@ -220,6 +230,10 @@ namespace Editor {
         g_horizontalDividerYPos = value;
         //ViewportManager::UpdateViewports();
     }
+
+    //void SetCurrentMapName(const std::string& filename) {
+    //    g_currentMapName = filename;
+    //}
 
     int GetSelectedObjectIndex() {
         return g_selectedObjectIndex;
@@ -355,9 +369,9 @@ namespace Editor {
         return g_currentHeightMapName;
     }
 
-    std::string GetCurrentMapName() {
-        return g_currentMapName;
-    }
+    //const std::string& GetCurrentMapName() {
+    //    return g_currentMapName;
+    //}
 
     std::string GetCurrentSectorName() {
         return g_currentSectorName;

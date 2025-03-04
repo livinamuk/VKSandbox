@@ -46,7 +46,6 @@ namespace OpenGLRenderer {
 
 
         Transform transform;
-        transform.position = glm::vec3(0, HEIGHTMAP_BEGIN_Y, 0);
         transform.scale = glm::vec3(HEIGHTMAP_SCALE_XZ, HEIGHTMAP_SCALE_Y, HEIGHTMAP_SCALE_XZ);
         glm::mat4 modelMatrix = transform.to_mat4();
         glm::mat4 inverseModelMatrix = glm::inverse(modelMatrix);

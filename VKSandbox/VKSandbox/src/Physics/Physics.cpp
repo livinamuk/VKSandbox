@@ -79,7 +79,7 @@ namespace Physics {
         PxRigidStatic* groundPlane = NULL;
         PxShape* groundShape = NULL;
 
-        groundPlane = PxCreatePlane(*g_physics, PxPlane(0, 1, 0, 5.0f), *g_defaultMaterial);
+        groundPlane = PxCreatePlane(*g_physics, PxPlane(0, 1, 0, 0.0f), *g_defaultMaterial);
         g_scene->addActor(*groundPlane);
         groundPlane->getShapes(&groundShape, 1);
         PxFilterData filterData;

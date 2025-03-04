@@ -1,5 +1,5 @@
 #pragma once
-#include "Sector.h"
+#include "CreateInfo.h"
 
 namespace SectorManager {
 

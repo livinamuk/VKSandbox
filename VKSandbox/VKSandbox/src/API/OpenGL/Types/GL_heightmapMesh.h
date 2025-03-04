@@ -11,9 +11,15 @@ private:
     std::vector<unsigned int> m_indices;
 
 public:
-    void Create(int size);
+    void AllocateMemory(int heightMapCount);
     void CleanUp();
     int GetVAO();
     int GetVBO();
     int GetEBO();
+
+private:
+    int m_totalVertexBufferSize = 0;
+    int m_totalIndexBufferSize = 0;
+
+    void Create();
 };

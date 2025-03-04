@@ -25,6 +25,10 @@ struct GameObject {
     void SetMousePickIndex(int index);
     void PrintMeshNames();
     void UpdateRenderItems();
+    
+    void BeginFrame();
+    void MarkAsSelected();
+    bool IsSelected();
 
     glm::vec3 GetPosition() const;
     glm::vec3 GetEulerRotation() const;
@@ -33,14 +37,15 @@ struct GameObject {
     const glm::vec3 GetObjectCenter();
     const glm::vec3 GetObjectCenterOffsetFromOrigin();
 
-    std::vector<RenderItem>& GetRenderItems();
-    std::vector<RenderItem>& GetRenderItemsBlended();
-    std::vector<RenderItem>& GetRenderItemsAlphaDiscarded();
-    std::vector<RenderItem>& GetRenderItemsHairTopLayer();
-    std::vector<RenderItem>& GetRenderItemsHairBottomLayer();
+    const std::vector<RenderItem>& GetRenderItems();
+    const std::vector<RenderItem>& GetRenderItemsBlended();
+    const std::vector<RenderItem>& GetRenderItemsAlphaDiscarded();
+    const std::vector<RenderItem>& GetRenderItemsHairTopLayer();
+    const std::vector<RenderItem>& GetRenderItemsHairBottomLayer();
 
 private:
     int m_mousePickIndex = 0;
+    bool m_selected = false;
     std::vector<RenderItem> m_renderItems;
     std::vector<RenderItem> m_renderItemsBlended;
     std::vector<RenderItem> m_renderItemsAlphaDiscarded;

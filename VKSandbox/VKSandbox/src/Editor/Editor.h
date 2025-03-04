@@ -37,6 +37,13 @@ namespace Editor {
     //void SetCameraView(uint32_t cameraViewIndex, CameraView cameraView);
     void SetViewportOrthoSize(uint32_t viewportIndex, float size);
     void SetEditorViewportSplitMode(EditorViewportSplitMode mode);
+    void UpdateObjectSelection();
+
+    // Editors
+    void OpenMapEditor();
+    void UpdateMapEditor();
+    //void SetCurrentMapName(const std::string& filename);
+    //const std::string& GetCurrentMapName();
 
     int GetActiveViewportIndex();
     int GetHoveredViewportIndex();
@@ -67,7 +74,6 @@ namespace Editor {
     EditorMesh& GetEditorMesh(); // BROKEN / 5% IMPLEMENTED
 
     std::string GetCurrentHeightMapName();
-    std::string GetCurrentMapName();
     std::string GetCurrentSectorName();
 
     // Dividers

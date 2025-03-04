@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 #include "HellTypes.h"
 #include "CreateInfo.h"
 
@@ -13,3 +13,4 @@ private:
     //std::vector<HouseData> m_houseDataList;
     bool m_hasHouse = false;
 };
+*/

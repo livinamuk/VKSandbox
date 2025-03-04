@@ -9,6 +9,7 @@ namespace Renderer {
     struct RendererSettingsSet {
         RendererSettings game;
         RendererSettings heightMapEditor;
+        RendererSettings mapEditor;
         RendererSettings sectorEditor;
     } g_rendererSettingsSet;
 
@@ -21,6 +22,15 @@ namespace Renderer {
         else if (BackEnd::GetAPI() == API::VULKAN) {
             // TODO: VulkanRenderer::InitMain();
         }
+
+        g_rendererSettingsSet.mapEditor.rendererOverrideState = RendererOverrideState::NORMALS;
+        g_rendererSettingsSet.mapEditor.drawGrass = false;
+
+        g_rendererSettingsSet.heightMapEditor.rendererOverrideState = RendererOverrideState::CAMERA_NDOTL;
+        g_rendererSettingsSet.heightMapEditor.drawGrass = false;
+
+        g_rendererSettingsSet.sectorEditor.rendererOverrideState = RendererOverrideState::BASE_COLOR;
+        g_rendererSettingsSet.sectorEditor.drawGrass = true;
     }
 
     void RenderLoadingScreen() {
@@ -124,6 +134,7 @@ namespace Renderer {
             switch (Editor::GetEditorMode()) {
                 case EditorMode::HEIGHTMAP_EDITOR: return g_rendererSettingsSet.heightMapEditor;
                 case EditorMode::SECTOR_EDITOR:    return g_rendererSettingsSet.sectorEditor;
+                case EditorMode::MAP_EDITOR:       return g_rendererSettingsSet.mapEditor;
             }
         }
         return g_rendererSettingsSet.game;

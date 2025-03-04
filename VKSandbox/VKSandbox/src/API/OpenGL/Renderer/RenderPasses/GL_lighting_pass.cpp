@@ -24,6 +24,7 @@ namespace OpenGLRenderer {
         glBindTextureUnit(6, gBuffer->GetColorAttachmentHandleByName("Emissive"));
         glBindTextureUnit(7, AssetManager::GetTextureByName("Flashlight2")->GetGLTexture().GetHandle());
         glBindTextureUnit(8, flashLightShadowMapFBO->GetDepthAttachmentHandle());
+        glBindTextureUnit(9, 339);
 
         glBindImageTexture(0, gBuffer->GetColorAttachmentHandleByName("FinalLighting"), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA16F);
 

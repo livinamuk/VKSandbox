@@ -37,8 +37,8 @@ namespace File {
         // Close file
         ifs.close();
 
-        std::cout << "Loaded: " << filepath << " " << Util::GetFileSize(filepath) << " bytes\n";
-        PrintHeightMapHeader(header);
+        //std::cout << "Loaded: " << filepath << " " << Util::GetFileSize(filepath) << " bytes\n";
+        //PrintHeightMapHeader(header);
     }
 
     void SaveHeightMap(const HeightMapData& heightmapData) {

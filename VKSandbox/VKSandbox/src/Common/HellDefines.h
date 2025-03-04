@@ -4,8 +4,8 @@
 #define DEFAULT_MATERIAL_NAME "CheckerBoard"
 #define TIME_WRAP 10000.0f
 
-#define NEAR_PLANE 0.0025f
-#define FAR_PLANE 500.0f
+#define NEAR_PLANE 0.005f
+#define FAR_PLANE 256.0f
 
 #define ORANGE        glm::vec4(1.00f, 0.65f, 0.00f, 1.0f)
 #define BLACK         glm::vec4(0.00f, 0.00f, 0.00f, 1.0f)
@@ -75,7 +75,6 @@
 #define FLASHLIGHT_SHADOWMAP_SIZE 2048
 
 #define HEIGHT_MAP_SIZE 256
-#define HEIGHTMAP_BEGIN_Y -5.0f
 #define HEIGHTMAP_SCALE_Y 25.0f
 #define HEIGHTMAP_SCALE_XZ 0.25f
 

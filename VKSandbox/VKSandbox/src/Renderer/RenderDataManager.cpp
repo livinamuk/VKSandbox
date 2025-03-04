@@ -22,6 +22,9 @@ namespace RenderDataManager {
     std::vector<ViewportData> g_viewportData;
     uint32_t g_baseSkinnedVertex;
 
+
+    std::vector<RenderItem> g_outlineRenderItems;
+
     void UpdateViewportFrustums();
     void UpdateViewportData();
     void UpdateRendererData();
@@ -37,6 +40,7 @@ namespace RenderDataManager {
    
     void BeginFrame() {
         g_animatedGameObjectsToSkin.clear();
+        g_outlineRenderItems.clear();
     }
 
     void Update() {
@@ -44,8 +48,7 @@ namespace RenderDataManager {
         UpdateViewportFrustums();
         UpdateGPULightData();
         UpdateRendererData();
-        UpdateDrawCommandsSet();
-    }
+        UpdateDrawCommandsSet();   }
 
     void UpdateViewportData() {
         const Resolutions& resolutions = Config::GetResolutions();
@@ -336,11 +339,25 @@ namespace RenderDataManager {
         return g_instanceData;
     }
 
+    const std::vector<RenderItem>& GetOutlineRenderItems() {
+        return g_outlineRenderItems;
+    }
+
     const DrawCommandsSet& GetDrawInfoSet() {
         return g_drawCommandsSet;
     }
 
     const std::vector<GPULight>& GetGPULightData() {
         return g_gpuLightData;
+    }
+
+    // Submissions
+
+    void SubmitForOutlineRendering(const RenderItem& renderItem) {
+        g_outlineRenderItems.push_back(renderItem);
+    }
+
+    void SubmitForOutlineRendering(const std::vector<RenderItem>& renderItems) {
+        g_outlineRenderItems.insert(g_outlineRenderItems.begin(), renderItems.begin(), renderItems.end());
     }
 }

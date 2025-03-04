@@ -18,13 +18,15 @@
 
 namespace Editor {
 
-    void UpdateObjectSelection();
     void UpdateGizmoInteract();
     void UpdateSelectRect();
     void UpdateMouseWrapping();
 
     glm::vec3 m_selectedObjectGizmoTranslateOffset = glm::vec3(0.0f);
     glm::vec3 m_selectedObjectGizmoRotateOffset = glm::vec3(0.0f);
+
+    // This whole function should be split into heightmap/sector/map editor update functions
+    // with the relevant parts in their own function, like changing camera view etc...
 
     void UpdateInput() {
         // Set active viewport
@@ -127,6 +129,17 @@ namespace Editor {
                 }
                 Gizmo::SetEuler(glm::vec3(0.0f, 0.0f, 0.0f));
             }
+        }
+
+
+        // Mark selected objects as selected, for outline rendering
+        if (GetSelectedObjectType() == EditorObjectType::GAME_OBJECT) {
+            GameObject& gameObject = World::GetGameObjects()[GetSelectedObjectIndex()];
+            gameObject.MarkAsSelected();
+        }
+        if (GetSelectedObjectType() == EditorObjectType::TREE) {
+            Tree& tree = World::GetTrees()[GetSelectedObjectIndex()];
+            tree.MarkAsSelected();
         }
     }
 

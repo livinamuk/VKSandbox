@@ -15,6 +15,7 @@ layout(binding = 5) uniform usampler2D ViewportIndexTexture;
 layout(binding = 6) uniform sampler2D EmissiveTexture;
 layout(binding = 7) uniform sampler2D FlashlightCookieTexture;
 layout(binding = 8) uniform sampler2D FlashlighShadowMapTexture;
+layout(binding = 9) uniform sampler2D HeightMapTestTexture;
 
 uniform int u_editorLighting;
 uniform int u_ambientLightingBoost;
@@ -128,7 +129,7 @@ void main() {
         float spotLightRadius = 50.0;
         float spotLightStregth = 3.0;        
         float innerAngle = cos(radians(0.0 * flashlightModifer));
-        float outerAngle = cos(radians(30.0));        
+        float outerAngle = cos(radians(30.0));         
         mat4 lightProjectionView = flashlightProjectionView;
         vec3 cookie = ApplyCookie(lightProjectionView, worldSpacePosition.xyz, spotLightPos, spotLightColor, 10, FlashlightCookieTexture);
         vec3 spotLighting = GetSpotlightLighting(spotLightPos, spotLightDir, spotLightColor, spotLightRadius, spotLightStregth, innerAngle, outerAngle, normal.xyz, worldSpacePosition.xyz, gammaBaseColor.rgb, roughness, metallic, viewPos, lightProjectionView);
@@ -138,6 +139,7 @@ void main() {
         spotLighting *= cookie * cookie * 5 * spotLightColor;
         directLighting += vec3(spotLighting) * flashlightModifer;
     }
+
 
     // Ambient light
     vec3 amibentLightColor = vec3(1, 0.98, 0.94);
@@ -157,7 +159,8 @@ void main() {
     
     // Composite
     vec3 finalColor = directLighting.rgb + ambientLighting;
-    
+    //finalColor = moonLight;
+
     // Emissive
     vec3 emssiveColor = texture(EmissiveTexture, uv_screenspace).rgb;
     //finalColor += emssiveColor;
@@ -242,4 +245,8 @@ void main() {
     // imageStore(outputImage, ivec2(gl_GlobalInvocationID.xy), vec4(sceneWorldPos, 1.0));
     // imageStore(outputImage, pixelCoords, vec4(worldSpacePosition.rgb * 0.1, 1.0));
     // imageStore(outputImage, pixelCoords, vec4(color.rgb, 1.0));     
+
+    
+    //float heightmap = texture(HeightMapTestTexture, uv_screenspace).r;
+    //imageStore(outputImage, pixelCoords, vec4(heightmap, 0, 0, 1));
 }

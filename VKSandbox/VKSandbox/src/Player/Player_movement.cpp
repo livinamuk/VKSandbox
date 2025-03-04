@@ -17,7 +17,7 @@ void Player::UpdateMovement(float deltaTime) {
         // Speed factor
         float speedFactor = 1.0f;
         if (Input::KeyDown(GLFW_KEY_LEFT_SHIFT)) {
-            speedFactor = 0.425f;
+            speedFactor = 5.0f;
         }
 
         // View height

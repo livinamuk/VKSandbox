@@ -8,9 +8,13 @@ struct Tree {
     Tree(TreeCreateInfo createInfo);
     TreeCreateInfo GetCreateInfo();
     void SetPosition(glm::vec3 position);
+    void BeginFrame();
+    void MarkAsSelected();
     void Update(float deltaTime);
     void UpdateRenderItems();
     void SetMousePickIndex(int mousePickIndex);
+
+    bool IsSelected();
 
     const std::vector<RenderItem>& GetRenderItems() { return m_renderItems; }
     const glm::vec3& GetPosition() { return m_transform.position; }
@@ -26,4 +30,5 @@ private:
     glm::mat4 m_modelMatrix = glm::mat4(1.0f);
     std::vector<RenderItem> m_renderItems;
     int m_mousePickIndex = 0;
+    bool m_isSelected = false;
 };
